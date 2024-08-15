@@ -61,7 +61,8 @@ Con funcionalidades que incluyen la capacidad de calificar y ajustar rutas basad
 ### DIAGRAMA INICIAL DE CLASES
 ![Diagrama](Imagenes/diagrama-clases.jpeg)
 
-### CASOS DE USO
+### HISTORIAS DE USUARIO
+Para consultar las historias de usuario en detalle, por favor, visita el siguiente [enlace](https://livejaverianaedu-my.sharepoint.com/:x:/g/personal/mariacardenasm_javeriana_edu_co/ERZDyyGOArxKmsunT0Png4YBs5OWU5_y9zXXtw3KtfqW8g?e=8Ycmbd)
   
 
 ### LEAN CANVAS
