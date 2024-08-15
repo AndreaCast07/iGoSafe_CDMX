@@ -31,9 +31,8 @@ Con funcionalidades que incluyen la capacidad de calificar y ajustar rutas basad
 </div>
 
 <div style="text-align: center;">
-   <h1>Neyl Peñuela Bernate
+   <h2>Neyl Peñuela Bernate</h2>
   <img src="Imagenes/Neyl-foto.jpeg" alt="Neyl" style="border-radius: 50%; width: 150px; height: 150px; object-fit: cover;">
-  </h1>
 </div>
 
 </div>
