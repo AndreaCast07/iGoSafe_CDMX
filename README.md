@@ -15,6 +15,7 @@ Con funcionalidades que incluyen la capacidad de calificar y ajustar rutas basad
 - **Calificación de Rutas**: Evalúa y ajusta las rutas basadas en tu experiencia y seguridad.
 - **Ubicación de Contactos**: Solo puedes seleccionar como destino la ubicación de contactos registrados, garantizando un viaje seguro y controlado.
 
+## Integrantes del equipo
 <div style="display: flex; flex-wrap: wrap; align-items: center;">
 
 <div style="text-align: center; margin-right: 20px;">
