@@ -41,7 +41,6 @@ A su vez, cuando se quiere elegir el punto al cuál se quiere llegar, aparecerá
 
 ### Ruta
 
-Si el usuario al que solicitó la ubicación acepta compartirla, se generará una ruta de acuerdo a la modalidad escodiga.
+Si el usuario al que solicitó la ubicación acepta compartirla, se generará una ruta y se mostrarán la calificación de esta misma.
 ![Pantalla ruta](Pantallas/ruta-generada.png)
 
-Aquí están las pantallas: [https://marvelapp.com/prototype/7g83hhc/screen/95337876] 
