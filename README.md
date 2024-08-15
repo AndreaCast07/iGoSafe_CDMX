@@ -48,4 +48,4 @@ Para poder que puedas entender el funcionamiento y flujo de nuestra aplicación.
 
 
 ### Descripcion del equipo
-Para saber más de los integrantes del grupo puedes verlo [aquí][descripcion_equipo.md]
+Para saber más de los integrantes del grupo puedes verlo [aquí](descripcion_equipo.md).
