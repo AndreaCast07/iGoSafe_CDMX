@@ -17,7 +17,7 @@ Con funcionalidades que incluyen la capacidad de calificar y ajustar rutas basad
 ## Integrantes del Equipo
 
 - **Jocelyne Gonzalez Hernandez**
-(Imagenes/Jocelyne.jpeg)
+  ![Jocelyne](Imagenes/Jocelyne-foto.jpeg)
 - **María José Cárdenas Machaca**
 - **Neyl Peñuela Bernate**
-- (Imagenes/Neyl.jpeg)
+ ![Neyl](Imagenes/Neyl-foto.jpeg)
