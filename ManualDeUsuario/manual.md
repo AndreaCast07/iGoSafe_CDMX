@@ -1,8 +1,9 @@
 # Manual de usuario
 Aquí encontrarás un manual de usuario para el uso de nuestro aplicativo  
 Primero, al abrir la app se encontrará un sistema de loggin que se constituye de tu número de celular y tu contraseña. 
-Dandote la oportunidad de poder recuperar esta última si se te ha olvidado, y si no tienes una cuenta aún, la forma de crearla presionando sobre el texto “Comenzar a usar iGoSafe”. 
-![Pantalla principal][ManualDeUsuario/Pantallas/pantalla-principal.png]
+Dandote la oportunidad de poder recuperar esta última si se te ha olvidado, y si no tienes una cuenta aún, la forma de crearla presionando sobre el texto “Comenzar a usar iGoSafe”.
+
+![Pantalla principal](ManualDeUsuario/Pantallas/pantalla-principal.png)
 <sub> Pantalla principal iGoSafe</sub> 
 
 Como va a ser la primera vez usando la aplicación entonces se va a crear la cuenta, apareciendo estas siguientes pantallas que piden el recibimiento de un código SMS para verificar e incluir este número de celular como perteneciente a un usuario de iGoSafe y continuar con la creación de contraseña: 
