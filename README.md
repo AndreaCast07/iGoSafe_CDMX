@@ -69,4 +69,4 @@ Con funcionalidades que incluyen la capacidad de calificar y ajustar rutas basad
 
 ## MANUAL DE USUARIO
 
-Para poder que puedas entender el funcionamiento y flujo de nuestra aplicación. Puedes acceder al manual de usuario [aquí] [URL_MANUAL].
+Para poder que puedas entender el funcionamiento y flujo de nuestra aplicación. Puedes acceder al manual de usuario [aquí](ManualDeUsuario/manual.md).
