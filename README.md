@@ -1,4 +1,7 @@
-# ![iGoSafe](Imagenes/logo.png)
+<div style="display: flex; align-items: center;">
+  <img src="Imagenes/logo.png" alt="iGoSafe Logo" style="width: 50px; height: 50px; margin-right: 15px;">
+  <h1 style="font-size: 2em; margin: 0;">iGoSafe</h1>
+</div>
 
 **Equipo Los Surfers**
 
