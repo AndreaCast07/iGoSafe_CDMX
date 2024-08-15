@@ -56,3 +56,5 @@ Si el usuario al que solicitó la ubicación acepta compartirla, se generará un
 <p style="text-align: center;">
   <img src="Pantallas/ruta-generada.png" alt="Pantalla ruta" style="width: 60%; max-width: 400px;">
 </p>
+
+Para una visualización detallada de las pantallas de la aplicación y los mockups, por favor, consulta el siguiente [enlace](https://marvelapp.com/prototype/7g83hhc/screen/95337876)
