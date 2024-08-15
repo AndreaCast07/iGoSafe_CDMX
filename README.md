@@ -22,19 +22,19 @@ Con funcionalidades que incluyen la capacidad de calificar y ajustar rutas basad
 
 <div style="text-align: center; margin-right: 20px;">
   <h2>Jocelyne Gonzalez Hernandez</h2>
-  <img src="Imagenes/Jocelyne-foto.jpeg" alt="Jocelyne" style="border-radius: 50%; width: 150px; height: 150px; object-fit: cover;">
+  <img src="Imagenes/Jocelyne-foto.jpeg" alt="Jocelyne" style="border-radius: 50%; width: 150px; height: 200px; object-fit: cover;">
   <p>  ESPACIO PARA LA BIOGRAFIA</p>
 </div>
 
 <div style="text-align: center; margin-right: 20px;">
   <h2>María José Cárdenas Machaca</h2>
-  <img src="Imagenes/placeholder.jpg" alt="María José" style="border-radius: 50%; width: 150px; height: 150px; object-fit: cover;">
+  <img src="Imagenes/placeholder.jpg" alt="María José" style="border-radius: 50%; width: 150px; height: 200px; object-fit: cover;">
   <p>  ESPACIO PARA LA BIOGRAFIA</p>
 </div>
 
 <div style="text-align: center;">
    <h2>Neyl Peñuela Bernate</h2>
-  <img src="Imagenes/Neyl-foto.jpeg" alt="Neyl" style="border-radius: 50%; width: 150px; height: 150px; object-fit: cover;">
+  <img src="Imagenes/Neyl-foto.jpeg" alt="Neyl" style="border-radius: 50%; width: 150px; height: 200px; object-fit: cover;">
   <p>  ESPACIO PARA LA BIOGRAFIA</p>
 </div>
 
