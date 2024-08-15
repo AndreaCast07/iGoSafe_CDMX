@@ -1,5 +1,5 @@
 <div style="display: flex; align-items: center;">
-  <img src="Imagenes/logo.png" alt="iGoSafe Logo" style="width: 50px; height: 50px; margin-right: 15px;">
+  <img src="Imagenes/logo.png"  style="width: 50px; height: 50px; margin-right: 15px;">
   <span style="font-size: 10em; font-weight: bold;">iGoSafe</span>
 </div>
 
