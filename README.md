@@ -11,8 +11,6 @@
 
 Con funcionalidades que incluyen la capacidad de calificar y ajustar rutas basadas en la seguridad, **iGoSafe** proporciona tranquilidad durante los desplazamientos al garantizar que solo se pueda seleccionar como destino la ubicación de un contacto registrado.
 
-## Características
-
 - **Rutas Seguras**: Obtén rutas diseñadas para maximizar la seguridad durante tu viaje.
 - **Calificación de Rutas**: Evalúa y ajusta las rutas basadas en tu experiencia y seguridad.
 - **Ubicación de Contactos**: Solo puedes seleccionar como destino la ubicación de contactos registrados, garantizando un viaje seguro y controlado.
@@ -21,12 +19,12 @@ Con funcionalidades que incluyen la capacidad de calificar y ajustar rutas basad
 
 <div style="text-align: center; margin-right: 20px;">
   <img src="Imagenes/Jocelyne-foto.jpeg" alt="Jocelyne" style="border-radius: 50%; width: 150px; height: 150px; object-fit: cover;">
-  <p><strong>Jocelyne Gonzalez Hernandez</strong></p>
+  <strong>Jocelyne Gonzalez Hernandez</strong>
 </div>
 
 <div style="text-align: center; margin-right: 20px;">
   <img src="Imagenes/placeholder.jpg" alt="María José" style="border-radius: 50%; width: 150px; height: 150px; object-fit: cover;">
-  <p><strong>María José Cárdenas Machaca</strong></p>
+  <strong>María José Cárdenas Machaca</strong>
 </div>
 
 <div style="text-align: center;">
