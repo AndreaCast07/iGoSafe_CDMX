@@ -34,4 +34,4 @@ A su vez, cuando se quiere elegir el punto al cuál se quiere llegar, aparecerá
 
 <sub> Solicitud de ubicación</sub> 
 
-Aquí están las [imagenes][https://marvelapp.com/prototype/7g83hhc/screen/95337876] 
+Aquí están las pantallas: [https://marvelapp.com/prototype/7g83hhc/screen/95337876] 
