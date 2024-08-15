@@ -22,7 +22,7 @@ Con funcionalidades que incluyen la capacidad de calificar y ajustar rutas basad
 
 <div style="text-align: center; margin-right: 20px;">
   <h2>Jocelyne Gonzalez Hernandez</h2>
-  <img src="Imagenes/Jocelyne-foto.jpeg" alt="Jocelyne" style="border-radius: 50%; width: 150px; height: 200px; object-fit: cover;">
+  <img src="Imagenes/Jocelyne-foto.jpeg" alt="Jocelyne" style="border-radius: 50%; width: 150px; height: 150px; object-fit: cover;">
   <p>Estudiante de la licenciatura en <b>Ingeniería en Tecnologías de Cómputo y Telecomunicaciones</b> de la <b>Universidad Iberoamericana de la Ciudad de México</b></p>  
   <p>Me apasionan los conciertos, la fiesta y salir a conocer lugares nuevos.</p>
 </div>
