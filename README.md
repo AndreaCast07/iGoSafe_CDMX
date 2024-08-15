@@ -21,8 +21,8 @@ Con funcionalidades que incluyen la capacidad de calificar y ajustar rutas basad
 <div style="display: flex; flex-wrap: wrap; align-items: center;">
 
 <div style="text-align: center; margin-right: 20px;">
+  <h1>Jocelyne Gonzalez Hernandez</h1>
   <img src="Imagenes/Jocelyne-foto.jpeg" alt="Jocelyne" style="border-radius: 50%; width: 150px; height: 150px; object-fit: cover;">
-  <strong>Jocelyne Gonzalez Hernandez</strong>
 </div>
 
 <div style="text-align: center; margin-right: 20px;">
@@ -31,8 +31,9 @@ Con funcionalidades que incluyen la capacidad de calificar y ajustar rutas basad
 </div>
 
 <div style="text-align: center;">
+   <h1>Neyl Peñuela Bernate
   <img src="Imagenes/Neyl-foto.jpeg" alt="Neyl" style="border-radius: 50%; width: 150px; height: 150px; object-fit: cover;">
-  <p><strong>Neyl Peñuela Bernate</strong></p>
+  </h1>
 </div>
 
 </div>
