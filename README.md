@@ -21,7 +21,7 @@ Con funcionalidades que incluyen la capacidad de calificar y ajustar rutas basad
 <div style="display: flex; flex-wrap: wrap; align-items: center;">
 
 <div style="text-align: center; margin-right: 20px;">
-  <h1>Jocelyne Gonzalez Hernandez</h1>
+  <h2>Jocelyne Gonzalez Hernandez</h2>
   <img src="Imagenes/Jocelyne-foto.jpeg" alt="Jocelyne" style="border-radius: 50%; width: 150px; height: 150px; object-fit: cover;">
 </div>
 
