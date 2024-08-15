@@ -1,4 +1,4 @@
-# ![iGoSafe](logo.png)
+# ![iGoSafe](Imagenes/logo.png)
 
 **Equipo Los Surfers**
 
