@@ -20,35 +20,26 @@ Con funcionalidades que incluyen la capacidad de calificar y ajustar rutas basad
 ### Servicios y hardware utilizados:     
 
 - Android Studio: Se usará para poder desarrollar la aplicación    
-
 - Firebase: La utilizaremos como herramienta para el desarrollo de la aplicación, desde allí manejaremos aspectos como pueden ser de analítica de datos.   
-
--- Hardware del Dispositivo móvil:   
-
 - Acelerómetro: se usará para calcular la velocidad en la que el usuario está llevando el recorrido. 
-
 - GPS: Se usará para crear la ruta, tomando el inicio y final del trayecto, y ubicando al usuario en todo su trayecto.   
-
 - Pantallas móviles: se usarán como dispositivos de entrada para la navegación y manejo de la aplicación, así como seleccionar las opciones deseadas.   
-
 - Memoria interna: Se usa para poder descargar la aplicación y requerimientos necesarios para el uso adecuado de esta.  
-
 - Giroscopio: Su uso será para entender hacia qué dirección se está dirigiendo el usuario.
-  
-- Sensor de huella: Para autorizar el compartir ubicación
+- Sensor de huella: Para autorizar el compartir ubicación.
 
 ## Integrantes del equipo
 <div style="display: flex; flex-wrap: wrap; align-items: center;">
 
 <div style="text-align: center; margin-right: 20px;">
-  <h2>Jocelyne Gonzalez Hernandez</h2>
+  <h3>Jocelyne Gonzalez Hernandez</h3>
   <img src="Imagenes/Jocelyne-foto.jpeg" alt="Jocelyne" style="border-radius: 50%; width: 150px; height: 200px; object-fit: cover;">
   <p>Estudiante de la licenciatura en <b>Ingeniería en Tecnologías de Cómputo y Telecomunicaciones</b> de la <b>Universidad Iberoamericana de la Ciudad de México.</b></p>  
   <p>Me apasionan los conciertos, la fiesta y salir a conocer lugares nuevos.</p>
 </div>
 
 <div style="text-align: center; margin-right: 20px;">
-  <h2>María José Cárdenas Machaca</h2>
+  <h3>María José Cárdenas Machaca</h3>
   <img src="Imagenes/Maria-foto.jpeg" alt="María José" style="border-radius: 50%; width: 150px; height: 150px; object-fit: cover;">
   <p>Estudiante de ingeniería de sistemas de la Pontificia Universidad Javeriana. </p>
   <p>ColomboPeruana.</p>
@@ -56,7 +47,7 @@ Con funcionalidades que incluyen la capacidad de calificar y ajustar rutas basad
 </div>
 
 <div style="text-align: center;">
-   <h2>Neyl Peñuela Bernate</h2>
+   <h3>Neyl Peñuela Bernate</h3>
   <img src="Imagenes/Neyl-foto.jpeg" alt="Neyl" style="border-radius: 50%; width: 150px; height: 200px; object-fit: cover;">
   <p>Estudiante de Ciencia de datos con experiencia en el uso de base de datos geoespaciales, y creación de indicadores de análisis Multivariado.</p>
   <p>Para poder crear no solo necesitamos de herramientas, también necesitamos saber más historias de vida.</p>
@@ -73,7 +64,7 @@ Con funcionalidades que incluyen la capacidad de calificar y ajustar rutas basad
 ### CASOS DE USO
   
 
- ### LEAN CANVAS
+### LEAN CANVAS
 ![leancanvas](Imagenes/lean-canva.jpeg)
 
 ## MANUAL DE USUARIO
