@@ -14,18 +14,29 @@ Con funcionalidades que incluyen la capacidad de calificar y ajustar rutas basad
 - **Calificación de Rutas**: Evalúa y ajusta las rutas basadas en tu experiencia y seguridad.
 - **Ubicación de Contactos**: Solo puedes seleccionar como destino la ubicación de contactos registrados, garantizando un viaje seguro y controlado.
 
-## Integrantes del Equipo
+<div style="display: flex; flex-wrap: wrap; align-items: center;">
 
-- **Jocelyne Gonzalez Hernandez**
-  ![Jocelyne](Imagenes/Jocelyne-foto.jpeg)
-- **María José Cárdenas Machaca**
-- **Neyl Peñuela Bernate**
- ![Neyl](Imagenes/Neyl-foto.jpeg)
+<div style="text-align: center; margin-right: 20px;">
+  <img src="Imagenes/Jocelyne-foto.jpeg" alt="Jocelyne" style="border-radius: 50%; width: 150px; height: 150px; object-fit: cover;">
+  <p><strong>Jocelyne Gonzalez Hernandez</strong></p>
+</div>
+
+<div style="text-align: center; margin-right: 20px;">
+  <img src="Imagenes/placeholder.jpg" alt="María José" style="border-radius: 50%; width: 150px; height: 150px; object-fit: cover;">
+  <p><strong>María José Cárdenas Machaca</strong></p>
+</div>
+
+<div style="text-align: center;">
+  <img src="Imagenes/Neyl-foto.jpeg" alt="Neyl" style="border-radius: 50%; width: 150px; height: 150px; object-fit: cover;">
+  <p><strong>Neyl Peñuela Bernate</strong></p>
+</div>
+
+</div>
 
 
-##ENTREGABLES
-###DIAGRAMA INICIAL DE CLASES
+## ENTREGABLES
+### DIAGRAMA INICIAL DE CLASES
 ![Diagrama](Imagenes/diagrama-clases.jpeg)
-###LEAN CANVAS
+### LEAN CANVAS
 ![leancanvas](Imagenes/lean-canva.jpeg)
-###CASOS DE USO
+### CASOS DE USO
