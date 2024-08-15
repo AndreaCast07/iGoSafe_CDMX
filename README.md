@@ -30,7 +30,8 @@ Con funcionalidades que incluyen la capacidad de calificar y ajustar rutas basad
 <div style="text-align: center; margin-right: 20px;">
   <h2>María José Cárdenas Machaca</h2>
   <img src="Imagenes/placeholder.jpg" alt="María José" style="border-radius: 50%; width: 150px; height: 200px; object-fit: cover;">
-  <p>  ESPACIO PARA LA BIOGRAFIA</p>
+  <p> Estudiante de ingeniería de sistemas de la Pontificia Universidad Javeriana.ColomboPeruana.</p>
+  <p>En mis tiempos libres me gusta ver series y dibujar. Mi animal favorito son los gatos.</p>
 </div>
 
 <div style="text-align: center;">
