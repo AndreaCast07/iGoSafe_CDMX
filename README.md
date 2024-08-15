@@ -21,3 +21,11 @@ Con funcionalidades que incluyen la capacidad de calificar y ajustar rutas basad
 - **María José Cárdenas Machaca**
 - **Neyl Peñuela Bernate**
  ![Neyl](Imagenes/Neyl-foto.jpeg)
+
+
+##ENTREGABLES
+###DIAGRAMA INICIAL DE CLASES
+![Diagrama](Imagenes/diagrama-clases.jpeg)
+###LEAN CANVAS
+![leancanvas](Imagenes/lean-canva.jpeg)
+###CASOS DE USO
