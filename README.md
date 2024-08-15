@@ -17,6 +17,26 @@ Con funcionalidades que incluyen la capacidad de calificar y ajustar rutas basad
 - **Calificación de Rutas**: Evalúa y ajusta las rutas basadas en tu experiencia y seguridad.
 - **Ubicación de Contactos**: Solo puedes seleccionar como destino la ubicación de contactos registrados, garantizando un viaje seguro y controlado.
 
+### Servicios y hardware utilizados:     
+
+- Android Studio: Se usará para poder desarrollar la aplicación    
+
+- Firebase: La utilizaremos como herramienta para el desarrollo de la aplicación, desde allí manejaremos aspectos como pueden ser de analítica de datos.   
+
+-- Hardware del Dispositivo móvil:   
+
+- Acelerómetro: se usará para calcular la velocidad en la que el usuario está llevando el recorrido. 
+
+- GPS: Se usará para crear la ruta, tomando el inicio y final del trayecto, y ubicando al usuario en todo su trayecto.   
+
+- Pantallas móviles: se usarán como dispositivos de entrada para la navegación y manejo de la aplicación, así como seleccionar las opciones deseadas.   
+
+- Memoria interna: Se usa para poder descargar la aplicación y requerimientos necesarios para el uso adecuado de esta.  
+
+- Giroscopio: Su uso será para entender hacia qué dirección se está dirigiendo el usuario.
+  
+- Sensor de huella: Para autorizar el compartir ubicación
+
 ## Integrantes del equipo
 <div style="display: flex; flex-wrap: wrap; align-items: center;">
 
@@ -49,6 +69,13 @@ Con funcionalidades que incluyen la capacidad de calificar y ajustar rutas basad
 ## ENTREGABLES
 ### DIAGRAMA INICIAL DE CLASES
 ![Diagrama](Imagenes/diagrama-clases.jpeg)
-### LEAN CANVAS
-![leancanvas](Imagenes/lean-canva.jpeg)
+
 ### CASOS DE USO
+  
+
+ ### LEAN CANVAS
+![leancanvas](Imagenes/lean-canva.jpeg)
+
+# Manual Usuario 
+
+Para poder que puedas entender el funcionamiento y flujo de nuestra aplicación. Puedes acceder al manual de usuario [aquí] [URL_MANUAL].
