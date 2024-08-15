@@ -6,7 +6,7 @@ Dandote la oportunidad de poder recuperar esta última si se te ha olvidado, y s
 ![Pantalla principal](Pantallas/pantalla-principal.png)
 <sub> Pantalla principal iGoSafe</sub> 
 
-Como va a ser la primera vez usando la aplicación entonces se va a crear la cuenta, apareciendo estas siguientes pantallas que piden el recibimiento de un código SMS para verificar e incluir este número de celular como perteneciente a un usuario de iGoSafe y continuar con la creación de contraseña: 
+Como va a ser la primera vez usando la aplicación entonces se va a crear la cuenta, apareciendo estas siguientes pantallas que piden el recibimiento de un código SMS para verificar e incluir este número de celular como perteneciente a un usuario de iGoSafe y continuar con la creación de contraseña.
 
 ![Pantalla numero](Pantallas/ingresar-numero.png)
 ![Pantalla verificacion](Pantallas/ingresar-codigo.png)
@@ -24,11 +24,12 @@ Al darle click en el botón de registro te llevara a esta nueva pantalla donde p
 
 Una vez iniciada la sesión se encontrará la opción de seleccionar los puntos a llegar y de partida, y a su vez la modalidad en la que se va a llegar a este punto en un automovil o caminando. 
 
+![Pantalla destino](Pantallas/seleccionar-destino.png)
 <sub> Pantalla principal de recorrido</sub> 
 
 A su vez, cuando se quiere elegir el punto al cuál se quiere llegar, aparecerán los usuarios de confianza, donde si se decide seleccionar, se le enviará una notificación al otro usuario después de presionar el botón “Solicitar Ubicación” y se dará la ruta para llegar a esta persona. 
 
-![Pantalla destino](Pantallas/seleccionar-destino.png)
+![Pantalla modalidad](Pantallas/seleccionar-modalidad.png)
 <sub> Lista de personas de confianza a la cuál dirigirse </sub> 
 
 ### Solicitar Ubicación 
@@ -37,5 +38,10 @@ A su vez, cuando se quiere elegir el punto al cuál se quiere llegar, aparecerá
 
 ![Pantalla solicitud](Pantallas/solicitud-ubicacion.png)
 <sub> Solicitud de ubicación</sub> 
+
+### Ruta
+
+Si el usuario al que solicitó la ubicación acepta compartirla, se generará una ruta de acuerdo a la modalidad escodiga.
+![Pantalla ruta](Pantallas/ruta-generada.png)
 
 Aquí están las pantallas: [https://marvelapp.com/prototype/7g83hhc/screen/95337876] 
