@@ -45,3 +45,7 @@ Para consultar las historias de usuario en detalle, por favor, visita el siguien
 ## MANUAL DE USUARIO
 
 Para poder que puedas entender el funcionamiento y flujo de nuestra aplicación. Puedes acceder al manual de usuario [aquí](ManualDeUsuario/manual.md).
+
+
+### Descripcion del equipo
+Para saber más de los integrantes del grupo puedes verlo [aquí][descripcion_equipo.md]
