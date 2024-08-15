@@ -8,8 +8,8 @@ Dandote la oportunidad de poder recuperar esta última si se te ha olvidado, y s
 
 Como va a ser la primera vez usando la aplicación entonces se va a crear la cuenta, apareciendo estas siguientes pantallas que piden el recibimiento de un código SMS para verificar e incluir este número de celular como perteneciente a un usuario de iGoSafe y continuar con la creación de contraseña: 
 
-![Pantalla numero](Pantallas/ingresa-numero.png)
-![Pantalla verificacion](Pantallas/ingresa-codigo.png)
+![Pantalla numero](Pantallas/ingresar-numero.png)
+![Pantalla verificacion](Pantallas/ingresar-codigo.png)
 ![Pantalla contraseña](Pantallas/crear-contraseña.png)
 <sub> Pantalla de verificación SMS y registro de cuenta</sub> 
 
