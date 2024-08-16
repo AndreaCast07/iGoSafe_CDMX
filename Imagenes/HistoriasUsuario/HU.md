@@ -4,7 +4,7 @@
 ![Registrar usuario](HU1-RegistroUsuario.jpeg)
 
 ## Historia de Usuario 2: Crear contraseña y perfil
-![Crear contraseña y perfil](HU2-CrearConstrasena.jpeg)
+![Crear contraseña y perfil](HU2-CrearContrasena.jpeg)
 
 ## Historia de Usuario 3: Iniciar sesión
 ![Iniciar sesión](HU3-IniciarSesion.jpeg)
