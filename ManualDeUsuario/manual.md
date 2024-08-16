@@ -26,7 +26,7 @@ Al darle click en el botón de registro te llevara a esta nueva pantalla donde p
   <br><sub>Pantalla de registro cliente</sub>
 </p>
 
-### Menu principal  
+### Menú principal  
 
 Una vez iniciada la sesión se encontrará la opción de seleccionar los puntos a llegar y de partida, y a su vez la modalidad en la que se va a llegar a este punto en un automovil o caminando. 
 
@@ -41,6 +41,7 @@ A su vez, cuando se quiere elegir el punto al cuál se quiere llegar, aparecerá
   <img src="Pantallas/seleccionar-modalidad.png" alt="Pantalla modalidad" style="width: 60%; max-width: 400px;">
   <br><sub>Lista de personas de confianza a la cual dirigirse</sub>
 </p>
+
 ### Solicitar Ubicación 
 
  En el momento en el que el usuario ha marcado como destino a otro usuario, este recibirá un mensaje de solicitud para retribuir la ubicación exacta o no.
@@ -64,19 +65,21 @@ Si el usuario al que solicitó la ubicación acepta compartirla, se generará un
   <br><sub>Visualización ruta peatonal</sub>
 </p>
 
+### Menú lateral 
 El usuario tendrá un menú a su derecha donde podrá realizar diferentes actividades, tales como ver sus estadísticas, ver sus viajes, y configuraciones generales del aplicativo, desde agregar más personas de confianza hasta manejar las notificaciones. Y claro, poder acceder a la versión Premium
 <p style="text-align: center;">
   <img src="Pantallas/menu_lateral.png" alt="Pantalla ruta" style="width: 60%; max-width: 400px;">
   <br><sub>Menú lateral</sub>
 </p>
 
-
+### Calificar ruta
 Después de terminar un trayecto podrá calificar la percepción de seguridad que se tuvo sobre esta.
 <p style="text-align: center;">
   <img src="Pantallas/calificar_ruta.png" alt="Pantalla ruta" style="width: 60%; max-width: 400px;">
   <br><sub>Calificar trayecto</sub>
 </p>
 
+### Contactos
 El usuario podrá marcar sus personas de confianza favoritos.
 <p style="text-align: center;">
   <img src="Pantallas/agregar_favoritos.png" alt="Pantalla ruta" style="width: 60%; max-width: 400px;">
