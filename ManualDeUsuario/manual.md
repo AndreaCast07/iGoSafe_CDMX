@@ -55,40 +55,34 @@ A su vez, cuando se quiere elegir el punto al cuál se quiere llegar, aparecerá
 Si el usuario al que solicitó la ubicación acepta compartirla, se generará una ruta y se mostrarán la calificación de esta misma.
 <p style="text-align: center;">
   <img src="Pantallas/ruta-generada.png" alt="Pantalla ruta" style="width: 60%; max-width: 400px;">
-  <br><sub>Solicitud de ubicación</sub>
-</p>
-
-Si el usuario al que solicitó la ubicación acepta compartirla, se generará una ruta y se mostrarán la calificación de esta misma.
-<p style="text-align: center;">
-  <img src="Pantallas/visualizacion_auto.png" alt="Pantalla ruta" style="width: 60%; max-width: 400px;">
-  <br><sub>Solicitud de ubicación</sub>
+  <br><sub>Visualización ruta automovil</sub>
 </p>
 
 Si el usuario al que solicitó la ubicación acepta compartirla, se generará una ruta y se mostrarán la calificación de esta misma.
 <p style="text-align: center;">
   <img src="Pantallas/visualizacion_peatonal.png" alt="Pantalla ruta" style="width: 60%; max-width: 400px;">
-  <br><sub>Solicitud de ubicación</sub>
+  <br><sub>Visualización ruta peatonal</sub>
 </p>
 
-Si el usuario al que solicitó la ubicación acepta compartirla, se generará una ruta y se mostrarán la calificación de esta misma.
+El usuario tendrá un menú a su derecha donde podrá realizar diferentes actividades, tales como ver sus estadísticas, ver sus viajes, y configuraciones generales del aplicativo, desde agregar más personas de confianza hasta manejar las notificaciones. Y claro, poder acceder a la versión Premium
 <p style="text-align: center;">
   <img src="Pantallas/menu_lateral.png" alt="Pantalla ruta" style="width: 60%; max-width: 400px;">
-  <br><sub>Solicitud de ubicación</sub>
+  <br><sub>Menú lateral</sub>
 </p>
 
 
-Si el usuario al que solicitó la ubicación acepta compartirla, se generará una ruta y se mostrarán la calificación de esta misma.
+Después de terminar un trayecto podrá calificar la percepción de seguridad que se tuvo sobre esta.
 <p style="text-align: center;">
   <img src="Pantallas/calificar_ruta.png" alt="Pantalla ruta" style="width: 60%; max-width: 400px;">
   <br><sub>Solicitud de ubicación</sub>
 </p>
 
-Si el usuario al que solicitó la ubicación acepta compartirla, se generará una ruta y se mostrarán la calificación de esta misma.
+El usuario podrá marcar sus personas de confianza favoritos.
 <p style="text-align: center;">
   <img src="Pantallas/agregar_favoritos.png" alt="Pantalla ruta" style="width: 60%; max-width: 400px;">
   <br><sub>Solicitud de ubicación</sub>
 
-Si el usuario al que solicitó la ubicación acepta compartirla, se generará una ruta y se mostrarán la calificación de esta misma.
+Si el usuario dio permiso al aplicativo para ver la lista de sus contactos, pues, podrá ver qué personas de su lista de contactos están usando iGoSafe.
 <p style="text-align: center;">
   <img src="Pantallas/buscar_contactos.png" alt="Pantalla ruta" style="width: 60%; max-width: 400px;">
   <br><sub>Solicitud de ubicación</sub>
