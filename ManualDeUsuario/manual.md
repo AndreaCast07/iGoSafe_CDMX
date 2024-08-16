@@ -74,18 +74,18 @@ El usuario tendrá un menú a su derecha donde podrá realizar diferentes activi
 Después de terminar un trayecto podrá calificar la percepción de seguridad que se tuvo sobre esta.
 <p style="text-align: center;">
   <img src="Pantallas/calificar_ruta.png" alt="Pantalla ruta" style="width: 60%; max-width: 400px;">
-  <br><sub>Solicitud de ubicación</sub>
+  <br><sub>Calificar trayecto</sub>
 </p>
 
 El usuario podrá marcar sus personas de confianza favoritos.
 <p style="text-align: center;">
   <img src="Pantallas/agregar_favoritos.png" alt="Pantalla ruta" style="width: 60%; max-width: 400px;">
-  <br><sub>Solicitud de ubicación</sub>
+  <br><sub>usuarios Favoritos</sub>
 
 Si el usuario dio permiso al aplicativo para ver la lista de sus contactos, pues, podrá ver qué personas de su lista de contactos están usando iGoSafe.
 <p style="text-align: center;">
   <img src="Pantallas/buscar_contactos.png" alt="Pantalla ruta" style="width: 60%; max-width: 400px;">
-  <br><sub>Solicitud de ubicación</sub>
+  <br><sub>Lista de contactos usando iGoSafe</sub>
 </p>
 </p>
 
