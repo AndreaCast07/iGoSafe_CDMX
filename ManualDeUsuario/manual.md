@@ -55,6 +55,44 @@ A su vez, cuando se quiere elegir el punto al cuál se quiere llegar, aparecerá
 Si el usuario al que solicitó la ubicación acepta compartirla, se generará una ruta y se mostrarán la calificación de esta misma.
 <p style="text-align: center;">
   <img src="Pantallas/ruta-generada.png" alt="Pantalla ruta" style="width: 60%; max-width: 400px;">
+  <br><sub>Solicitud de ubicación</sub>
+</p>
+
+Si el usuario al que solicitó la ubicación acepta compartirla, se generará una ruta y se mostrarán la calificación de esta misma.
+<p style="text-align: center;">
+  <img src="Pantallas/visualizacion_auto.png" alt="Pantalla ruta" style="width: 60%; max-width: 400px;">
+  <br><sub>Solicitud de ubicación</sub>
+</p>
+
+Si el usuario al que solicitó la ubicación acepta compartirla, se generará una ruta y se mostrarán la calificación de esta misma.
+<p style="text-align: center;">
+  <img src="Pantallas/visualizacion_peatonal.png" alt="Pantalla ruta" style="width: 60%; max-width: 400px;">
+  <br><sub>Solicitud de ubicación</sub>
+</p>
+
+Si el usuario al que solicitó la ubicación acepta compartirla, se generará una ruta y se mostrarán la calificación de esta misma.
+<p style="text-align: center;">
+  <img src="Pantallas/menu_lateral.png" alt="Pantalla ruta" style="width: 60%; max-width: 400px;">
+  <br><sub>Solicitud de ubicación</sub>
+</p>
+
+
+Si el usuario al que solicitó la ubicación acepta compartirla, se generará una ruta y se mostrarán la calificación de esta misma.
+<p style="text-align: center;">
+  <img src="Pantallas/calificar_ruta.png" alt="Pantalla ruta" style="width: 60%; max-width: 400px;">
+  <br><sub>Solicitud de ubicación</sub>
+</p>
+
+Si el usuario al que solicitó la ubicación acepta compartirla, se generará una ruta y se mostrarán la calificación de esta misma.
+<p style="text-align: center;">
+  <img src="Pantallas/agregar_favoritos.png" alt="Pantalla ruta" style="width: 60%; max-width: 400px;">
+  <br><sub>Solicitud de ubicación</sub>
+
+Si el usuario al que solicitó la ubicación acepta compartirla, se generará una ruta y se mostrarán la calificación de esta misma.
+<p style="text-align: center;">
+  <img src="Pantallas/buscar_contactos.png" alt="Pantalla ruta" style="width: 60%; max-width: 400px;">
+  <br><sub>Solicitud de ubicación</sub>
+</p>
 </p>
 
 Para una visualización detallada de las pantallas de la aplicación y los mockups, por favor, consulta el siguiente [enlace](https://marvelapp.com/prototype/7g83hhc/screen/95337876)
