@@ -49,3 +49,6 @@ Para poder que puedas entender el funcionamiento y flujo de nuestra aplicación.
 
 ### DESCRIPCIÓN DEL EQUIPO
 Para saber más de los integrantes del grupo puedes verlo [aquí](descripcion_equipo.md).
+
+Comentarios Profesor
+Buen trabajo -> 5.0
