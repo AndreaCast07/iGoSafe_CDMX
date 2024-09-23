@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">iGoSafeApp</string>
+    <string name="celular">Número de celular</string>
+    <string name="contraseña">Contraseña</string>
+    <string name="olvidarContraseña"><u>¿Olvidaste tu contraseña?</u></string>
+    <string name="cuenta">¿No tienes una cuenta?</string>
+    <string name="comienza">Comienza a usar iGoSafe</string>
 </resources>

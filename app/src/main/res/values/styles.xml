@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="AppThemeIgoSafe" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">@color/azul1</item>
+        <item name="colorPrimaryDark">@color/azul</item>
+        <item name="colorAccent">@color/azul3</item>
+        <item name="android:windowContentTransitions">true</item>
+    </style>
+
+    <style name="inicio" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">@color/azul1</item>
+        <item name="colorPrimaryDark">@color/black</item>
+        <item name="colorAccent">@color/azul</item>
+        <item name="android:windowContentTransitions">true</item>
+    </style>
+</resources>
