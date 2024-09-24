@@ -6,6 +6,8 @@
     <color name="azul1">#00d0ff</color>
     <color name="azul2">#5ca6ff</color>
     <color name="azul3">#234e55</color>
+    <color name="azul4">#214a68</color>
     <color name="verde">#7ed957</color>
     <color name="naranja">#f4ac2c</color>
+    <color name="grisAzul">#cde8f2</color>
 </resources>
