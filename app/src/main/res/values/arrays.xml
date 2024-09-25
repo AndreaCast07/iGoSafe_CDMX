@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="opcionesDocumentos">
+        <item>Tipo de documento</item>
+        <item>Cédula ciudadanía</item>
+        <item>Cédula extranjería</item>
+        <item>Otro</item>
+    </string-array>
+</resources>

@@ -22,9 +22,18 @@
         <activity android:name=".LoginActivity"
             android:exported="false"/>
         <activity android:name=".SignInPhone"
-            android:exported="false"/>
+            android:exported="false"
+            android:theme="@style/AppThemeregister"/>
+        <activity android:name=".SignInValidateSms"
+            android:exported="false"
+            android:theme="@style/AppThemeregister"/>
         <activity android:name=".Create_profile"
-            android:exported="false"/>
+            android:exported="false"
+            android:theme="@style/AppThemeregister"/>
+        <activity android:name=".CreatePassword"
+            android:exported="false"
+            android:theme="@style/AppThemeregister"/>
+
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />

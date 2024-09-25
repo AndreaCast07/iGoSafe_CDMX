@@ -7,4 +7,10 @@
     <string name="comienza">Comienza a usar iGoSafe</string>
     <string name="cuentaExiste">¿Ya tienes una cuenta?</string>
     <string name="iniciaSesion">Inicia sesión</string>
+    <string name="volverEnviarCodigo"><u>¿No recibiste un código? Volver a enviar</u></string>
+    <string name="regisContrasena">Contraseña</string>
+    <string name="confirContrasena">Confirmar contraseña</string>
+    <string name="infoContrasena">La contraseña debe contar con 6 dígitos y ser compuesta con número y caracteres</string>
+    <string name="numDocumento">Número de documento</string>
+    <string name="creaPerfil">Crea tu perfil</string>
 </resources>

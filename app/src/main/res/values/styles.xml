@@ -7,10 +7,10 @@
         <item name="android:windowContentTransitions">true</item>
     </style>
 
-    <style name="inicio" parent="Theme.MaterialComponents.Light.NoActionBar">
+    <style name="AppThemeregister" parent="Theme.MaterialComponents.Light.NoActionBar">
         <item name="colorPrimary">@color/azul1</item>
-        <item name="colorPrimaryDark">@color/black</item>
-        <item name="colorAccent">@color/azul</item>
+        <item name="colorPrimaryDark">@color/azul4</item>
+        <item name="colorAccent">@color/azul4</item>
         <item name="android:windowContentTransitions">true</item>
     </style>
 </resources>
