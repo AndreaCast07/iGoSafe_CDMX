@@ -11,6 +11,18 @@
         android:theme="@style/AppThemeIgoSafe"
         tools:targetApi="31">
         <activity
+            android:name=".comentarios"
+            android:exported="false" />
+        <activity
+            android:name=".review_ruta"
+            android:exported="false" />
+        <activity
+            android:name=".ruta_peatonal"
+            android:exported="false" />
+        <activity
+            android:name=".ruta_vehicular"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
@@ -19,20 +31,25 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".LoginActivity"
-            android:exported="false"/>
-        <activity android:name=".SignInPhone"
+        <activity
+            android:name=".LoginActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SignInPhone"
             android:exported="false"
-            android:theme="@style/AppThemeregister"/>
-        <activity android:name=".SignInValidateSms"
+            android:theme="@style/AppThemeregister" />
+        <activity
+            android:name=".SignInValidateSms"
             android:exported="false"
-            android:theme="@style/AppThemeregister"/>
-        <activity android:name=".Create_profile"
+            android:theme="@style/AppThemeregister" />
+        <activity
+            android:name=".Create_profile"
             android:exported="false"
-            android:theme="@style/AppThemeregister"/>
-        <activity android:name=".CreatePassword"
+            android:theme="@style/AppThemeregister" />
+        <activity
+            android:name=".CreatePassword"
             android:exported="false"
-            android:theme="@style/AppThemeregister"/>
+            android:theme="@style/AppThemeregister" />
 
         <meta-data
             android:name="preloaded_fonts"

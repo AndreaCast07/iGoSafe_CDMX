@@ -10,4 +10,7 @@
     <color name="verde">#7ed957</color>
     <color name="naranja">#f4ac2c</color>
     <color name="grisAzul">#cde8f2</color>
+    <color name="amarillo">#FFEB3B</color>
+    <color name="rojo">#F44336</color>
+    <color name="gris">#676868</color>
 </resources>

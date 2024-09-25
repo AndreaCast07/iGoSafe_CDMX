@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ruta_peatonal"
+    android:background="@color/white">
+
+    <ImageView
+        android:id="@+id/rutaVehicular"
+        android:layout_width="414dp"
+        android:layout_height="495dp"
+        android:scaleType="fitXY"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ruta_vehicular" />
+
+    <RatingBar
+        android:id="@+id/ratingRutaSegura"
+        android:layout_width="229dp"
+        android:layout_height="40dp"
+        android:layout_margin="0dp"
+        android:layout_marginTop="9dp"
+        android:isIndicator="true"
+        android:numStars="5"
+        android:scaleX="0.5"
+        android:scaleY="0.5"
+        android:stepSize="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/rutaSegura" />
+
+    <Button
+        android:id="@+id/iniciarViaje"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="92dp"
+        android:backgroundTint="@color/naranja"
+        android:text="Iniciar Viaje"
+        app:cornerRadius="10dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/rutaPeaton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="28dp"
+        android:layout_marginEnd="48dp"
+        android:layout_marginBottom="10dp"
+        android:text="RUTA PEATONAL"
+        app:layout_constraintBottom_toTopOf="@+id/ratingRutaSegura"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/rutaVehicular"
+        app:layout_constraintVertical_bias="0.021" />
+
+    <TextView
+        android:id="@+id/rutaSegura"
+        android:layout_width="140dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="44dp"
+        android:layout_marginTop="20dp"
+        android:gravity="center"
+        android:text="Ruta segura"
+        android:textColor="@color/azul"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/Contacto" />
+
+    <TextView
+        android:id="@+id/Contacto"
+        android:layout_width="wrap_content"
+        android:layout_height="20dp"
+        android:layout_marginStart="44dp"
+        android:layout_marginTop="28dp"
+        android:text="Nombre del contacto"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/rutaVehicular" />
+
+    <Button
+        android:id="@+id/comentarios"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="30dp"
+        android:layout_marginBottom="44dp"
+        android:background="#00FFFFFF"
+        android:text="Ver comentarios"
+        android:textColor="@color/gris"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

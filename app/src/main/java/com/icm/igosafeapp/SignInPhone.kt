@@ -1,5 +1,6 @@
 package com.icm.igosafeapp
 
+import android.annotation.SuppressLint
 import android.app.ActivityOptions
 import android.content.Intent
 import android.os.Build
@@ -13,17 +14,20 @@ import androidx.appcompat.app.AppCompatActivity
 
 class SignInPhone : AppCompatActivity() {
     private lateinit var btnSend: Button
+    private lateinit var btnSend2: Button  //PRUEBA
     private lateinit var txtIniciarSesion: TextView
     private lateinit var editTxtCelular: TextView
     private lateinit var txt: TextView
     private lateinit var logo: ImageView
 
+    @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sign_in_phone)
 
         // Inicializar las vistas
         btnSend = findViewById(R.id.btnSendSMS)
+        btnSend2 = findViewById(R.id.prueba) //PRUEBA
         txtIniciarSesion = findViewById(R.id.iniciarSesion)
         editTxtCelular = findViewById(R.id.registrarCelular)
         txt = findViewById(R.id.textView2)
@@ -31,6 +35,7 @@ class SignInPhone : AppCompatActivity() {
 
         mostrarLayoutIniciarSesion()
         mostrarLayoutValidarRegistro()
+        rutaVehiculo()
     }
 
     private fun mostrarLayoutIniciarSesion() {
@@ -43,6 +48,13 @@ class SignInPhone : AppCompatActivity() {
     private fun mostrarLayoutValidarRegistro() {
         btnSend.setOnClickListener {
             val intent = Intent(this, SignInValidateSms::class.java)
+            startActivity(intent)
+        }
+    }
+
+    private fun rutaVehiculo() {   //PRUEBA
+        btnSend2.setOnClickListener {
+            val intent = Intent(this, ruta_vehicular::class.java)
             startActivity(intent)
         }
     }

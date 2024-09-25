@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ruta_vehicular"
+    android:background="@color/white">
+
+    <ImageView
+        android:id="@+id/rutaVehicular"
+        android:layout_width="440dp"
+        android:layout_height="502dp"
+        android:scaleType="fitXY"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ruta_vehicular" />
+
+    <Button
+        android:id="@+id/cambiarRuta"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="48dp"
+        android:layout_marginBottom="16dp"
+        android:backgroundTint="@color/grisAzul"
+        android:text="Cambiar Ruta"
+        android:textColor="@color/gris"
+        app:cornerRadius="10dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <RatingBar
+        android:id="@+id/ratingRutaMedia"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_margin="0dp"
+        android:isIndicator="true"
+        android:numStars="5"
+        android:scaleX="0.5"
+        android:scaleY="0.5"
+        android:stepSize="0.5"
+        app:layout_constraintBottom_toTopOf="@+id/cambiarRuta"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <RatingBar
+        android:id="@+id/ratingRutaSegura"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_margin="0dp"
+        android:layout_marginBottom="24dp"
+        android:isIndicator="true"
+        android:numStars="5"
+        android:scaleX="0.5"
+        android:scaleY="0.5"
+        android:stepSize="0.5"
+        app:layout_constraintBottom_toTopOf="@+id/iniciarViaje"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <Button
+        android:id="@+id/iniciarViaje"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="48dp"
+        android:layout_marginBottom="20dp"
+        android:backgroundTint="@color/naranja"
+        android:text="Iniciar Viaje"
+        app:cornerRadius="10dp"
+        app:layout_constraintBottom_toTopOf="@+id/ratingRutaMedia"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/rutaVehiculo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="28dp"
+        android:layout_marginEnd="64dp"
+        android:layout_marginBottom="20dp"
+        android:text="RUTA VEHICULAR"
+        app:layout_constraintBottom_toTopOf="@+id/ratingRutaSegura"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/rutaVehicular" />
+
+    <TextView
+        android:id="@+id/rutaSegura"
+        android:layout_width="140dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="29dp"
+        android:drawableStart="@drawable/custom_safe_circle"
+        android:text="  Ruta segura"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/Contacto" />
+
+    <TextView
+        android:id="@+id/Contacto"
+        android:layout_width="wrap_content"
+        android:layout_height="20dp"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="28dp"
+        android:text="Nombre del contacto"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/rutaVehicular" />
+
+    <TextView
+        android:id="@+id/rutaIntermedia"
+        android:layout_width="140dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="28dp"
+        android:layout_marginTop="44dp"
+        android:drawableStart="@drawable/custom_intermediate_circle"
+        android:text="  Ruta intermedia"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/comentarios2" />
+
+    <Button
+        android:id="@+id/comentarios1"
+        android:layout_width="wrap_content"
+        android:layout_height="35dp"
+        android:layout_marginStart="28dp"
+        android:layout_marginTop="2dp"
+        android:background="#00FFFFFF"
+        android:text="Ver comentarios"
+        android:textAllCaps="false"
+        android:textColor="@color/gris"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/rutaIntermedia" />
+
+    <Button
+        android:id="@+id/comentarios2"
+        android:layout_width="wrap_content"
+        android:layout_height="35dp"
+        android:layout_marginStart="28dp"
+        android:layout_marginTop="2dp"
+        android:background="#00FFFFFF"
+        android:text="Ver comentarios"
+        android:textAllCaps="false"
+        android:textColor="@color/gris"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/rutaSegura" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
