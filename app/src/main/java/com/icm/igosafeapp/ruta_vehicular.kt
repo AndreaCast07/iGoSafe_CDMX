@@ -39,7 +39,7 @@ class ruta_vehicular : AppCompatActivity() {
 
         iniciar.setOnClickListener {
               // Mostrar el popup cuando se presiona el botón
-            val intent = Intent(this, review_ruta::class.java)
+            val intent = Intent(this, recorrido_vehicular::class.java)
             startActivity(intent)
         }
     }

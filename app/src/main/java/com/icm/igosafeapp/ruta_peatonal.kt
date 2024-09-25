@@ -23,7 +23,7 @@ class ruta_peatonal : AppCompatActivity() {
 
         iniciar.setOnClickListener {
             // Mostrar el popup cuando se presiona el botón
-            val intent = Intent(this, review_ruta::class.java)
+            val intent = Intent(this, recorrido_peatonal::class.java)
             startActivity(intent)
         }
     }
