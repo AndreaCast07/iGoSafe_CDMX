@@ -36,13 +36,16 @@ android {
 }
 
 dependencies {
-
+    implementation ("androidx.activity:activity-ktx:1.7.2")
+    implementation ("com.google.android.gms:play-services-auth-api-phone:18.0.1")
+    implementation("com.google.android.gms:play-services-auth-api-phone:18.0.1")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     implementation("com.google.android.material:material:1.10.0")
+    implementation(libs.play.services.auth.api.phone)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
