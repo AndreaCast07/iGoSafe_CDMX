@@ -15,7 +15,7 @@
         android:background="@drawable/custom_input_general"
         android:drawableStart="@drawable/ic_search"
         android:drawablePadding="10dp"
-        android:hint="Buscar contactos en iGoSafe"
+        android:hint="Buscar favoritos en iGoSafe"
         android:inputType="text"
         android:paddingStart="12dp"
         app:layout_constraintEnd_toEndOf="parent"

@@ -40,16 +40,13 @@ class adapter_contactos(context: Context, private val contacts: List<String>) : 
 
         favoriteCheckBox.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
-                // Agregar a favoritos
                 favorites.add(contactName)
             } else {
-                // Quitar de favoritos
                 favorites.remove(contactName)
             }
         }
         return view
     }
-    // Método para obtener la lista de favoritos
     fun getFavorites(): List<String> {
         return favorites
     }

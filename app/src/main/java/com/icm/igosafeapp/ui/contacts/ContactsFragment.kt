@@ -1,5 +1,6 @@
 package com.icm.igosafeapp.ui.contacts
 
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -57,9 +58,9 @@ class ContactsFragment : Fragment() {
 
             override fun afterTextChanged(s: Editable?) {}
         })
-
         return root
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

@@ -24,6 +24,7 @@
     <string name="apodo">Apodo</string>
     <string name="nombreCompleto">Nombre completo</string>
     <string name="formaViaje">Elige la forma en la que te gustaria viajar</string>
+    <string name="verComentarios"><u>Ver comentarios</u></string>
 
     <string name="menu_planear_viaje">Planea tu viaje</string>
     <string name="menu_favoritos">Favoritos</string>

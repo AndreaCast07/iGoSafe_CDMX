@@ -22,7 +22,6 @@ class ruta_vehicular : AppCompatActivity() {
     lateinit var icono: TextView
     lateinit var iniciar: Button
     lateinit var comentarios1:Button
-    lateinit var comentarios2:Button
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(com.icm.igosafeapp.R.layout.activity_ruta_vehicular)
@@ -32,8 +31,7 @@ class ruta_vehicular : AppCompatActivity() {
         drawable?.setBounds(0, 0, 5, 5)  // Ajusta el tamaño (ancho y alto en píxeles)
         textView.setCompoundDrawables(drawable, null, null, null)*/
         iniciar = findViewById(R.id.iniciarViaje)
-        comentarios1 = findViewById(R.id.comentarios1)
-        comentarios2 = findViewById(R.id.comentarios2)
+        comentarios1 = findViewById(R.id.comentarios)
 
         verComentarios()
 
@@ -45,11 +43,6 @@ class ruta_vehicular : AppCompatActivity() {
     }
     private fun verComentarios() {
         comentarios1.setOnClickListener {
-            val intent = Intent(this, comentarios::class.java)
-            startActivity(intent)
-        }
-
-        comentarios2.setOnClickListener {
             val intent = Intent(this, comentarios::class.java)
             startActivity(intent)
         }

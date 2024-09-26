@@ -19,6 +19,8 @@ import com.icm.igosafeapp.R
 import com.icm.igosafeapp.databinding.FragmentPlanearViajeBinding
 import com.icm.igosafeapp.recorrido_peatonal
 import com.icm.igosafeapp.recorrido_vehicular
+import com.icm.igosafeapp.ruta_peatonal
+import com.icm.igosafeapp.ruta_vehicular
 
 class HomeFragment : Fragment() {
 
@@ -92,11 +94,11 @@ class HomeFragment : Fragment() {
         binding.btnSolicitarUbicacion.setOnClickListener {
             when (selectedOption) {
                 "Caminar" -> {
-                    val intent = Intent(requireContext(), recorrido_peatonal::class.java)
+                    val intent = Intent(requireContext(), ruta_peatonal::class.java)
                     startActivity(intent)
                 }
                 "Carro" -> {
-                    val intent = Intent(requireContext(), recorrido_vehicular::class.java)
+                    val intent = Intent(requireContext(), ruta_vehicular::class.java)
                     startActivity(intent)
                 }
             }

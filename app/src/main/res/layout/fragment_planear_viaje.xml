@@ -67,6 +67,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="40dp"
         android:fontFamily="@font/roboto"
+        android:textSize="16sp"
         android:text="@string/formaViaje"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.259"
@@ -77,7 +78,6 @@
         android:id="@+id/btnCaminar"
         android:layout_width="150dp"
         android:layout_height="50dp"
-        android:layout_marginStart="28dp"
         android:layout_marginTop="76dp"
         android:background="@drawable/custom_shape_right"
         android:drawableRight="@drawable/ic_walk"
@@ -85,6 +85,8 @@
         android:drawableTint="@color/white"
         android:text="Caminar"
         app:backgroundTint="@color/azul"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.132"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/container_with_border" />
 
@@ -93,7 +95,6 @@
         android:layout_width="150dp"
         android:layout_height="50dp"
         android:layout_marginTop="76dp"
-        android:layout_marginEnd="28dp"
         android:background="@drawable/custom_shape_left"
         android:drawableRight="@drawable/ic_car"
         android:drawablePadding="8dp"
@@ -101,17 +102,17 @@
         android:text="Carro"
         app:backgroundTint="@color/azul2"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@+id/btnCaminar"
+        app:layout_constraintHorizontal_bias="0.843"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/container_with_border" />
 
     <ImageView
         android:id="@+id/imageBanner"
         android:layout_width="300dp"
         android:layout_height="300dp"
-        android:layout_marginStart="28dp"
         android:layout_marginTop="44dp"
         android:src="@drawable/banner"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btnCaminar" />
 

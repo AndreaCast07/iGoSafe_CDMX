@@ -19,29 +19,30 @@ class favoritesFragment : Fragment() {
     private var _binding: FragmentFavoritesBinding? = null
     private val binding get() = _binding!!
     private lateinit var favoritesListView: ListView
-    private lateinit var favorites: List<String> // Lista para almacenar los contactos favoritos
     private lateinit var searchBar: EditText
+
+    private val fixedFavorites = listOf(
+        "Juan Pérez",
+        "María Gómez",
+        "Carlos Fernández",
+        "Ana Torres",
+        "Luis Martínez",
+        "Sofía López"
+    )
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        // Inflar el layout del fragmento
         _binding = FragmentFavoritesBinding.inflate(inflater, container, false)
 
-        // Inicializar los elementos de la interfaz
-        searchBar = binding.searchBar // Acceder al EditText usando binding
-        favoritesListView = binding.contactList // Acceder a ListView usando binding
+        searchBar = binding.searchBar
+        favoritesListView = binding.contactList
 
-        // Recibir los favoritos desde el argumento o guardarlos en una lista vacía
-        favorites = arguments?.getStringArrayList("favoritos") ?: emptyList()
-
-        // Configurar el adaptador
-        val adapter = adapter_contactos(requireContext(), favorites)
+        val adapter = adapter_contactos(requireContext(), fixedFavorites)
         favoritesListView.adapter = adapter
 
-        // Agregar un TextWatcher para filtrar la lista
         searchBar.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
@@ -53,7 +54,6 @@ class favoritesFragment : Fragment() {
         })
 
         return binding.root
-
     }
 
     override fun onDestroyView() {
