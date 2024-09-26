@@ -54,7 +54,7 @@ class SignInPhone : AppCompatActivity() {
 
     private fun rutaVehiculo() {   //PRUEBA
         btnSend2.setOnClickListener {
-            val intent = Intent(this, modalidad::class.java)
+            val intent = Intent(this, comentarios::class.java)
             startActivity(intent)
         }
     }

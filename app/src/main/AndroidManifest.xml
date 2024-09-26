@@ -16,6 +16,18 @@
         android:theme="@style/AppThemeIgoSafe"
         tools:targetApi="31">
         <activity
+            android:name=".adapter_comentarios"
+            android:exported="false" />
+        <activity
+            android:name=".contactos_favoritos"
+            android:exported="false" />
+        <activity
+            android:name=".adapter_contactos"
+            android:exported="false" />
+        <activity
+            android:name=".ver_contactos"
+            android:exported="false" />
+        <activity
             android:name=".modalidad"
             android:exported="false" />
         <activity
