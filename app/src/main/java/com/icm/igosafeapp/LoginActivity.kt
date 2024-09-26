@@ -41,7 +41,6 @@ class LoginActivity : AppCompatActivity() {
         bienvenida = findViewById(R.id.titleName)
         celularInput = findViewById(R.id.inputCelular)
         passwordInput = findViewById(R.id.inputConstraseña)
-        txtOlvidarContraseña = findViewById(R.id.OlvidarContraseña)
         btnInciar = findViewById(R.id.btnIniciarSesion)
         txt = findViewById(R.id.textView)
         txtRegistrarse = findViewById(R.id.registrarse)

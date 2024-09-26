@@ -148,7 +148,7 @@
         android:id="@+id/btnValidate"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:layout_marginTop="308dp"
+        android:layout_marginTop="164dp"
         android:backgroundTint="@color/verde"
         android:text="Validar"
         android:textColor="@color/white"

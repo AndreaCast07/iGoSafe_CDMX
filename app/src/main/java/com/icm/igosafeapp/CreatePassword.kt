@@ -12,14 +12,13 @@ class CreatePassword : AppCompatActivity(){
         setContentView(R.layout.activity_create_password)
 
         btnRegistro = findViewById(R.id.btnRegistrarse)
-
-        mostrarLayoutCrearPerfil()
+        mostrarLayoutMenu()
 
     }
 
-    private fun mostrarLayoutCrearPerfil(){
+    private fun mostrarLayoutMenu(){
         btnRegistro.setOnClickListener {
-            val intent = Intent(this, Create_profile::class.java)
+            val intent = Intent(this, Menu::class.java)
             startActivity(intent)
         }
     }
