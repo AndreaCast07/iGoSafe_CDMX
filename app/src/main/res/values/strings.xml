@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">iGoSafeApp</string>
+    <string name="app_name2">iGoSafeApp</string>
     <string name="celular">Número de celular</string>
     <string name="contraseña">Contraseña</string>
     <string name="olvidarContraseña"><u>¿Olvidaste tu contraseña?</u></string>
@@ -13,4 +13,24 @@
     <string name="infoContrasena">La contraseña debe contar con 6 dígitos y ser compuesta con número y caracteres</string>
     <string name="numDocumento">Número de documento</string>
     <string name="creaPerfil">Crea tu perfil</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Jorge Luis Castellanos</string>
+    <string name="nav_header_subtitle">iGoSafe Free</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+    <string name="comentarioOrigen">Tu ubicación</string>
+    <string name="comentarioDestino">¿A quién visitarás hoy?</string>
+    <string name="apodo">Apodo</string>
+    <string name="nombreCompleto">Nombre completo</string>
+    <string name="formaViaje">Elige la forma en la que te gustaria viajar</string>
+
+    <string name="menu_planear_viaje">Planea tu viaje</string>
+    <string name="menu_favoritos">Favoritos</string>
+    <string name="menu_contactos">Contactos</string>
+    <string name="menu_premium">Adquiere iGoSafer</string>
+
+    <string name="menu_home">Home</string>
+    <string name="menu_gallery">Gallery</string>
+    <string name="menu_slideshow">Slideshow</string>
 </resources>

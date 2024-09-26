@@ -38,12 +38,12 @@ class LoginActivity : AppCompatActivity() {
         ocultarContrasena()
         mostrarLayoutRegisterPhone()
         mostrarLayoutForgetPassword()
+        mostrarLayoutMenu()
+    }
 
-        //cambiar a crear perfil provisional
-        txt.setOnClickListener {
-            val intent = Intent(this, Create_profile::class.java)
-            startActivity(intent)
-        }
+    override fun onBackPressed() {
+        super.onBackPressed()
+        finishAffinity()
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -79,6 +79,13 @@ class LoginActivity : AppCompatActivity() {
     private fun mostrarLayoutForgetPassword() {
         txtOlvidarContraseña.setOnClickListener {
 
+        }
+    }
+
+    private fun mostrarLayoutMenu() {
+        btnInciar.setOnClickListener {
+            val intent = Intent(this, Menu::class.java)
+            startActivity(intent)
         }
     }
 }

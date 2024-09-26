@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/nav_viaje">
+
+    <fragment
+        android:id="@+id/nav_viaje"
+        android:name="com.icm.igosafeapp.ui.home.HomeFragment"
+        tools:layout="@layout/fragment_planear_viaje" />
+
+    <fragment
+        android:id="@+id/nav_contactos"
+        android:name="com.icm.igosafeapp.ui.contacts.ContactsFragment"
+        tools:layout="@layout/fragment_contacts" />
+
+    <fragment
+        android:id="@+id/nav_favoritos"
+        android:name="com.icm.igosafeapp.ui.favorites.favoritesFragment"
+        tools:layout="@layout/fragment_favorites" />
+
+    <action
+        android:id="@+id/action_homeFragment_to_caminarFragment"
+        app:destination="@id/recorridoPeatonal" />
+
+    <action
+        android:id="@+id/action_homeFragment_to_carroFragment"
+        app:destination="@id/recorridoVehicular" />
+</navigation>

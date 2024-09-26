@@ -13,4 +13,7 @@
     <color name="amarillo">#FFEB3B</color>
     <color name="rojo">#F44336</color>
     <color name="gris">#676868</color>
+    <color name="azul5">#212f40</color>
+    <color name="azul6">#466C99</color>
+    <color name="morado">#692AA8</color>
 </resources>

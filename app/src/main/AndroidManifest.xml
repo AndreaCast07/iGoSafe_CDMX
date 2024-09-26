@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
@@ -11,7 +8,7 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:label="@string/app_name"
+        android:label="@string/app_name2"
         android:supportsRtl="true"
         android:theme="@style/AppThemeIgoSafe"
         tools:targetApi="31">
@@ -25,17 +22,14 @@
             android:name=".adapter_contactos"
             android:exported="false" />
         <activity
-            android:name=".ver_contactos"
-            android:exported="false" />
-        <activity
             android:name=".modalidad"
-            android:exported="false" />
+            android:exported="false"/>
         <activity
-            android:name=".recorrido_vehicular"
-            android:exported="false" />
-        <activity
-            android:name=".recorrido_peatonal"
-            android:exported="false" />
+            android:name=".Menu"
+            android:exported="false"
+            android:label=""
+            android:theme="@style/AppThemeIgoSafe.NoActionBar"
+            />
         <activity
             android:name=".comentarios"
             android:exported="false" />
@@ -76,6 +70,16 @@
             android:name=".CreatePassword"
             android:exported="false"
             android:theme="@style/AppThemeregister" />
+        <activity
+            android:name=".recorrido_peatonal"
+            android:exported="false"
+            android:theme="@style/AppThemeregister" />
+
+        <activity
+            android:name=".recorrido_vehicular"
+            android:exported="false"
+            android:theme="@style/AppThemeregister" />
+
 
         <meta-data
             android:name="preloaded_fonts"
