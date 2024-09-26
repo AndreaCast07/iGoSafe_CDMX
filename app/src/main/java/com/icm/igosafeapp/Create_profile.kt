@@ -1,5 +1,6 @@
 package com.icm.igosafeapp
 
+
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -13,6 +14,7 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import android.widget.ImageView
+
 import android.widget.Spinner
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -28,6 +30,7 @@ import java.util.Locale
 
 class Create_profile : AppCompatActivity() {
     private lateinit var spinnerDocumento: Spinner
+
     private lateinit var photoPerfil: ImageView
     private lateinit var iconCamera: ImageView
     private var pickedPhoto: Uri? = null
@@ -58,12 +61,14 @@ class Create_profile : AppCompatActivity() {
         setContentView(R.layout.activity_create_profile)
 
         spinnerDocumento = findViewById(R.id.selectTipoDocumento)
+
         photoPerfil = findViewById(R.id.photoPerfil)
         iconCamera = findViewById(R.id.iconCamera)
 
         cargarDatosSpinner()
         setupImageClickListeners()
         imageUrl = createImageUri()
+
     }
 
     private fun cargarDatosSpinner() {
@@ -88,6 +93,7 @@ class Create_profile : AppCompatActivity() {
             }
         }
     }
+
 
     private fun checkAndRequestPermissions(): Boolean {
         val permissions = arrayOf(
@@ -197,4 +203,5 @@ class Create_profile : AppCompatActivity() {
         }
         photoPerfil.setImageBitmap(pickedBitMap)
     }
+
 }

@@ -1,5 +1,6 @@
 package com.icm.igosafeapp
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -28,17 +29,16 @@ class review_ruta : AppCompatActivity() {
         val ratingBar: RatingBar = findViewById(R.id.ratingRutaSegura)
         val editText: EditText =findViewById(R.id.review)
 
-        // Configurar el botón de cerrar
         closeButton.setOnClickListener {
             val rating = ratingBar.rating
             val reviewText = editText.text.toString()
 
-            // Validar si el RatingBar tiene un valor y el EditText no está vacío
             if (rating > 0 && reviewText.isNotBlank()) {
-                // Aquí puedes manejar la lógica para guardar el rating y el comentario
                 Toast.makeText(this, "Reseña guardada", Toast.LENGTH_SHORT).show()
+                val intent = Intent(this, Menu::class.java)
+                startActivity(intent)
             } else {
-                // Mostrar un mensaje si la validación falla
+
                 Toast.makeText(this, "Por favor, completa el rating y el comentario.", Toast.LENGTH_SHORT).show()
             }
         }

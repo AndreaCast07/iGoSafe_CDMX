@@ -27,7 +27,6 @@ class SignInPhone : AppCompatActivity() {
 
         // Inicializar las vistas
         btnSend = findViewById(R.id.btnSendSMS)
-        btnSend2 = findViewById(R.id.prueba) //PRUEBA
         txtIniciarSesion = findViewById(R.id.iniciarSesion)
         editTxtCelular = findViewById(R.id.registrarCelular)
         txt = findViewById(R.id.textView2)
@@ -35,7 +34,6 @@ class SignInPhone : AppCompatActivity() {
 
         mostrarLayoutIniciarSesion()
         mostrarLayoutValidarRegistro()
-        rutaVehiculo()
     }
 
     private fun mostrarLayoutIniciarSesion() {
@@ -49,13 +47,8 @@ class SignInPhone : AppCompatActivity() {
         btnSend.setOnClickListener {
             val intent = Intent(this, SignInValidateSms::class.java)
             startActivity(intent)
+
         }
     }
 
-    private fun rutaVehiculo() {   //PRUEBA
-        btnSend2.setOnClickListener {
-            val intent = Intent(this, modalidad::class.java)
-            startActivity(intent)
-        }
-    }
 }
