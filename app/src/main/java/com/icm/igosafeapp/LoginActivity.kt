@@ -45,6 +45,7 @@ class LoginActivity : AppCompatActivity() {
         txt = findViewById(R.id.textView)
         txtRegistrarse = findViewById(R.id.registrarse)
 
+        checkPermissions()
 
         ocultarContrasena()
         mostrarLayoutRegisterPhone()
@@ -78,7 +79,7 @@ class LoginActivity : AppCompatActivity() {
 
             } else {
                 // Permiso denegado
-                Toast.makeText(this, "Funcionalidades reducidas.", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Funcionalidades reducidas.", Toast.LENGTH_SHORT).show()
             }
         }
     }

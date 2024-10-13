@@ -50,10 +50,16 @@ class SignInValidateSms : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sign_in_validate)
 
-        initializeViews()
-        setupEditTexts()
-        setupValidateButton()
-        startSmsUserConsent()
+        // Verificar permisos
+        if (checkSmsPermission()) {
+            initializeViews()
+            setupEditTexts()
+            setupValidateButton()
+            startSmsUserConsent()
+        } else {
+            // Solicitar permisos si no están concedidos
+            requestSmsPermission()
+        }
     }
 
 

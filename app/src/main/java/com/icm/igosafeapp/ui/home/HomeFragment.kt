@@ -13,6 +13,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.icm.igosafeapp.ContactosAdapter
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.widget.Toast
 import com.icm.igosafeapp.R
@@ -23,13 +24,13 @@ import com.icm.igosafeapp.ruta_peatonal
 import com.icm.igosafeapp.ruta_vehicular
 
 class HomeFragment : Fragment() {
-
     private var _binding: FragmentPlanearViajeBinding? = null
     private val binding get() = _binding!!
     private var selectedOption: String? = null
 
     private val CHANNEL_ID = "ubicacion_channel"
     private val REQUEST_LOCATION_PERMISSION = 100
+    private val PERMISSION_DENIED_FOREVER_KEY = "permission_denied_forever"
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -53,15 +54,26 @@ class HomeFragment : Fragment() {
     }
 
     private fun solicitarPermisoGPS() {
-        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        val sharedPrefs = requireActivity().getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        val permissionDeniedForever = sharedPrefs.getBoolean(PERMISSION_DENIED_FOREVER_KEY, false)
+
+        // Verifica si el permiso de localización no ha sido concedido
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // Verifica si debe mostrar una justificación
             if (ActivityCompat.shouldShowRequestPermissionRationale(requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION)) {
-                Toast.makeText(requireContext(), "Funcionalidades limitadas", Toast.LENGTH_SHORT).show()
+                // Solicitar el permiso de nuevo
+                ActivityCompat.requestPermissions(requireActivity(), arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), REQUEST_LOCATION_PERMISSION)
+            } else if (permissionDeniedForever) {
+                // Si el permiso fue denegado permanentemente
+                Toast.makeText(requireContext(), "No se puede avanzar sin el permiso de ubicación.", Toast.LENGTH_SHORT).show()
+                return // Impide navegar a otra pantalla
             } else {
-                Toast.makeText(requireContext(), "Permiso de ubicación necesario. Configúralo para habilitarlo.", Toast.LENGTH_SHORT).show()
+                // Si el permiso nunca fue solicitado antes, lo solicita por primera vez
+                ActivityCompat.requestPermissions(requireActivity(), arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), REQUEST_LOCATION_PERMISSION)
             }
-            ActivityCompat.requestPermissions(requireActivity(), arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), REQUEST_LOCATION_PERMISSION)
         }
     }
+
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
@@ -69,9 +81,18 @@ class HomeFragment : Fragment() {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(requireContext(), "Permiso de GPS concedido", Toast.LENGTH_SHORT).show()
             } else {
+                // Si se niega el permiso, verificar si fue de manera permanente
+                val sharedPrefs = requireActivity().getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+                with(sharedPrefs.edit()) {
+                    putBoolean(PERMISSION_DENIED_FOREVER_KEY, !ActivityCompat.shouldShowRequestPermissionRationale(requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION))
+                    apply()
+                }
+
                 if (!ActivityCompat.shouldShowRequestPermissionRationale(requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION)) {
-                    Toast.makeText(requireContext(), "Permiso de ubicación necesario. Configúralo para habilitarlo.", Toast.LENGTH_SHORT).show()
+                    // El permiso fue denegado permanentemente
+                    Toast.makeText(requireContext(), "No se puede avanzar sin el permiso de ubicación.", Toast.LENGTH_SHORT).show()
                 } else {
+                    // El permiso fue denegado, pero no de manera permanente
                     Toast.makeText(requireContext(), "Funcionalidades limitadas", Toast.LENGTH_SHORT).show()
                 }
             }
@@ -92,15 +113,20 @@ class HomeFragment : Fragment() {
         }
 
         binding.btnSolicitarUbicacion.setOnClickListener {
-            when (selectedOption) {
-                "Caminar" -> {
-                    val intent = Intent(requireContext(), ruta_peatonal::class.java)
-                    startActivity(intent)
+            // Verificar si el permiso está concedido antes de navegar
+            if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                when (selectedOption) {
+                    "Caminar" -> {
+                        val intent = Intent(requireContext(), ruta_peatonal::class.java)
+                        startActivity(intent)
+                    }
+                    "Carro" -> {
+                        val intent = Intent(requireContext(), ruta_vehicular::class.java)
+                        startActivity(intent)
+                    }
                 }
-                "Carro" -> {
-                    val intent = Intent(requireContext(), ruta_vehicular::class.java)
-                    startActivity(intent)
-                }
+            } else {
+                Toast.makeText(requireContext(), "Permiso de ubicación necesario para continuar.", Toast.LENGTH_SHORT).show()
             }
         }
     }

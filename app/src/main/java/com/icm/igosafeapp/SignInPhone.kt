@@ -5,6 +5,7 @@ import android.app.ActivityOptions
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.util.Pair
 import android.view.View
 import android.widget.Button
@@ -32,8 +33,14 @@ class SignInPhone : AppCompatActivity() {
         txt = findViewById(R.id.textView2)
         logo = findViewById(R.id.logoGris)
 
-        mostrarLayoutIniciarSesion()
+        configurarListeners()
+        //mostrarLayoutIniciarSesion()
+        //mostrarLayoutValidarRegistro()
+    }
+
+    private fun configurarListeners() {
         mostrarLayoutValidarRegistro()
+        mostrarLayoutIniciarSesion()
     }
 
     private fun mostrarLayoutIniciarSesion() {
@@ -45,9 +52,9 @@ class SignInPhone : AppCompatActivity() {
 
     private fun mostrarLayoutValidarRegistro() {
         btnSend.setOnClickListener {
+            Log.d("SignInPhone", "Button clicked")
             val intent = Intent(this, SignInValidateSms::class.java)
             startActivity(intent)
-
         }
     }
 
