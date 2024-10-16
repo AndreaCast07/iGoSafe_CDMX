@@ -38,6 +38,7 @@ class SignInValidateSms : AppCompatActivity() {
     private lateinit var timerText: TextView
     private lateinit var resendCode: TextView
     private val SMS_PERMISSION_REQUEST_CODE = 100
+    private lateinit var codigo:String
 
     private val smsConsentLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == RESULT_OK && result.data != null) {
@@ -80,7 +81,7 @@ class SignInValidateSms : AppCompatActivity() {
         resendCode.setOnClickListener {
             sendOTP()
         }
-
+        sendOTP()
         // Optionally, start a countdown timer
         startCountdownTimer()
     }
@@ -134,18 +135,21 @@ class SignInValidateSms : AppCompatActivity() {
     private fun setupValidateButton() {
         btnValidar.setOnClickListener {
             val enteredCode = editTexts.joinToString("") { it.text.toString() }
-            if (enteredCode == "12345") {
-                Toast.makeText(this, "Code is correct!", Toast.LENGTH_SHORT).show()
+            if (enteredCode == codigo) {
+                Toast.makeText(this, "Código correcto", Toast.LENGTH_SHORT).show()
                 navigateToCreateProfile()
             } else {
-                Toast.makeText(this, "Incorrect code. Please try again.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Código incorrecto, prueba de nuvo.", Toast.LENGTH_SHORT).show()
             }
         }
     }
     private fun navigateToCreateProfile() {
-        val intent = Intent(this, Create_profile::class.java)
+        val celular = intent.getStringExtra("CELULAR") // Intent del celular
+        val intent = Intent(this, Create_profile::class.java).apply {
+            putExtra("CELULAR", celular)
+        }
         startActivity(intent)
-        finish() // Optional: finish this activity so the user can't go back
+        finish()
     }
 
     private fun setupValidateButtons() {
@@ -188,19 +192,22 @@ class SignInValidateSms : AppCompatActivity() {
     }
 
     private fun sendOTP() {
-        val otp = generateOTP()
+        /*
         val phone = etPhone.text.toString()
-        val message = "$otp is your verification code."
+        val message = "$otp es su código de verificación."
 
         val smsManager = SmsManager.getDefault()
         val parts = smsManager.divideMessage(message)
-        smsManager.sendMultipartTextMessage(phone, null, parts, null, null)
+        smsManager.sendMultipartTextMessage(phone, null, parts, null, null)*/
+        val otp = generateOTP()
+        codigo = otp
+        extractOTPFromMessage("$otp is your verification code.")
 
-        Toast.makeText(this, "OTP sent", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "Código enviado", Toast.LENGTH_SHORT).show()
     }
 
     private fun generateOTP(): String {
-        return (100000..999999).random().toString()
+        return (10000..99999).random().toString()
     }
 
     private fun startSmsUserConsent() {
@@ -252,7 +259,7 @@ class SignInValidateSms : AppCompatActivity() {
 
     private fun extractOTPFromMessage(message: String?) {
         message?.let {
-            val otpPattern = Regex("\\d{6}")
+            val otpPattern = Regex("\\d{5}")
             val otpMatcher = otpPattern.find(it)
             otpMatcher?.value?.let { otp ->
                 for (i in otp.indices) {

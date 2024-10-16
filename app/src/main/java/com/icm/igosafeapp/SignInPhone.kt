@@ -11,6 +11,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 
 class SignInPhone : AppCompatActivity() {
@@ -52,9 +53,16 @@ class SignInPhone : AppCompatActivity() {
 
     private fun mostrarLayoutValidarRegistro() {
         btnSend.setOnClickListener {
-            Log.d("SignInPhone", "Button clicked")
-            val intent = Intent(this, SignInValidateSms::class.java)
-            startActivity(intent)
+            val celular = editTxtCelular.text.toString().trim()
+            if (celular.isEmpty()) {
+                Toast.makeText(this, "Por favor, ingrese su número de celular", Toast.LENGTH_SHORT).show()
+            } else {
+                Log.d("SignInPhone", "Button clicked with celular: $celular")
+                val intent = Intent(this, SignInValidateSms::class.java).apply {
+                    putExtra("CELULAR", celular)
+                }
+                startActivity(intent)
+            }
         }
     }
 

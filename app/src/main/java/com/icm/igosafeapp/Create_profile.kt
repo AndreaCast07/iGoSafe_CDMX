@@ -17,6 +17,7 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
+import android.widget.EditText
 import android.widget.ImageView
 
 import android.widget.Spinner
@@ -34,6 +35,8 @@ import java.util.Date
 import java.util.Locale
 
 class Create_profile : AppCompatActivity() {
+    private lateinit var txtNombre: EditText
+    private lateinit var txtNumDocumento: EditText
     private lateinit var spinnerDocumento: Spinner
     private lateinit var btnCrearPerfil: Button
 
@@ -66,6 +69,8 @@ class Create_profile : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create_profile)
 
+        txtNombre = findViewById(R.id.editTxtName)
+        txtNumDocumento = findViewById(R.id.editTxtDocumento)
         photoPerfil = findViewById(R.id.photoPerfil)
         iconCamera = findViewById(R.id.iconCamera)
         spinnerDocumento = findViewById(R.id.selectTipoDocumento)
@@ -101,10 +106,33 @@ class Create_profile : AppCompatActivity() {
     }
     private fun mostrarLayoutCreatePasword() {
         btnCrearPerfil.setOnClickListener {
-            val intent = Intent(this, CreatePassword::class.java)
-            startActivity(intent)
+            if (validarCampos()) {
+                val celular = intent.getStringExtra("CELULAR")
+                val nombre = txtNombre.text.toString()
+                val tipoDocumento = spinnerDocumento.selectedItem.toString()
+                val numDocumento = txtNumDocumento.text.toString()
+
+                val intent = Intent(this, CreatePassword::class.java).apply {
+                    putExtra("CELULAR", celular)
+                    putExtra("NOMBRE", nombre)
+                    putExtra("TIPO_DOCUMENTO", tipoDocumento)
+                    putExtra("NUM_DOCUMENTO", numDocumento)
+                }
+
+                startActivity(intent)
+                finish()
+            } else {
+                Toast.makeText(this, "Por favor, complete todos los campos.", Toast.LENGTH_SHORT).show()
+            }
         }
     }
+
+    private fun validarCampos(): Boolean {
+        return txtNombre.text.isNotEmpty() &&
+                txtNumDocumento.text.isNotEmpty() &&
+                spinnerDocumento.selectedItemPosition != 0
+    }
+
 
     private fun setupImageClickListeners() {
         photoPerfil.setOnClickListener {
