@@ -1,0 +1,36 @@
+{
+  "contacts": [
+    {
+      "name": "Carlos Gómez",
+      "nickname": "Charlie",
+      "location": {
+        "latitude": 4.6482837,
+        "longitude": -74.2478953
+      }
+    },
+    {
+      "name": "Laura Martínez",
+      "nickname": "Lau",
+      "location": {
+        "latitude": 4.6560716,
+        "longitude": -74.0595918
+      }
+    },
+    {
+      "name": "Andrés Rodríguez",
+      "nickname": "Andy",
+      "location": {
+        "latitude": 4.6941982,
+        "longitude": -74.1446326
+      }
+    },
+    {
+      "name": "Mariana Pérez",
+      "nickname": "Mari",
+      "location": {
+        "latitude": 4.598056,
+        "longitude": -74.075833
+      }
+    }
+  ]
+}
