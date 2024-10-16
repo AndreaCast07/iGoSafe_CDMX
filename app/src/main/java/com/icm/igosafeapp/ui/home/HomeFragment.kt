@@ -16,6 +16,8 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.widget.Toast
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.icm.igosafeapp.R
 import com.icm.igosafeapp.databinding.FragmentPlanearViajeBinding
 import com.icm.igosafeapp.recorrido_peatonal
@@ -32,6 +34,8 @@ class HomeFragment : Fragment() {
     private val REQUEST_LOCATION_PERMISSION = 100
     private val PERMISSION_DENIED_FOREVER_KEY = "permission_denied_forever"
 
+    private var contacts: List<Contactos> =  emptyList()
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -47,6 +51,13 @@ class HomeFragment : Fragment() {
                 solicitarPermisoGPS()
             }
         }
+        // Recibir los contactos pasados por el Intent
+        val contactsJson = arguments?.getString("contacts")
+        if (contactsJson != null) {
+            val type = object : TypeToken<List<Contactos>>() {}.type
+            contacts = Gson().fromJson(contactsJson, type)
+        }
+
 
         setupAutoCompleteTextView()
         setupButtons()
@@ -132,7 +143,6 @@ class HomeFragment : Fragment() {
     }
 
     private fun setupAutoCompleteTextView() {
-        val contacts = getContacts()
         val adapter = ContactosAdapter(requireContext(), contacts)
         binding.contactLocation.setAdapter(adapter)
 
@@ -146,13 +156,13 @@ class HomeFragment : Fragment() {
         }
     }
 
-    private fun getContacts(): List<Contactos> {
+    /*private fun getContacts(): List<Contactos> {
         return listOf(
             Contactos(R.drawable.ic_person, "Johnny", "John Doe"),
             Contactos(R.drawable.ic_person, "Sally", "Sally Smith"),
             Contactos(R.drawable.ic_person, "Bobby", "Bobby Brown")
         )
-    }
+    }*/
 
     override fun onDestroyView() {
         super.onDestroyView()
