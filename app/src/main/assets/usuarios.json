@@ -1,0 +1,20 @@
+[
+  {
+    "celular": "123456789",
+    "contraseña": "123456789",
+    "datosUsuario": {
+      "nombre": "Juan Perez",
+      "tipoDocumento": "Cédula ciudadanía",
+      "documento": "123456789"
+    }
+  },
+  {
+    "celular": "65437905",
+    "contraseña": "aaaaaooooo",
+    "datosUsuario": {
+      "nombre": "Ana Lopez",
+      "tipoDocumento": "Cédula ciudadanía",
+      "documento": "987654321"
+    }
+  }
+]

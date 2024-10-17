@@ -1,5 +1,6 @@
 package com.icm.igosafeapp
 
+import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Bundle
 import android.text.SpannableString
@@ -57,5 +58,13 @@ class Menu : AppCompatActivity() {
         val s = SpannableString(item.title)
         s.setSpan(ForegroundColorSpan(ContextCompat.getColor(this, colorId)), 0, s.length, 0)
         item.title = s
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        val intent = Intent(this, LoginActivity::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+        startActivity(intent)
+        finish()
     }
 }

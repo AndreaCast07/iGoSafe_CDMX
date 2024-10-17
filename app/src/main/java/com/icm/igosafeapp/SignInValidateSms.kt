@@ -73,16 +73,13 @@ class SignInValidateSms : AppCompatActivity() {
             findViewById(R.id.editText5)
         )
         btnValidar = findViewById(R.id.btnValidate)
-        //etPhone = findViewById(R.id.etPhone)
-        timerText = findViewById(R.id.timer) // Connect timer TextView
-        resendCode = findViewById(R.id.resendCode) // Connect resend TextView
-
+        timerText = findViewById(R.id.timer)
+        resendCode = findViewById(R.id.resendCode)
 
         resendCode.setOnClickListener {
             sendOTP()
         }
         sendOTP()
-        // Optionally, start a countdown timer
         startCountdownTimer()
     }
 

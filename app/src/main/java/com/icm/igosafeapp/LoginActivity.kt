@@ -1,6 +1,5 @@
 package com.icm.igosafeapp
 
-import Usuario
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.Manifest
@@ -21,6 +20,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.gson.Gson
+import com.icm.igosafeapp.manejoArchivos.UsuarioManager
+import entidades.Usuario
 import java.io.File
 
 class LoginActivity : AppCompatActivity() {
@@ -33,6 +34,7 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var txt: TextView
     private lateinit var txtRegistrarse: TextView
 
+    private lateinit var usuarioManager: UsuarioManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,6 +49,8 @@ class LoginActivity : AppCompatActivity() {
         btnInciar = findViewById(R.id.btnIniciarSesion)
         txt = findViewById(R.id.textView)
         txtRegistrarse = findViewById(R.id.registrarse)
+
+        usuarioManager = UsuarioManager(this)
 
         checkPermissions()
 
@@ -129,10 +133,16 @@ class LoginActivity : AppCompatActivity() {
                 val celular = celularInput.text.toString()
                 val contrasena = passwordInput.text.toString()
 
-                if (buscarUsuario(celular, contrasena)) {
-                    val intent = Intent(this, Menu::class.java)
-                    startActivity(intent)
-                    finish()
+                if (usuarioManager.celularRegistrado(celular)) {
+                    if (usuarioManager.verificarUsuario(celular, contrasena)) {
+                        val intent = Intent(this, Menu::class.java)
+                        startActivity(intent)
+                        finish()
+                    } else {
+                        Toast.makeText(this, "Contraseña incorrecta.", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    Toast.makeText(this, "El celular no está registrado.", Toast.LENGTH_SHORT).show()
                 }
             } else {
                 Toast.makeText(this, "Por favor, llena todos los campos.", Toast.LENGTH_SHORT).show()
@@ -147,29 +157,6 @@ class LoginActivity : AppCompatActivity() {
 
     private fun validarCampos(): Boolean {
         return celularInput.text.toString().isNotEmpty() && passwordInput.text.toString().isNotEmpty()
-    }
-
-    private fun buscarUsuario(celular: String, contrasena: String): Boolean {
-        val file = File(filesDir, "usuarios.json")
-        if (file.exists() && file.length() > 0) {
-            val jsonContent = file.readText()
-            val usuarios = Gson().fromJson(jsonContent, Array<Usuario>::class.java).toList()
-
-            for (usuario in usuarios) {
-                if (usuario.celular == celular) {
-                    return if (usuario.contraseña == contrasena) {
-                        true
-                    } else {
-                        Toast.makeText(this, "Contraseña incorrecta.", Toast.LENGTH_SHORT).show()
-                        false
-                    }
-                }
-            }
-            Toast.makeText(this, "El celular no está registrado.", Toast.LENGTH_SHORT).show()
-        } else {
-            Toast.makeText(this, "No hay usuarios registrados.", Toast.LENGTH_SHORT).show()
-        }
-        return false
     }
 
 }
