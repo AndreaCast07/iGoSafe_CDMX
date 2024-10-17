@@ -50,6 +50,8 @@ dependencies {
     implementation("com.google.android.material:material:1.10.0")
     implementation("com.google.code.gson:gson:2.8.9")
     implementation("com.google.android.gms:play-services-location:21.3.0")
+    implementation ("com.squareup.okhttp3:okhttp:4.9.1")
+    implementation ("org.osmdroid:osmdroid-android:6.1.10")
     implementation(libs.play.services.auth.api.phone)
     implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
