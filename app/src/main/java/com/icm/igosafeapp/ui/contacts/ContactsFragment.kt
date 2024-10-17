@@ -1,9 +1,11 @@
 package com.icm.igosafeapp.ui.contacts
 
+import Contactos
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,6 +15,8 @@ import android.widget.ListView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.icm.igosafeapp.adapter_contactos
 import com.icm.igosafeapp.databinding.FragmentContactsBinding
 
@@ -37,14 +41,19 @@ class ContactsFragment : Fragment() {
         searchBar = binding.searchBar
         contactList = binding.contactList
 
-        contactNames = mutableListOf(
-            "Juan Pérez",
-            "María Gómez",
-            "Carlos Fernández",
-            "Ana Torres",
-            "Luis Martínez",
-            "Sofía López"
-        )
+// Recibe los contactos desde el bundle
+        val contactsJson = arguments?.getString("contacts")
+        contactNames = mutableListOf()
+
+        // Si se reciben contactos en formato JSON, deserializarlos
+        if (contactsJson != null) {
+            val type = object : TypeToken<List<Contactos>>() {}.type
+            val contacts: List<Contactos> = Gson().fromJson(contactsJson, type)
+            contactNames = contacts.map { it.fullName }.toMutableList()
+        } else {
+            Log.e("ContactsFragment", "No se recibieron contactos.")
+        }
+
 
         adapter = adapter_contactos(requireContext(), contactNames)
         contactList.adapter = adapter

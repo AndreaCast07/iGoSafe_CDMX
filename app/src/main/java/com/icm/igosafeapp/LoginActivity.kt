@@ -73,7 +73,7 @@ class LoginActivity : AppCompatActivity() {
 
     private fun requestContactsPermission() {
         if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_CONTACTS)) {
-            Toast.makeText(this, "Necesitamos acceso a los contactos para funcionalidades completas.", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Necesitamos acceso a los contactos para funcionalidades completas.", Toast.LENGTH_SHORT).show()
         }
         ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_CONTACTS), PERMISSION_REQUEST_CODE)
     }
@@ -138,7 +138,14 @@ class LoginActivity : AppCompatActivity() {
 
                 if (usuarioManager.celularRegistrado(celular)) {
                     if (usuarioManager.verificarUsuario(celular, contrasena)) {
-                        val contacts = loadContactsFromAssets()
+                        // Verificar si el permiso de contactos ha sido concedido
+                        val contacts = if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
+                            loadContactsFromAssets() // Cargar contactos desde el archivo JSON
+                        } else {
+                            // Pasar una lista vacía si no hay permiso
+                            emptyList<Contactos>()
+                        }
+
                         if (contacts.isNotEmpty()) {
                             val contactsJson = Gson().toJson(contacts)
 
@@ -147,7 +154,10 @@ class LoginActivity : AppCompatActivity() {
                             startActivity(intent)
                             finish()
                         } else {
+                            val intent = Intent(this, Menu::class.java)
+                            startActivity(intent)
                             Toast.makeText(this, "No se pudieron cargar los contactos.", Toast.LENGTH_SHORT).show()
+                            finish()
                         }
                     } else {
                         Toast.makeText(this, "Contraseña incorrecta.", Toast.LENGTH_SHORT).show()

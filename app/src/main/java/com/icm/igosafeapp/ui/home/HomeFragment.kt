@@ -9,15 +9,11 @@ import android.view.ViewGroup
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.fragment.findNavController
 import com.icm.igosafeapp.ContactosAdapter
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Geocoder
-import android.location.Location
-import android.location.LocationManager
 import android.os.Looper
 import android.util.Log
 import android.widget.Toast
@@ -26,6 +22,7 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.icm.igosafeapp.R
@@ -132,13 +129,14 @@ class HomeFragment : Fragment() {
             return
         }
 
+
         // Inicia actualizaciones en tiempo real
         try {
-            val locationRequest = LocationRequest.create().apply {
-                interval = 10000 // Actualiza cada 10 segundos
-                fastestInterval = 5000 // Intervalo más rápido
-                priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-            }
+            val locationRequest = LocationRequest.Builder(
+                Priority.PRIORITY_HIGH_ACCURACY, // Prioridad de alta precisión
+                1000 // Intervalo de 10 segundos
+            ).setMinUpdateIntervalMillis(5000) // Intervalo más rápido de 5 segundos
+                .build()
 
             fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
         } catch (e: SecurityException) {

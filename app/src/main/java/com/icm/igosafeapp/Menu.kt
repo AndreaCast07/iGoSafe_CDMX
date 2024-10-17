@@ -53,11 +53,32 @@ class Menu : AppCompatActivity() {
 
         // Obtener los contactos del Intent
         val contactsJson = intent.getStringExtra("contacts")
-        if (contactsJson != null) {
-            val bundle = Bundle()
-            bundle.putString("contacts", contactsJson)
-            navController.navigate(R.id.nav_viaje, bundle)
+        val bundle = if (contactsJson != null) {
+            Bundle().apply {
+                putString("contacts", contactsJson)
+            }
+        } else {
+            null
         }
+        navController.navigate(R.id.nav_viaje, bundle)
+        // Configura el listener para el NavigationView
+        navView.setNavigationItemSelectedListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.nav_contactos -> {
+                    // Navega a nav_contactos con el bundle
+                    navController.navigate(R.id.nav_contactos, bundle)
+                    true // Indica que el evento fue manejado
+                }
+                R.id.nav_viaje -> {
+                    // Navega a nav_viaje
+                    navController.navigate(R.id.nav_viaje, bundle)
+                    true // Indica que el evento fue manejado
+                }
+                else -> false // Para otros ítems de menú
+            }
+        }
+
+
     }
 
     private fun cambiarColorItem(navigationView: NavigationView, itemId: Int, colorId: Int) {
