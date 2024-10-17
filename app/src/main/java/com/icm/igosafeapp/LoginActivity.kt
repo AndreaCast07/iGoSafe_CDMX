@@ -1,5 +1,6 @@
 package com.icm.igosafeapp
 
+import Contactos
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.Manifest
@@ -22,6 +23,7 @@ import androidx.core.content.ContextCompat
 import com.google.gson.Gson
 import com.icm.igosafeapp.manejoArchivos.UsuarioManager
 import entidades.Usuario
+import org.json.JSONObject
 import java.io.File
 
 class LoginActivity : AppCompatActivity() {
@@ -38,7 +40,6 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContentView(R.layout.activity_login)
 
         // Inicializar las vistas
@@ -83,6 +84,19 @@ class LoginActivity : AppCompatActivity() {
 
         if (requestCode == PERMISSION_REQUEST_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                val contacts = loadContactsFromAssets()
+
+                val contactsJson = Gson().toJson(contacts)  //NUEVO
+                val bundle = Bundle()
+                bundle.putString("contacts", contactsJson)
+                // Aquí puedes guardar los contactos en SharedPreferences o pasar a HomeFragment
+                /*val intent = Intent(this, Menu::class.java).apply {
+                    putExtra("contacts", Gson().toJson(contacts))
+                }*/
+                val intent = Intent(this, Menu::class.java)
+                intent.putExtras(bundle)  // Pasa el Bundle con los contactos
+                startActivity(intent)
+                finish()
 
             } else {
                 // Permiso denegado
@@ -159,4 +173,31 @@ class LoginActivity : AppCompatActivity() {
         return celularInput.text.toString().isNotEmpty() && passwordInput.text.toString().isNotEmpty()
     }
 
+    private fun loadContactsFromAssets(): List<Contactos> {
+        val contactsList = mutableListOf<Contactos>()
+        try {
+            val inputStream = assets.open("contactos.json") // Asegúrate de que el archivo se llama contacts.json
+            val json = inputStream.bufferedReader().use { it.readText() }
+            val jsonObject = JSONObject(json)
+            val contactsArray = jsonObject.getJSONArray("contacts")
+
+            for (i in 0 until contactsArray.length()) {
+                val contactJson = contactsArray.getJSONObject(i)
+                val name = contactJson.getString("name")
+                val nickname = contactJson.getString("nickname")
+                // Puedes usar un ícono predeterminado o cargar uno dinámicamente
+                val icon = R.drawable.ic_person // Asegúrate de tener este ícono en tus recursos
+
+                val locationJson = contactJson.getJSONObject("location")
+                val latitude = locationJson.getDouble("latitude")
+                val longitude = locationJson.getDouble("longitude")
+
+                // Crea un objeto Contactos y agrégalo a la lista
+                contactsList.add(Contactos(icon, nickname, name))
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return contactsList
+    }
 }
