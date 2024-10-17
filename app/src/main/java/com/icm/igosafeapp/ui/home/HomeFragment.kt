@@ -217,7 +217,7 @@ class HomeFragment : Fragment() {
 
 
 
-    private fun setupButtons(name: String?, nickname: String?) {
+    private fun setupButtons(name: String?, nickname: String?, latitude: Double, longitude: Double) {
         binding.btnCaminar.setOnClickListener {
             selectedOption = "Caminar"
             binding.btnCaminar.backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.azul)
@@ -234,17 +234,22 @@ class HomeFragment : Fragment() {
             if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                 when (selectedOption) {
                     "Caminar" -> {
-                        Log.d("SetupButtons", "Enviando a ruta_peatonal -> Name: $name, Nickname: $nickname")
+                        Log.d("SetupButtons", "Enviando a ruta_peatonal -> Name: $name, Nickname: $nickname, Latitude: $latitude, Longitude: $longitude")
                         val intent = Intent(requireContext(), ruta_peatonal::class.java).apply {
                             putExtra("name", name)
                             putExtra("nickname", nickname)
+                            putExtra("latitude", latitude)
+                            putExtra("longitude", longitude)
                         }
                         startActivity(intent)
                     }
                     "Carro" -> {
+                        Log.d("SetupButtons", "Enviando a ruta_vehicular -> Name: $name, Nickname: $nickname, Latitude: $latitude, Longitude: $longitude")
                         val intent = Intent(requireContext(), ruta_vehicular::class.java).apply {
                             putExtra("name", name)
                             putExtra("nickname", nickname)
+                            putExtra("latitude", latitude)
+                            putExtra("longitude", longitude)
                         }
                         startActivity(intent)
                     }
@@ -270,8 +275,13 @@ class HomeFragment : Fragment() {
             binding.contactLocation.setText(selectedContact?.nickname, false)
 
             val (latitude, longitude) = loadContactLocation(selectedNickname)
+
             val (name, nickname) = loadContactNameAndNickname(selectedNickname)
-            setupButtons(name, nickname)
+
+// Proporcionar valores predeterminados si son nulos
+            setupButtons(name, nickname, latitude ?: 0.0, longitude ?: 0.0)
+
+
 
             if (latitude != null && longitude != null) {
                 Log.d("HomeFragment", "Latitud: $latitude, Longitud: $longitude")

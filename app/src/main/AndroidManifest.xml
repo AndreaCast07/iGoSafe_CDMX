@@ -85,10 +85,7 @@
             android:name=".CreatePassword"
             android:exported="false"
             android:theme="@style/AppThemeregister" />
-        <activity
-            android:name=".recorrido_peatonal"
-            android:exported="false"
-            android:theme="@style/AppThemeregister" />
+
 
         <activity
             android:name=".recorrido_vehicular"
