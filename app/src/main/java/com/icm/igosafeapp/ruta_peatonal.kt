@@ -18,6 +18,9 @@ import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Looper
 import android.util.Log
+import android.view.View
+import android.widget.EditText
+import android.widget.TextView
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -27,8 +30,9 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.MapStyleOptions
 
 class ruta_peatonal : AppCompatActivity(), OnMapReadyCallback {
-    lateinit var iniciar: Button
-    lateinit var comentarios1: Button
+    private lateinit var iniciar: Button
+    private lateinit var textDistancia: TextView
+    private lateinit var comentarios1: Button
     private lateinit var mMap: GoogleMap
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
@@ -40,9 +44,7 @@ class ruta_peatonal : AppCompatActivity(), OnMapReadyCallback {
         setContentView(R.layout.activity_ruta_peatonal)
 
         iniciar = findViewById(R.id.iniciarViaje)
-        comentarios1 = findViewById(R.id.comentarios)
-
-        verComentarios()
+        textDistancia = findViewById(R.id.textDistancia)
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         val mapFragment = supportFragmentManager
@@ -50,8 +52,17 @@ class ruta_peatonal : AppCompatActivity(), OnMapReadyCallback {
         mapFragment.getMapAsync(this)
 
         iniciar.setOnClickListener {
-            val intent = Intent(this, recorrido_peatonal::class.java)
-            startActivity(intent)
+            if (iniciar.text == "Iniciar Viaje") {
+                // Mostrar distancia
+                textDistancia.visibility = View.VISIBLE
+                textDistancia.text = "Distancia: X km"
+
+                iniciar.text = "Finalizar"
+            } else {
+                val intent = Intent(this, review_ruta::class.java)
+                startActivity(intent)
+                finish()
+                }
         }
 
         // Configura el callback para recibir actualizaciones de la ubicación
