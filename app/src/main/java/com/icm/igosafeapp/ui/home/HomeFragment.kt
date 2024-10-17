@@ -15,16 +15,25 @@ import com.icm.igosafeapp.ContactosAdapter
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.location.Geocoder
+import android.location.Location
+import android.location.LocationManager
+import android.os.Looper
 import android.util.Log
 import android.widget.Toast
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.LocationServices
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.icm.igosafeapp.R
 import com.icm.igosafeapp.databinding.FragmentPlanearViajeBinding
-import com.icm.igosafeapp.recorrido_peatonal
-import com.icm.igosafeapp.recorrido_vehicular
 import com.icm.igosafeapp.ruta_peatonal
 import com.icm.igosafeapp.ruta_vehicular
+import org.json.JSONObject
+import java.util.Locale
 
 class HomeFragment : Fragment() {
     private var _binding: FragmentPlanearViajeBinding? = null
@@ -35,18 +44,42 @@ class HomeFragment : Fragment() {
     private val REQUEST_LOCATION_PERMISSION = 100
     private val PERMISSION_DENIED_FOREVER_KEY = "permission_denied_forever"
 
-    private var contacts: List<Contactos> =  emptyList()
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var locationCallback: LocationCallback
+
+    private var contacts: List<Contactos> = emptyList()
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        //val homeViewModel =
-            //ViewModelProvider(this).get(HomeViewModel::class.java)
-
         _binding = FragmentPlanearViajeBinding.inflate(inflater, container, false)
 
+        // Inicializa el cliente de ubicación
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
+
+        // Inicializa el LocationCallback
+        locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult) {
+                for (location in locationResult.locations) {
+                    val geocoder = Geocoder(requireContext(), Locale.getDefault())
+                    try {
+                        val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
+                        if (addresses != null && addresses.isNotEmpty()) {
+                            val address = addresses[0].getAddressLine(0)
+                            binding.actualLocation.setText(address) // Establece la dirección en el EditText
+                        } else {
+                            Log.e("HomeFragment", "No se encontraron direcciones para la ubicación.")
+                        }
+                    } catch (e: Exception) {
+                        Log.e("HomeFragment", "Error al obtener la dirección: ${e.message}")
+                    }
+                }
+            }
+        }
+
+        // Configurar el listener para el EditText
         binding.actualLocation.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
                 solicitarPermisoGPS()
@@ -62,9 +95,16 @@ class HomeFragment : Fragment() {
             Log.e("HomeFragment", "No se recibieron contactos")
         }
 
-
         setupAutoCompleteTextView()
         setupButtons()
+
+        // Verifica si ya se tiene el permiso de localización al crear la vista
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            obtenerUbicacion()
+        } else {
+            solicitarPermisoGPS() // Solicitar permiso si no se tiene
+        }
+
         return binding.root
     }
 
@@ -74,29 +114,59 @@ class HomeFragment : Fragment() {
 
         // Verifica si el permiso de localización no ha sido concedido
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // Verifica si debe mostrar una justificación
             if (ActivityCompat.shouldShowRequestPermissionRationale(requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION)) {
                 // Solicitar el permiso de nuevo
                 ActivityCompat.requestPermissions(requireActivity(), arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), REQUEST_LOCATION_PERMISSION)
             } else if (permissionDeniedForever) {
-                // Si el permiso fue denegado permanentemente
                 Toast.makeText(requireContext(), "No se puede avanzar sin el permiso de ubicación.", Toast.LENGTH_SHORT).show()
-                return // Impide navegar a otra pantalla
+                return
             } else {
-                // Si el permiso nunca fue solicitado antes, lo solicita por primera vez
+                // Solicitar permiso por primera vez
                 ActivityCompat.requestPermissions(requireActivity(), arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), REQUEST_LOCATION_PERMISSION)
             }
         }
     }
 
+    private fun obtenerUbicacion() {
+        if (!verificarPermisosUbicacion()) {
+            return
+        }
+
+        // Inicia actualizaciones en tiempo real
+        try {
+            val locationRequest = LocationRequest.create().apply {
+                interval = 10000 // Actualiza cada 10 segundos
+                fastestInterval = 5000 // Intervalo más rápido
+                priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+            }
+
+            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
+        } catch (e: SecurityException) {
+            Log.e("HomeFragment", "Error al solicitar actualizaciones de ubicación: ${e.message}")
+        }
+    }
+
+    private fun verificarPermisosUbicacion(): Boolean {
+        return if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                requireActivity(),
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                REQUEST_LOCATION_PERMISSION
+            )
+            false
+        } else {
+            true
+        }
+    }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_LOCATION_PERMISSION) {
+            Log.d("HomeFragment", "onRequestPermissionsResult called")
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(requireContext(), "Permiso de GPS concedido", Toast.LENGTH_SHORT).show()
+                obtenerUbicacion() // Llama a obtenerUbicacion si se concede el permiso
             } else {
-                // Si se niega el permiso, verificar si fue de manera permanente
                 val sharedPrefs = requireActivity().getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
                 with(sharedPrefs.edit()) {
                     putBoolean(PERMISSION_DENIED_FOREVER_KEY, !ActivityCompat.shouldShowRequestPermissionRationale(requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION))
@@ -104,10 +174,8 @@ class HomeFragment : Fragment() {
                 }
 
                 if (!ActivityCompat.shouldShowRequestPermissionRationale(requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION)) {
-                    // El permiso fue denegado permanentemente
                     Toast.makeText(requireContext(), "No se puede avanzar sin el permiso de ubicación.", Toast.LENGTH_SHORT).show()
                 } else {
-                    // El permiso fue denegado, pero no de manera permanente
                     Toast.makeText(requireContext(), "Funcionalidades limitadas", Toast.LENGTH_SHORT).show()
                 }
             }
@@ -128,7 +196,6 @@ class HomeFragment : Fragment() {
         }
 
         binding.btnSolicitarUbicacion.setOnClickListener {
-            // Verificar si el permiso está concedido antes de navegar
             if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                 when (selectedOption) {
                     "Caminar" -> {
@@ -156,20 +223,51 @@ class HomeFragment : Fragment() {
 
         binding.contactLocation.setOnItemClickListener { parent, view, position, id ->
             val selectedContact = adapter.getItem(position)
+            val selectedNickname = selectedContact?.nickname
+
             binding.contactLocation.setText(selectedContact?.nickname, false)
+
+            val (latitude, longitude) = loadContactLocation(selectedNickname)
+
+            if (latitude != null && longitude != null) {
+                Log.d("HomeFragment", "Latitud: $latitude, Longitud: $longitude")
+            } else {
+                Log.e("HomeFragment", "No se encontraron coordenadas para el contacto seleccionado.")
+            }
         }
     }
 
-    /*private fun getContacts(): List<Contactos> {
-        return listOf(
-            Contactos(R.drawable.ic_person, "Johnny", "John Doe"),
-            Contactos(R.drawable.ic_person, "Sally", "Sally Smith"),
-            Contactos(R.drawable.ic_person, "Bobby", "Bobby Brown")
-        )
-    }*/
+    private fun loadContactLocation(selectedNickname: String?): Pair<Double?, Double?> {
+        var latitude: Double? = null
+        var longitude: Double? = null
+        try {
+            val inputStream = requireActivity().assets.open("contactos.json") // Asegúrate de que el archivo se llama contactos.json
+            val json = inputStream.bufferedReader().use { it.readText() }
+            val jsonObject = JSONObject(json)
+            val contactsArray = jsonObject.getJSONArray("contacts")
+
+            for (i in 0 until contactsArray.length()) {
+                val contactJson = contactsArray.getJSONObject(i)
+                val nickname = contactJson.getString("nickname")
+
+                // Verifica si el apodo coincide con el contacto seleccionado
+                if (nickname == selectedNickname) {
+                    val locationJson = contactJson.getJSONObject("location")
+                    latitude = locationJson.getDouble("latitude")
+                    longitude = locationJson.getDouble("longitude")
+                    break // Salir del bucle una vez que se encuentra el contacto
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return Pair(latitude, longitude) // Devuelve un par con latitud y longitud
+    }
+
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        fusedLocationClient.removeLocationUpdates(locationCallback) // Detener actualizaciones al destruir la vista
     }
 }
