@@ -23,7 +23,6 @@ import android.util.Log
 import android.widget.Toast
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationListener
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
@@ -33,7 +32,9 @@ import com.icm.igosafeapp.R
 import com.icm.igosafeapp.databinding.FragmentPlanearViajeBinding
 import com.icm.igosafeapp.ruta_peatonal
 import com.icm.igosafeapp.ruta_vehicular
+import org.json.JSONObject
 import java.util.Locale
+
 class HomeFragment : Fragment() {
     private var _binding: FragmentPlanearViajeBinding? = null
     private val binding get() = _binding!!
@@ -57,6 +58,26 @@ class HomeFragment : Fragment() {
 
         // Inicializa el cliente de ubicación
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
+
+        // Inicializa el LocationCallback
+        locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult) {
+                for (location in locationResult.locations) {
+                    val geocoder = Geocoder(requireContext(), Locale.getDefault())
+                    try {
+                        val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
+                        if (addresses != null && addresses.isNotEmpty()) {
+                            val address = addresses[0].getAddressLine(0)
+                            binding.actualLocation.setText(address) // Establece la dirección en el EditText
+                        } else {
+                            Log.e("HomeFragment", "No se encontraron direcciones para la ubicación.")
+                        }
+                    } catch (e: Exception) {
+                        Log.e("HomeFragment", "Error al obtener la dirección: ${e.message}")
+                    }
+                }
+            }
+        }
 
         // Configurar el listener para el EditText
         binding.actualLocation.setOnFocusChangeListener { _, hasFocus ->
@@ -114,30 +135,14 @@ class HomeFragment : Fragment() {
         // Inicia actualizaciones en tiempo real
         try {
             val locationRequest = LocationRequest.create().apply {
-                interval = 100000 // Actualiza cada 10 segundos
+                interval = 10000 // Actualiza cada 10 segundos
                 fastestInterval = 5000 // Intervalo más rápido
                 priority = LocationRequest.PRIORITY_HIGH_ACCURACY
             }
 
-            locationCallback = object : LocationCallback() {
-                override fun onLocationResult(locationResult: LocationResult) {
-                    for (location in locationResult.locations) {
-                        val geocoder = Geocoder(requireContext(), Locale.getDefault())
-                        val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
-
-                        if (addresses != null && addresses.isNotEmpty()) {
-                            val address = addresses[0].getAddressLine(0)
-                            binding.actualLocation.setText(address) // Establece la dirección en el EditText
-                        } else {
-                            Log.e("HomeFragment", "No se encontraron direcciones para la ubicación.")
-                        }
-                    }
-                }
-            }
-
             fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
         } catch (e: SecurityException) {
-            e.printStackTrace()
+            Log.e("HomeFragment", "Error al solicitar actualizaciones de ubicación: ${e.message}")
         }
     }
 
@@ -157,6 +162,7 @@ class HomeFragment : Fragment() {
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_LOCATION_PERMISSION) {
+            Log.d("HomeFragment", "onRequestPermissionsResult called")
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(requireContext(), "Permiso de GPS concedido", Toast.LENGTH_SHORT).show()
                 obtenerUbicacion() // Llama a obtenerUbicacion si se concede el permiso
@@ -217,9 +223,47 @@ class HomeFragment : Fragment() {
 
         binding.contactLocation.setOnItemClickListener { parent, view, position, id ->
             val selectedContact = adapter.getItem(position)
+            val selectedNickname = selectedContact?.nickname
+
             binding.contactLocation.setText(selectedContact?.nickname, false)
+
+            val (latitude, longitude) = loadContactLocation(selectedNickname)
+
+            if (latitude != null && longitude != null) {
+                Log.d("HomeFragment", "Latitud: $latitude, Longitud: $longitude")
+            } else {
+                Log.e("HomeFragment", "No se encontraron coordenadas para el contacto seleccionado.")
+            }
         }
     }
+
+    private fun loadContactLocation(selectedNickname: String?): Pair<Double?, Double?> {
+        var latitude: Double? = null
+        var longitude: Double? = null
+        try {
+            val inputStream = requireActivity().assets.open("contactos.json") // Asegúrate de que el archivo se llama contactos.json
+            val json = inputStream.bufferedReader().use { it.readText() }
+            val jsonObject = JSONObject(json)
+            val contactsArray = jsonObject.getJSONArray("contacts")
+
+            for (i in 0 until contactsArray.length()) {
+                val contactJson = contactsArray.getJSONObject(i)
+                val nickname = contactJson.getString("nickname")
+
+                // Verifica si el apodo coincide con el contacto seleccionado
+                if (nickname == selectedNickname) {
+                    val locationJson = contactJson.getJSONObject("location")
+                    latitude = locationJson.getDouble("latitude")
+                    longitude = locationJson.getDouble("longitude")
+                    break // Salir del bucle una vez que se encuentra el contacto
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return Pair(latitude, longitude) // Devuelve un par con latitud y longitud
+    }
+
 
     override fun onDestroyView() {
         super.onDestroyView()
@@ -227,4 +271,3 @@ class HomeFragment : Fragment() {
         fusedLocationClient.removeLocationUpdates(locationCallback) // Detener actualizaciones al destruir la vista
     }
 }
-
