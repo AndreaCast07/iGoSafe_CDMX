@@ -96,7 +96,6 @@ class HomeFragment : Fragment() {
         }
 
         setupAutoCompleteTextView()
-        setupButtons()
 
         // Verifica si ya se tiene el permiso de localización al crear la vista
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
@@ -182,7 +181,43 @@ class HomeFragment : Fragment() {
         }
     }
 
-    private fun setupButtons() {
+    private fun loadContactNameAndNickname(selectedNickname: String?): Pair<String?, String?> {
+        var name: String? = null
+        var nickname: String? = null
+
+        try {
+            val inputStream = requireActivity().assets.open("contactos.json")
+            val json = inputStream.bufferedReader().use { it.readText() }
+            val jsonObject = JSONObject(json)
+            val contactsArray = jsonObject.getJSONArray("contacts")
+
+            for (i in 0 until contactsArray.length()) {
+                val contactJson = contactsArray.getJSONObject(i)
+                val currentNickname = contactJson.getString("nickname")
+
+                // Log para verificar los valores en cada iteración
+                Log.d("loadContactNameAndNickname", "Comparando -> selectedNickname: $selectedNickname, currentNickname: $currentNickname")
+
+                // Comparación insensible a mayúsculas/minúsculas
+                if (currentNickname.equals(selectedNickname, ignoreCase = true)) {
+                    name = contactJson.getString("name")
+                    nickname = currentNickname
+                    Log.d("loadContactNameAndNickname", "Nombre encontrado: $name, Apodo: $nickname")
+                    break
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        // Log final para verificar lo que se va a retornar
+        Log.d("loadContactNameAndNickname", "Retornando -> Nombre: $name, Apodo: $nickname")
+        return Pair(name, nickname)
+    }
+
+
+
+    private fun setupButtons(name: String?, nickname: String?) {
         binding.btnCaminar.setOnClickListener {
             selectedOption = "Caminar"
             binding.btnCaminar.backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.azul)
@@ -199,11 +234,18 @@ class HomeFragment : Fragment() {
             if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                 when (selectedOption) {
                     "Caminar" -> {
-                        val intent = Intent(requireContext(), ruta_peatonal::class.java)
+                        Log.d("SetupButtons", "Enviando a ruta_peatonal -> Name: $name, Nickname: $nickname")
+                        val intent = Intent(requireContext(), ruta_peatonal::class.java).apply {
+                            putExtra("name", name)
+                            putExtra("nickname", nickname)
+                        }
                         startActivity(intent)
                     }
                     "Carro" -> {
-                        val intent = Intent(requireContext(), ruta_vehicular::class.java)
+                        val intent = Intent(requireContext(), ruta_vehicular::class.java).apply {
+                            putExtra("name", name)
+                            putExtra("nickname", nickname)
+                        }
                         startActivity(intent)
                     }
                 }
@@ -228,6 +270,8 @@ class HomeFragment : Fragment() {
             binding.contactLocation.setText(selectedContact?.nickname, false)
 
             val (latitude, longitude) = loadContactLocation(selectedNickname)
+            val (name, nickname) = loadContactNameAndNickname(selectedNickname)
+            setupButtons(name, nickname)
 
             if (latitude != null && longitude != null) {
                 Log.d("HomeFragment", "Latitud: $latitude, Longitud: $longitude")
@@ -255,12 +299,14 @@ class HomeFragment : Fragment() {
                     val locationJson = contactJson.getJSONObject("location")
                     latitude = locationJson.getDouble("latitude")
                     longitude = locationJson.getDouble("longitude")
+                    Log.d("LoadContactLocation", "Latitud: $latitude, Longitud: $longitude")
                     break // Salir del bucle una vez que se encuentra el contacto
                 }
             }
         } catch (e: Exception) {
             e.printStackTrace()
         }
+        Log.d("LoadContactLocation", "Retornando -> Latitud: $latitude, Longitud: $longitude")
         return Pair(latitude, longitude) // Devuelve un par con latitud y longitud
     }
 

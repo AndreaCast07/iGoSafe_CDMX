@@ -38,6 +38,9 @@ import com.google.android.gms.maps.model.MarkerOptions
 class ruta_vehicular : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var iniciar: Button
     private lateinit var textDistancia: TextView
+    private lateinit var nombre: TextView
+    private lateinit var apodo: TextView
+
     private lateinit var mMap: GoogleMap
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
@@ -48,7 +51,15 @@ class ruta_vehicular : AppCompatActivity(), OnMapReadyCallback {
         setContentView(R.layout.activity_ruta_vehicular)
 
         iniciar = findViewById(R.id.iniciarViaje2)
-        textDistancia = findViewById((R.id.textDistancia2))
+        textDistancia = findViewById(R.id.textDistancia2)
+        nombre = findViewById(R.id.textViewNombre2)
+        apodo = findViewById(R.id.Contacto2)
+
+        val name = intent.getStringExtra("name")
+        val nickname = intent.getStringExtra("nickname")
+
+        nombre.text = name ?: "Sin nombre"
+        apodo.text = nickname ?: "Sin apodo"
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         val mapFragment = supportFragmentManager

@@ -32,7 +32,9 @@ import com.google.android.gms.maps.model.MapStyleOptions
 class ruta_peatonal : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var iniciar: Button
     private lateinit var textDistancia: TextView
-    private lateinit var comentarios1: Button
+    private lateinit var nombre: TextView
+    private lateinit var apodo: TextView
+
     private lateinit var mMap: GoogleMap
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
@@ -45,6 +47,14 @@ class ruta_peatonal : AppCompatActivity(), OnMapReadyCallback {
 
         iniciar = findViewById(R.id.iniciarViaje)
         textDistancia = findViewById(R.id.textDistancia)
+        nombre = findViewById(R.id.textViewNombre)
+        apodo = findViewById(R.id.Contacto)
+
+        val name = intent.getStringExtra("name")
+        val nickname = intent.getStringExtra("nickname")
+
+        nombre.text = name ?: "Sin nombre"
+        apodo.text = nickname ?: "Sin apodo"
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         val mapFragment = supportFragmentManager
@@ -128,13 +138,6 @@ class ruta_peatonal : AppCompatActivity(), OnMapReadyCallback {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 obtenerUbicacionActual()
             }
-        }
-    }
-
-    private fun verComentarios() {
-        comentarios1.setOnClickListener {
-            val intent = Intent(this, comentarios::class.java)
-            startActivity(intent)
         }
     }
 
