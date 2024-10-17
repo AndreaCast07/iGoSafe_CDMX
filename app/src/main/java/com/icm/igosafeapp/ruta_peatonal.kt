@@ -244,7 +244,7 @@ class ruta_peatonal : AppCompatActivity(), OnMapReadyCallback {
     private fun obtenerOSRMUrl(origen: LatLng, destino: LatLng, profile: String): String {
         val origenCoords = "${origen.longitude},${origen.latitude}"
         val destinoCoords = "${destino.longitude},${destino.latitude}"
-        return "https://router.project-osrm.org/route/v1/$profile/$origenCoords;$destinoCoords?overview=full&geometries=geojson"
+        return "https://router.project-osrm.org/route/v1/foot/$origenCoords;$destinoCoords?overview=full&geometries=geojson"
     }
 
     private fun decodificarRuta(jsonResponse: String): List<LatLng> {
