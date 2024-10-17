@@ -50,6 +50,14 @@ class Menu : AppCompatActivity() {
         // Cambiar color a itemPremium
         val navigationView: NavigationView = findViewById(R.id.nav_view)
         cambiarColorItem(navigationView, R.id.nav_premium, R.color.verde)
+
+        // Obtener los contactos del Intent
+        val contactsJson = intent.getStringExtra("contacts")
+        if (contactsJson != null) {
+            val bundle = Bundle()
+            bundle.putString("contacts", contactsJson)
+            navController.navigate(R.id.nav_viaje, bundle)
+        }
     }
 
     private fun cambiarColorItem(navigationView: NavigationView, itemId: Int, colorId: Int) {

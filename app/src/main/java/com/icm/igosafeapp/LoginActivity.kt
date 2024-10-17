@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import androidx.navigation.fragment.findNavController
 import android.text.InputType
 import android.util.Log
 import android.view.MotionEvent
@@ -20,8 +21,11 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.navigation.Navigation
+import androidx.navigation.findNavController
 import com.google.gson.Gson
 import com.icm.igosafeapp.manejoArchivos.UsuarioManager
+import com.icm.igosafeapp.ui.home.HomeFragment
 import entidades.Usuario
 import org.json.JSONObject
 import java.io.File
@@ -64,7 +68,6 @@ class LoginActivity : AppCompatActivity() {
     private fun checkPermissions() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
             requestContactsPermission()
-        } else {
         }
     }
 
@@ -84,20 +87,6 @@ class LoginActivity : AppCompatActivity() {
 
         if (requestCode == PERMISSION_REQUEST_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                val contacts = loadContactsFromAssets()
-
-                val contactsJson = Gson().toJson(contacts)  //NUEVO
-                val bundle = Bundle()
-                bundle.putString("contacts", contactsJson)
-                // Aquí puedes guardar los contactos en SharedPreferences o pasar a HomeFragment
-                /*val intent = Intent(this, Menu::class.java).apply {
-                    putExtra("contacts", Gson().toJson(contacts))
-                }*/
-                val intent = Intent(this, Menu::class.java)
-                intent.putExtras(bundle)  // Pasa el Bundle con los contactos
-                startActivity(intent)
-                finish()
-
             } else {
                 // Permiso denegado
                 Toast.makeText(this, "Funcionalidades reducidas.", Toast.LENGTH_SHORT).show()
@@ -149,9 +138,17 @@ class LoginActivity : AppCompatActivity() {
 
                 if (usuarioManager.celularRegistrado(celular)) {
                     if (usuarioManager.verificarUsuario(celular, contrasena)) {
-                        val intent = Intent(this, Menu::class.java)
-                        startActivity(intent)
-                        finish()
+                        val contacts = loadContactsFromAssets()
+                        if (contacts.isNotEmpty()) {
+                            val contactsJson = Gson().toJson(contacts)
+
+                            val intent = Intent(this, Menu::class.java)
+                            intent.putExtra("contacts", contactsJson)
+                            startActivity(intent)
+                            finish()
+                        } else {
+                            Toast.makeText(this, "No se pudieron cargar los contactos.", Toast.LENGTH_SHORT).show()
+                        }
                     } else {
                         Toast.makeText(this, "Contraseña incorrecta.", Toast.LENGTH_SHORT).show()
                     }

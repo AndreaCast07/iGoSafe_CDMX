@@ -15,6 +15,7 @@ import com.icm.igosafeapp.ContactosAdapter
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.util.Log
 import android.widget.Toast
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -41,8 +42,8 @@ class HomeFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val homeViewModel =
-            ViewModelProvider(this).get(HomeViewModel::class.java)
+        //val homeViewModel =
+            //ViewModelProvider(this).get(HomeViewModel::class.java)
 
         _binding = FragmentPlanearViajeBinding.inflate(inflater, container, false)
 
@@ -51,11 +52,14 @@ class HomeFragment : Fragment() {
                 solicitarPermisoGPS()
             }
         }
+
         // Recibir los contactos pasados por el Intent
-        val contactsJson = arguments?.getString("contacts")
-        if (contactsJson != null) {
+        arguments?.getString("contacts")?.let { contactsJson ->
             val type = object : TypeToken<List<Contactos>>() {}.type
             contacts = Gson().fromJson(contactsJson, type)
+            Log.d("HomeFragment", "Contactos cargados: ${contacts.size}")
+        } ?: run {
+            Log.e("HomeFragment", "No se recibieron contactos")
         }
 
 
