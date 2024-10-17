@@ -1,5 +1,18 @@
 package com.icm.igosafeapp
 
+import android.content.Context
+import org.osmdroid.config.Configuration
+import org.osmdroid.util.GeoPoint
+import org.graphhopper.GraphHopper
+import org.graphhopper.routing.util.EncodingManager
+import org.graphhopper.routing.util.Vehicle
+import org.graphhopper.storage.GraphHopperStorage
+import org.graphhopper.util.DistanceCalcEarth
+import org.graphhopper.util.PointList
+import org.graphhopper.util.TranslationMap
+import org.graphhopper.GraphHopper
+import org.graphhopper.routing.util.EncodingManager
+import org.graphhopper.routing.util.Vehicle
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
@@ -30,6 +43,9 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.PolylineOptions
+import com.graphhopper.GraphHopper
+import com.graphhopper.routing.util.EncodingManager
+import com.graphhopper.util.PointList
 import java.io.InputStreamReader
 
 data class Neighborhood(
@@ -131,12 +147,11 @@ class recorrido_peatonal : AppCompatActivity() {
 
         for (neighborhood in neighborhoods) {
             val coordinates = neighborhood.geometry.coordinates
-            // Aplanar la lista de coordenadas en caso de ser un MultiPolygon
+
             val flattenedCoordinates = if (coordinates.size > 1) {
-                // Para MultiPolygon, toma la primera serie de coordenadas
                 coordinates[0] // O usa una lógica que elija el conjunto correcto
             } else {
-                // Para Polygon, usa las coordenadas tal cual
+
                 coordinates[0]
             }
 
@@ -152,6 +167,38 @@ class recorrido_peatonal : AppCompatActivity() {
 
         println("La ruta pasa por $neighborhoodCount barrios.")
         println("La calificación promedio de la ruta es: $averageRating")
+    }
+
+
+
+    fun configureGraphHopper(osmFilePath: String, graphHopperLocation: String): GraphHopper {
+        // Crea una instancia de GraphHopper
+        val hopper = GraphHopper()
+
+        // Configura el archivo OSM que has descargado
+        hopper.setOSMFile(osmFilePath)
+
+        // Configura la ubicación de GraphHopper donde se almacenará la base de datos
+        hopper.setGraphHopperLocation(graphHopperLocation)
+
+        // Establece el tipo de vehículo; puedes cambiar a Vehicle.BIKE o Vehicle.FOOT según tus necesidades
+        hopper.setEncodingManager(EncodingManager.create(Vehicle.CAR))
+
+        // Importa o carga los datos
+        hopper.importOrLoad()
+
+        return hopper
+    }
+
+    fun getRouteDistance(hopper: GraphHopper, start: GeoPoint, end: GeoPoint): Double {
+        val fromPoint = PointList()
+        fromPoint.add(start.longitude, start.latitude)
+
+        val toPoint = PointList()
+        toPoint.add(end.longitude, end.latitude)
+
+        val path = hopper.route(fromPoint, toPoint)
+        return path.distance
     }
 
     private fun addMarkers() {
