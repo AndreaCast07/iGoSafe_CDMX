@@ -90,6 +90,8 @@ class ruta_peatonal : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+
+
     private fun verificarPermisosUbicacion(): Boolean {
         return if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
             ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -106,6 +108,7 @@ class ruta_peatonal : AppCompatActivity(), OnMapReadyCallback {
 
     private fun actualizarUbicacionEnMapa(location: Location) {
         val currentLatLng = LatLng(location.latitude, location.longitude)
+        LocationHolder.currentLocation = currentLatLng
         mMap.clear() // Elimina marcadores previos
         mMap.addMarker(MarkerOptions().position(currentLatLng).title("Ubicación Actual"))
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f))
@@ -132,4 +135,7 @@ class ruta_peatonal : AppCompatActivity(), OnMapReadyCallback {
         // Detén las actualizaciones cuando la actividad no está visible
         fusedLocationClient.removeLocationUpdates(locationCallback)
     }
+}
+object LocationHolder {
+    var currentLocation: LatLng? = null
 }
