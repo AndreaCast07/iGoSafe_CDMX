@@ -1,5 +1,6 @@
 package com.icm.igosafeapp
 
+import Contactos
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Bundle
@@ -18,6 +19,7 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.icm.igosafeapp.databinding.ActivityMenuBinding
+import org.json.JSONObject
 
 class Menu : AppCompatActivity() {
 
@@ -31,6 +33,7 @@ class Menu : AppCompatActivity() {
         setContentView(binding.root)
 
         setSupportActionBar(binding.appBarActivityMenu.toolbar)
+
 
         binding.appBarActivityMenu.logoBar.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
@@ -77,9 +80,9 @@ class Menu : AppCompatActivity() {
                 else -> false // Para otros ítems de menú
             }
         }
-
-
     }
+
+
 
     private fun cambiarColorItem(navigationView: NavigationView, itemId: Int, colorId: Int) {
         val item: MenuItem = navigationView.menu.findItem(itemId)

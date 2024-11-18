@@ -104,6 +104,7 @@ class HomeFragment : Fragment() {
         return binding.root
     }
 
+
     private fun solicitarPermisoGPS() {
         val sharedPrefs = requireActivity().getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
         val permissionDeniedForever = sharedPrefs.getBoolean(PERMISSION_DENIED_FOREVER_KEY, false)

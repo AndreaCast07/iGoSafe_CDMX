@@ -64,7 +64,7 @@ class CreatePassword : AppCompatActivity(){
 
                 //usuarioManager.guardarUsuario(usuario)
 
-                val intent = Intent(this, Menu::class.java)
+                val intent = Intent(this, LoginActivity::class.java)
                 startActivity(intent)
                 finish()
             } else {

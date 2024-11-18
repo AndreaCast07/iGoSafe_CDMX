@@ -207,4 +207,5 @@ class LoginActivity : AppCompatActivity() {
         }
         return contactsList
     }
+
 }
