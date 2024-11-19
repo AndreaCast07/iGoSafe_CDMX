@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "371704711119",
+    "project_id": "igosafe-2b97b",
+    "storage_bucket": "igosafe-2b97b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:371704711119:android:660cf0a4838a470f3574ba",
+        "android_client_info": {
+          "package_name": "com.icm.igosafeapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD-pXnQRboX2Pv7Xnidx9YfDNGuTt_RiLg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
