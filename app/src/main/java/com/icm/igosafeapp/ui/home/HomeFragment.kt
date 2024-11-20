@@ -16,6 +16,8 @@ import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.os.Looper
 import android.provider.ContactsContract
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.widget.Toast
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -229,27 +231,27 @@ class HomeFragment : Fragment() {
     }
 
     private fun setupAutoCompleteTextView() {
-        val adapter = ContactosAdapter(requireContext(), contacts)
+        val adapter = ContactosAdapter(requireContext(), contacts) // `contacts` es la lista de Contactos
         binding.contactLocation.setAdapter(adapter)
 
+        // Muestra el menú desplegable al hacer clic
         binding.contactLocation.setOnClickListener {
             binding.contactLocation.showDropDown()
         }
 
+        // Maneja eventos de selección
         binding.contactLocation.setOnItemClickListener { parent, view, position, id ->
             val selectedContact = adapter.getItem(position)
             val selectedNickname = selectedContact?.nickname
 
-            binding.contactLocation.setText(selectedContact?.nickname, false)
+            // Establece el texto en el campo
+            binding.contactLocation.setText(selectedNickname, false)
 
+            // Aquí puedes cargar datos relacionados con el contacto seleccionado
             val (latitude, longitude) = loadContactLocation(selectedNickname)
-
             val (name, nickname) = loadContactNameAndNickname(selectedNickname)
 
-// Proporcionar valores predeterminados si son nulos
             setupButtons(name, nickname, latitude ?: 0.0, longitude ?: 0.0)
-
-
 
             if (latitude != null && longitude != null) {
                 Log.d("HomeFragment", "Latitud: $latitude, Longitud: $longitude")
@@ -257,7 +259,19 @@ class HomeFragment : Fragment() {
                 Log.e("HomeFragment", "No se encontraron coordenadas para el contacto seleccionado.")
             }
         }
+
+        // Muestra sugerencias dinámicamente mientras se escribe
+        binding.contactLocation.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                binding.contactLocation.showDropDown()
+            }
+
+            override fun afterTextChanged(s: Editable?) {}
+        })
     }
+
 
     private fun setupButtons(name: String?, nickname: String?, latitude: Double, longitude: Double) {
         binding.btnCaminar.setOnClickListener {
@@ -392,12 +406,5 @@ class HomeFragment : Fragment() {
         // Detener actualizaciones de ubicación para evitar uso innecesario de recursos
         fusedLocationClient.removeLocationUpdates(locationCallback)
     }
-
-  /*  override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-        // Asegurarse de detener cualquier tarea en segundo plano o recursos innecesarios
-        fusedLocationClient.removeLocationUpdates(locationCallback)
-    }*/
 }
 

@@ -6,10 +6,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.Filter
 import android.widget.ImageView
 import android.widget.TextView
 
-class ContactosAdapter(context: Context, contacts: List<Contactos>) : ArrayAdapter<Contactos>(context, 0, contacts) {
+class ContactosAdapter(context: Context, private val originalContacts: List<Contactos>) : ArrayAdapter<Contactos>(context, 0, originalContacts) {
+    private var filteredContacts: List<Contactos> = originalContacts
+
+    override fun getCount(): Int = filteredContacts.size
+
+    override fun getItem(position: Int): Contactos? = filteredContacts[position]
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val contact = getItem(position)
@@ -27,4 +33,30 @@ class ContactosAdapter(context: Context, contacts: List<Contactos>) : ArrayAdapt
         }
         return view
     }
+
+    override fun getFilter(): Filter {
+        return object : Filter() {
+            override fun performFiltering(constraint: CharSequence?): FilterResults {
+                val filterResults = FilterResults()
+                if (constraint.isNullOrEmpty()) {
+                    filterResults.values = originalContacts
+                    filterResults.count = originalContacts.size
+                } else {
+                    val query = constraint.toString().lowercase()
+                    val filtered = originalContacts.filter {
+                        it.nickname.lowercase().contains(query) || it.fullName.lowercase().contains(query)
+                    }
+                    filterResults.values = filtered
+                    filterResults.count = filtered.size
+                }
+                return filterResults
+            }
+
+            override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
+                filteredContacts = results?.values as? List<Contactos> ?: originalContacts
+                notifyDataSetChanged()
+            }
+        }
+    }
 }
+
