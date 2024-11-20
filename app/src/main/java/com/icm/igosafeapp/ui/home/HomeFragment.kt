@@ -15,6 +15,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.os.Looper
+import android.provider.ContactsContract
 import android.util.Log
 import android.widget.Toast
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -23,12 +24,15 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.icm.igosafeapp.R
 import com.icm.igosafeapp.databinding.FragmentPlanearViajeBinding
 import com.icm.igosafeapp.ruta_peatonal
 import com.icm.igosafeapp.ruta_vehicular
+import entidades.Usuario
 import org.json.JSONObject
 import java.util.Locale
 
@@ -36,6 +40,8 @@ class HomeFragment : Fragment() {
     private var _binding: FragmentPlanearViajeBinding? = null
     private val binding get() = _binding!!
     private var selectedOption: String? = null
+
+    private val REQUEST_CONTACTS_PERMISSION = 101
 
     private val CHANNEL_ID = "ubicacion_channel"
     private val REQUEST_LOCATION_PERMISSION = 100
@@ -60,6 +66,9 @@ class HomeFragment : Fragment() {
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
                 for (location in locationResult.locations) {
+                    val latitude = location.latitude
+                    val longitude = location.longitude
+
                     val geocoder = Geocoder(requireContext(), Locale.getDefault())
                     try {
                         val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
@@ -72,6 +81,7 @@ class HomeFragment : Fragment() {
                     } catch (e: Exception) {
                         Log.e("HomeFragment", "Error al obtener la dirección: ${e.message}")
                     }
+                    subirUbicacionAFirebase(latitude, longitude)
                 }
             }
         }
@@ -92,18 +102,42 @@ class HomeFragment : Fragment() {
             Log.e("HomeFragment", "No se recibieron contactos")
         }
 
+        //setupAutoCompleteTextView()
+
+        // Agrupar la verificación y solicitud de permisos
+        val permisos = listOf(
+            Manifest.permission.ACCESS_FINE_LOCATION to ::obtenerUbicacion,
+            Manifest.permission.READ_CONTACTS to ::cargarContactos
+        )
+
+        permisos.forEach { (permiso, accion) ->
+            if (ContextCompat.checkSelfPermission(requireContext(), permiso) != PackageManager.PERMISSION_GRANTED) {
+                // Si el permiso no está concedido, solicitarlo
+                when (permiso) {
+                    Manifest.permission.READ_CONTACTS -> solicitarPermisoContactos()  // Solicitar permiso de contactos
+                    Manifest.permission.ACCESS_FINE_LOCATION -> solicitarPermisoGPS()  // Solicitar permiso de ubicación
+                }
+            } else {
+                // Si el permiso está concedido, ejecutar la acción
+                accion()
+            }
+        }
+
         setupAutoCompleteTextView()
 
-        // Verifica si ya se tiene el permiso de localización al crear la vista
-        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            obtenerUbicacion()
-        } else {
-            solicitarPermisoGPS() // Solicitar permiso si no se tiene
-        }
 
         return binding.root
     }
-
+    private fun solicitarPermisoContactos() {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(requireActivity(), Manifest.permission.READ_CONTACTS)) {
+            Toast.makeText(requireContext(), "Se necesita acceso a los contactos para continuar.", Toast.LENGTH_SHORT).show()
+        }
+        ActivityCompat.requestPermissions(
+            requireActivity(),
+            arrayOf(Manifest.permission.READ_CONTACTS),
+            REQUEST_CONTACTS_PERMISSION
+        )
+    }
 
     private fun solicitarPermisoGPS() {
         val sharedPrefs = requireActivity().getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
@@ -176,6 +210,14 @@ class HomeFragment : Fragment() {
                 } else {
                     Toast.makeText(requireContext(), "Funcionalidades limitadas", Toast.LENGTH_SHORT).show()
                 }
+            }
+        }
+        if (requestCode == REQUEST_CONTACTS_PERMISSION) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                //  Toast.makeText(requireContext(), "Permiso de contactos concedido.", Toast.LENGTH_SHORT).show()
+                cargarContactos()
+            } else {
+                Toast.makeText(requireContext(), "Funcionalidades limitadas.", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -318,7 +360,95 @@ class HomeFragment : Fragment() {
         Log.d("LoadContactLocation", "Retornando -> Latitud: $latitude, Longitud: $longitude")
         return Pair(latitude, longitude) // Devuelve un par con latitud y longitud
     }
+    // Obtener datos del usuario logueado
 
+   /* fun obtenerUsuarioActual(onResultado: (Usuario?) -> Unit) {
+        val user = FirebaseAuth.getInstance().currentUser
+        if (user != null) {
+            val userId = user.uid
+            val databaseReference = FirebaseDatabase.getInstance().getReference("users").child(userId)
+
+            databaseReference.get()
+                .addOnSuccessListener { snapshot ->
+                    val usuario = snapshot.getValue(Usuario::class.java)
+                    onResultado(usuario)
+                }
+                .addOnFailureListener { e ->
+                    Log.e("UsuarioManager", "Error al obtener usuario: ${e.message}")
+                    onResultado(null)
+                }
+        } else {
+            onResultado(null)
+        }
+    }*/
+
+    // Subir ubicación a Firebase bajo el userId
+    private fun subirUbicacionAFirebase(latitude: Double, longitude: Double) {
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser != null) {
+            val userId = currentUser.uid // Obtener el userId
+            val databaseReference = FirebaseDatabase.getInstance().getReference("users").child(userId)
+
+            val ubicacionData = mapOf(
+                "latitude" to latitude,
+                "longitude" to longitude
+            )
+
+            databaseReference.child("location").setValue(ubicacionData) // Guardar en la clave 'location'
+                .addOnSuccessListener {
+                    Log.d("HomeFragment", "Ubicación subida exitosamente a Firebase.")
+                }
+                .addOnFailureListener { e ->
+                    Log.e("HomeFragment", "Error al subir la ubicación a Firebase: ${e.message}")
+                }
+        } else {
+            Log.e("HomeFragment", "No se encontró un usuario autenticado.")
+        }
+    }
+
+
+    private fun cargarContactos() {
+        val listaContactos = mutableListOf<Contactos>()
+        val resolver = requireContext().contentResolver
+        val cursor = resolver.query(
+            ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+            arrayOf(
+                ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
+                ContactsContract.CommonDataKinds.Phone.NUMBER
+            ),
+            null,
+            null,
+            "${ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME} ASC"
+        )
+
+        cursor?.use {
+            while (it.moveToNext()) {
+                val nombreCompleto = it.getString(it.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME))
+                val nickname = nombreCompleto.split(" ").firstOrNull() ?: nombreCompleto
+                val iconResId = R.drawable.ic_person // Recurso predeterminado
+                listaContactos.add(Contactos(iconResId, nickname, nombreCompleto))
+            }
+        }
+
+        contacts = listaContactos
+        Log.d("HomeFragment", "Contactos cargados: ${contacts.size}")
+
+        setupAutoCompleteTextView()
+    }
+
+
+
+    /* fun onRequestPermissionsResultContactos(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+         if (requestCode == REQUEST_CONTACTS_PERMISSION) {
+             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+               //  Toast.makeText(requireContext(), "Permiso de contactos concedido.", Toast.LENGTH_SHORT).show()
+                 cargarContactos()
+             } else {
+                 Toast.makeText(requireContext(), "Funcionalidades limitadas.", Toast.LENGTH_SHORT).show()
+             }
+         }
+     }*/
 
     override fun onDestroyView() {
         super.onDestroyView()

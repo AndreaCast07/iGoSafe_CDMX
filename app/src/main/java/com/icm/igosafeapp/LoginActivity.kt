@@ -67,7 +67,7 @@ class LoginActivity : AppCompatActivity() {
 
         usuarioManager = UsuarioManager(this)
 
-        checkPermissions()
+     //   checkPermissions()
 
         ocultarContrasena()
         mostrarLayoutRegisterPhone()
@@ -75,7 +75,7 @@ class LoginActivity : AppCompatActivity() {
 
     }
 
-    private fun checkPermissions() {
+  /*  private fun checkPermissions() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
             requestContactsPermission()
         }
@@ -86,9 +86,9 @@ class LoginActivity : AppCompatActivity() {
             Toast.makeText(this, "Necesitamos acceso a los contactos para funcionalidades completas.", Toast.LENGTH_SHORT).show()
         }
         ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_CONTACTS), PERMISSION_REQUEST_CODE)
-    }
+    }**/
 
-    override fun onRequestPermissionsResult(
+   /* override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
         grantResults: IntArray
@@ -106,7 +106,7 @@ class LoginActivity : AppCompatActivity() {
 
     companion object {
         private const val PERMISSION_REQUEST_CODE = 777
-    }
+    }*/
 
     @SuppressLint("ClickableViewAccessibility")
     private fun ocultarContrasena() {
@@ -179,7 +179,7 @@ class LoginActivity : AppCompatActivity() {
         return celularInput.text.toString().isNotEmpty() && passwordInput.text.toString().isNotEmpty()
     }
 
-    private fun loadContactsFromAssets(): List<Contactos> {
+   /* private fun loadContactsFromAssets(): List<Contactos> {
         val contactsList = mutableListOf<Contactos>()
         try {
             val inputStream = assets.open("contactos.json") // Asegúrate de que el archivo se llama contacts.json
@@ -205,6 +205,6 @@ class LoginActivity : AppCompatActivity() {
             e.printStackTrace()
         }
         return contactsList
-    }
+    }*/
 
 }
