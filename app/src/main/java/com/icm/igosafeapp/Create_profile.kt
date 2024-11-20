@@ -104,10 +104,11 @@ class Create_profile : AppCompatActivity() {
             override fun onNothingSelected(parent: AdapterView<*>) {}
         }
     }
+
     private fun mostrarLayoutCreatePasword() {
         btnCrearPerfil.setOnClickListener {
             if (validarCampos()) {
-                val celular = intent.getStringExtra("CELULAR")
+                val celular = intent.getStringExtra("CELULAR") ?: ""
                 val nombre = txtNombre.text.toString()
                 val tipoDocumento = spinnerDocumento.selectedItem.toString()
                 val numDocumento = txtNumDocumento.text.toString()
@@ -117,12 +118,15 @@ class Create_profile : AppCompatActivity() {
                     putExtra("NOMBRE", nombre)
                     putExtra("TIPO_DOCUMENTO", tipoDocumento)
                     putExtra("NUM_DOCUMENTO", numDocumento)
+
+                    // Si no hay foto seleccionada, enviamos null.
+                    putExtra("FOTO_URI", imageUrl?.toString())
                 }
 
                 startActivity(intent)
                 finish()
             } else {
-                Toast.makeText(this, "Por favor, complete todos los campos.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Por favor, completa todos los campos.", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -132,6 +136,7 @@ class Create_profile : AppCompatActivity() {
                 txtNumDocumento.text.isNotEmpty() &&
                 spinnerDocumento.selectedItemPosition != 0
     }
+
 
 
     private fun setupImageClickListeners() {
@@ -229,6 +234,7 @@ class Create_profile : AppCompatActivity() {
             photoPerfil.setImageBitmap(takenImage)
         }
     }
+
     private fun getPhotoFile(fileName: String): File {
         val storageDirectory = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         return File.createTempFile(fileName, ".jpg", storageDirectory)

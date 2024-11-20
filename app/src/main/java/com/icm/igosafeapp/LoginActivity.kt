@@ -23,6 +23,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.navigation.Navigation
 import androidx.navigation.findNavController
+import com.google.firebase.auth.FirebaseAuth
 import com.google.gson.Gson
 import com.icm.igosafeapp.manejoArchivos.UsuarioManager
 import com.icm.igosafeapp.ui.home.HomeFragment
@@ -45,6 +46,15 @@ class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
+
+        // Verificar si hay un usuario autenticado
+        if (FirebaseAuth.getInstance().currentUser != null) {
+            // Si hay una sesión activa, redirigir al menú principal
+            val intent = Intent(this, Menu::class.java)
+            startActivity(intent)
+            finish()
+            return
+        }
 
         // Inicializar las vistas
         logo = findViewById(R.id.logo)
@@ -136,40 +146,29 @@ class LoginActivity : AppCompatActivity() {
                 val celular = celularInput.text.toString()
                 val contrasena = passwordInput.text.toString()
 
-                if (usuarioManager.celularRegistrado(celular)) {
-                    if (usuarioManager.verificarUsuario(celular, contrasena)) {
-                        // Verificar si el permiso de contactos ha sido concedido
-                        val contacts = if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
-                            loadContactsFromAssets() // Cargar contactos desde el archivo JSON
-                        } else {
-                            // Pasar una lista vacía si no hay permiso
-                            emptyList<Contactos>()
-                        }
-
-                        if (contacts.isNotEmpty()) {
-                            val contactsJson = Gson().toJson(contacts)
-
-                            val intent = Intent(this, Menu::class.java)
-                            intent.putExtra("contacts", contactsJson)
-                            startActivity(intent)
-                            finish()
-                        } else {
-                            val intent = Intent(this, Menu::class.java)
-                            startActivity(intent)
-                            Toast.makeText(this, "No se pudieron cargar los contactos.", Toast.LENGTH_SHORT).show()
-                            finish()
+                // Verificar si el celular está registrado
+                usuarioManager.celularRegistrado(celular) { registrado ->
+                    if (registrado) {
+                        // Intentar iniciar sesión
+                        usuarioManager.iniciarSesion(celular, contrasena) { exito ->
+                            if (exito) {
+                                val intent = Intent(this, Menu::class.java)
+                                startActivity(intent)
+                                finish()
+                            } else {
+                                Toast.makeText(this, "Error al iniciar sesión. Verifique sus credenciales.", Toast.LENGTH_SHORT).show()
+                            }
                         }
                     } else {
-                        Toast.makeText(this, "Contraseña incorrecta.", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "El celular no está registrado.", Toast.LENGTH_SHORT).show()
                     }
-                } else {
-                    Toast.makeText(this, "El celular no está registrado.", Toast.LENGTH_SHORT).show()
                 }
             } else {
                 Toast.makeText(this, "Por favor, llena todos los campos.", Toast.LENGTH_SHORT).show()
             }
         }
     }
+
 
     override fun onBackPressed() {
         super.onBackPressed()
