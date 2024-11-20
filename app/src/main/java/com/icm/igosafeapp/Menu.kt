@@ -54,28 +54,24 @@ class Menu : AppCompatActivity() {
         val navigationView: NavigationView = findViewById(R.id.nav_view)
         cambiarColorItem(navigationView, R.id.nav_premium, R.color.verde)
 
-        // Obtener los contactos del Intent
-        val contactsJson = intent.getStringExtra("contacts")
-        val bundle = if (contactsJson != null) {
-            Bundle().apply {
-                putString("contacts", contactsJson)
-            }
-        } else {
-            null
-        }
-        navController.navigate(R.id.nav_viaje, bundle)
+        navController.navigate(R.id.nav_viaje)
         // Configura el listener para el NavigationView
         navView.setNavigationItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.nav_contactos -> {
                     // Navega a nav_contactos con el bundle
-                    navController.navigate(R.id.nav_contactos, bundle)
+                    navController.navigate(R.id.nav_contactos)
                     true // Indica que el evento fue manejado
                 }
                 R.id.nav_viaje -> {
                     // Navega a nav_viaje
-                    navController.navigate(R.id.nav_viaje, bundle)
+                    navController.navigate(R.id.nav_viaje)
                     true // Indica que el evento fue manejado
+                }
+                R.id.nav_favoritos -> {
+                    // Navegar a fragmento de favoritos
+                    navController.navigate(R.id.nav_favoritos) // Navegar al fragmento de favoritos
+                    true
                 }
                 else -> false // Para otros ítems de menú
             }

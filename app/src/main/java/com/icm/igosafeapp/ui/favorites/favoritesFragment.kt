@@ -1,5 +1,6 @@
 package com.icm.igosafeapp.ui.favorites
 
+import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -21,14 +22,8 @@ class favoritesFragment : Fragment() {
     private lateinit var favoritesListView: ListView
     private lateinit var searchBar: EditText
 
-    private val fixedFavorites = listOf(
-        "Juan Pérez",
-        "María Gómez",
-        "Carlos Fernández",
-        "Ana Torres",
-        "Luis Martínez",
-        "Sofía López"
-    )
+    private lateinit var adapter: adapter_contactos
+    private var favorites: List<String> = mutableListOf()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -40,13 +35,19 @@ class favoritesFragment : Fragment() {
         searchBar = binding.searchBar
         favoritesListView = binding.contactList
 
-        val adapter = adapter_contactos(requireContext(), fixedFavorites)
+        // Cargar los favoritos desde SharedPreferences
+        loadFavorites()
+
+        // Crear el adaptador con la lista de favoritos
+        adapter = adapter_contactos(requireContext(), favorites)
         favoritesListView.adapter = adapter
 
+        // Agregar filtro a la lista de favoritos
         searchBar.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                // Filtrar favoritos
                 adapter.filter.filter(s)
             }
 
@@ -56,8 +57,16 @@ class favoritesFragment : Fragment() {
         return binding.root
     }
 
+    private fun loadFavorites() {
+        // Cargar los favoritos desde SharedPreferences
+        val sharedPreferences = requireContext().getSharedPreferences("favorites", Context.MODE_PRIVATE)
+        favorites = sharedPreferences.getStringSet("favorites", mutableSetOf())?.toList() ?: mutableListOf()
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
 }
+
+
