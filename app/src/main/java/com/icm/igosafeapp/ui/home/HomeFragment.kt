@@ -73,6 +73,19 @@ class HomeFragment : Fragment() {
 
                     // Aquí puede ir la lógica para manejar la ubicación y cargarla en Firebase
                     subirUbicacionAFirebase(latitude, longitude)
+
+                    val geocoder = Geocoder(requireContext(), Locale.getDefault())
+                    try {
+                        val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
+                        if (addresses != null && addresses.isNotEmpty()) {
+                            val address = addresses[0].getAddressLine(0)
+                            binding.actualLocation.setText(address) // Establece la dirección en el EditText
+                        } else {
+                            Log.e("HomeFragment", "No se encontraron direcciones para la ubicación.")
+                        }
+                    } catch (e: Exception) {
+                        Log.e("HomeFragment", "Error al obtener la dirección: ${e.message}")
+                    }
                 }
             }
         }
@@ -120,7 +133,8 @@ class HomeFragment : Fragment() {
     private fun obtenerUbicacion() {
         if (verificarPermisosUbicacion()) {
             try {
-                val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 1000).build()
+                val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 10000) // 10 segundos de intervalo
+                    .build()
                 fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
             } catch (e: SecurityException) {
                 Log.e("HomeFragment", "Error al solicitar actualizaciones de ubicación: ${e.message}")
