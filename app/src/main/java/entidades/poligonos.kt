@@ -24,5 +24,5 @@ data class NeighborhoodProperties(
 
 data class Geometry(
     val type: String,
-    val coordinates: List<List<List<List<Double>>>>
+    val coordinates:List<List<List<Double>>>
 )
