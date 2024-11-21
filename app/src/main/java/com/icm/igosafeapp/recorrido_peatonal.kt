@@ -46,15 +46,19 @@ import android.view.View
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.widget.AppCompatRatingBar
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.PolygonOptions
+import com.google.firebase.database.FirebaseDatabase
 import com.google.maps.android.PolyUtil
+import com.icm.igosafeapp.manejoArchivos.CalificacionesManager
 import entidades.GeoJson
 import entidades.Neighborhood
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Polyline
+import java.util.concurrent.CountDownLatch
 import javax.net.ssl.HttpsURLConnection
 
 class recorrido_peatonal : AppCompatActivity(), OnMapReadyCallback  {
@@ -64,7 +68,8 @@ class recorrido_peatonal : AppCompatActivity(), OnMapReadyCallback  {
     private lateinit var neighborhoods: List<Neighborhood>
     private lateinit var progressBar: ProgressBar
     private lateinit var textoRuta: TextView
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var calificacionText: TextView
+    private lateinit var startsCalificacion: AppCompatRatingBar
     private lateinit var actuaLocation: Marker
     private var startLocation = LatLng(0.0, 0.0)
     private var endLocation = LatLng(0.0, 0.0)
@@ -78,11 +83,13 @@ class recorrido_peatonal : AppCompatActivity(), OnMapReadyCallback  {
             progressBar = findViewById(R.id.progressBar)
             textoRuta = findViewById(R.id.textoRuta)
             terminar = findViewById(R.id.finalizar)
+            calificacionText = findViewById(R.id.calificacionText)
+            startsCalificacion = findViewById(R.id.ratingBar)
 
-            val startLatitude = intent.getDoubleExtra("start_latitude", 0.0)
-            val startLongitude = intent.getDoubleExtra("start_longitude", 0.0)
-            val endLatitude = intent.getDoubleExtra("end_latitude", 0.0)
-            val endLongitude = intent.getDoubleExtra("end_longitude", 0.0)
+            val startLatitude = intent.getDoubleExtra("startLat", 0.0)
+            val startLongitude = intent.getDoubleExtra("startLong", 0.0)
+            val endLatitude = intent.getDoubleExtra("endLat", 0.0)
+            val endLongitude = intent.getDoubleExtra("endLong", 0.0)
 
             startLocation = LatLng(startLatitude, startLongitude)
             endLocation = LatLng(endLatitude, endLongitude)
@@ -90,10 +97,10 @@ class recorrido_peatonal : AppCompatActivity(), OnMapReadyCallback  {
             val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
             mapFragment.getMapAsync(this)
 
-            terminar.setOnClickListener {
+            /*terminar.setOnClickListener {
                 val intent = Intent(this, review_ruta::class.java)
                 startActivity(intent)
-            }
+            }*/
 
             loadGeoJson()
             progressBar.visibility = View.VISIBLE
@@ -116,16 +123,31 @@ class recorrido_peatonal : AppCompatActivity(), OnMapReadyCallback  {
             Log.d("RecorridoPeatonal", "Start Location: $startLocation, End Location: $endLocation")
             getOSRMDistance(startLocation, endLocation) { distance, routeCoordinates ->
                 if (routeCoordinates.isNotEmpty()) {
+                    val calificacionManager = CalificacionesManager(this)
 
                     drawRoute(routeCoordinates, startLocation, endLocation)
                     val barriosPorRuta = evaluateRoute(routeCoordinates)
-                    val promedioCalificacion = calculateAverageRating(barriosPorRuta)
+                    calcularPromedio(barriosPorRuta, calificacionManager) { promedioCalificacion ->
+                        // Actualizar la UI con el promedio de calificación
+                        calificacionText.text = promedioCalificacion.toString()
+                        startsCalificacion.rating = promedioCalificacion.toFloat()
 
-                    Log.d("Ruta", "La ruta pasa por los siguientes barrios: $barriosPorRuta")
-                    Log.d("Ruta", "La calificación promedio de la ruta es: $promedioCalificacion")
+                        Log.d("Ruta", "La ruta pasa por los siguientes barrios: $barriosPorRuta")
+                        Log.d("Ruta", "La calificación promedio de la ruta es: $promedioCalificacion")
 
-                    progressBar.visibility = View.GONE
-                    textoRuta.text = "Distancia: ${distance / 1000} km | Tiempo: ${distance / 1000 / 5} minutos"
+                        // Cálculo del tiempo estimado en base a la distancia y velocidad
+                        val velocidadPromedio = 5 // km/h
+                        val distanciaKm = distance / 1000.0
+                        val tiempoMinutos = (distanciaKm / velocidadPromedio) * 60
+
+                        progressBar.visibility = View.GONE
+                        textoRuta.text = "Distancia: ${distance / 1000} km | Tiempo: ${"%.2f".format(tiempoMinutos)} minutos"
+                    }
+                    terminar.setOnClickListener {
+                        val intent = Intent(this, review_ruta::class.java)
+                        intent.putStringArrayListExtra("barriosPorRuta", ArrayList(barriosPorRuta))
+                        startActivity(intent)
+                    }
 
                 } else {
                     Log.e("RecorridoPeatonal", "No se pudieron obtener coordenadas de la ruta")
@@ -136,19 +158,44 @@ class recorrido_peatonal : AppCompatActivity(), OnMapReadyCallback  {
         }
     }
 
-    //Calcular promedio del viaje
-    private fun calculateAverageRating(barriosPorRuta: List<String>): Double {
+    // Calcular promedio del viaje
+    private fun obtenerOAgregarCalificacion(barrio: String, calificacionManager: CalificacionesManager, onResultado: (String, Double) -> Unit) {
+        calificacionManager.obtenerCalificaciones { calificaciones ->
+            val barrioExistente = calificaciones.any { it.barrio == barrio }
+
+            if (!barrioExistente) {
+                val calificacionPorDefecto = 3.0
+                calificacionManager.guardarCalificacion(barrio, calificacionPorDefecto) { success ->
+                    if (success) {
+                        Log.d("CalificacionManager", "Barrio $barrio agregado con calificación $calificacionPorDefecto")
+                        onResultado(barrio, calificacionPorDefecto)
+                    } else {
+                        Log.e("CalificacionManager", "Error al agregar barrio $barrio")
+                        onResultado(barrio, 0.0) // Si no se pudo guardar, retornamos 0.0
+                    }
+                }
+            } else {
+                val calificacion = calificaciones.find { it.barrio == barrio }?.calificacion ?: 0.0
+                onResultado(barrio, calificacion)
+            }
+        }
+    }
+
+    private fun calcularPromedio(barriosPorRuta: List<String>, calificacionManager: CalificacionesManager, onResultado: (Double) -> Unit) {
         var totalRating = 0.0
         var neighborhoodCount = 0
 
-        for (neighborhood in neighborhoods) {
-            if (barriosPorRuta.contains(neighborhood.name)) {
-                totalRating += neighborhood.tasacalificada
+        for (barrio in barriosPorRuta) {
+            obtenerOAgregarCalificacion(barrio, calificacionManager) { nombreBarrio, calificacion ->
+                totalRating += calificacion
                 neighborhoodCount++
+
+                if (neighborhoodCount == barriosPorRuta.size) {
+                    val averageRating = if (neighborhoodCount > 0) totalRating / neighborhoodCount else 0.0
+                    onResultado(averageRating)  // Retorna el promedio a través del callback
+                }
             }
         }
-
-        return if (neighborhoodCount > 0) totalRating / neighborhoodCount else 0.0
     }
 
     //Dibujar ruta
@@ -183,7 +230,7 @@ class recorrido_peatonal : AppCompatActivity(), OnMapReadyCallback  {
     private fun loadGeoJson() {
         var reader: InputStreamReader? = null
         try {
-            val inputStream = assets.open("Seguridad_Indica_Barrios_mal.geojson")
+            val inputStream = assets.open("Seguridad_Indica_Barrios_final.geojson")
             reader = InputStreamReader(inputStream)
             val geoJsonData = Gson().fromJson(reader, GeoJson::class.java)
 
@@ -234,7 +281,6 @@ class recorrido_peatonal : AppCompatActivity(), OnMapReadyCallback  {
 
     //Generar ruta peatonal
     private fun getOSRMDistance(start: LatLng, end: LatLng, callback: (distance: Double, routeCoordinates: List<LatLng>) -> Unit) {
-
         val urlStr = "https://routing.openstreetmap.de/routed-foot/route/v1/driving/${start.longitude},${start.latitude};${end.longitude},${end.latitude}"
         Log.d("RecorridoPeatonal", "OSRM URL: $urlStr")
 
@@ -258,22 +304,34 @@ class recorrido_peatonal : AppCompatActivity(), OnMapReadyCallback  {
                             Log.d("RecorridoPeatonalOMG", "Routes length: ${routes.length()}")
                             val distance = route.getDouble("distance")
                             val geometry = route.getString("geometry")
-                            Log.d("RecorridoPeatonalOMG", "Gometry: $geometry")
+                            Log.d("RecorridoPeatonalOMG", "Geometry: $geometry")
 
                             val routeCoordinates = decodePolyline(geometry)
-
                             val barriosPorRuta = evaluateRoute(routeCoordinates)
-                            val barriosNoSeguros = barriosPorRuta.filter { barrio ->
-                                neighborhoods.any { it.name == barrio && it.tasacalificada < 2.5 }
+                            obtenerCalificacionesDesdeFirebase(barriosPorRuta) { calificaciones ->
+                                val barriosNoSeguros = barriosPorRuta.filter { barrio ->
+                                    calificaciones[barrio]?.let { it < 2.5 } ?: false
+                                }
+
+                                if (barriosNoSeguros.isNotEmpty()) {
+                                    Log.w("barriosNoSeguros", "Ruta pasa por barrios inseguros: $barriosNoSeguros")
+
+                                    val safeRouteWithWaypoints = generateSafeRouteWithWaypoints(
+                                        start,
+                                        end,
+                                        barriosNoSeguros,
+                                        neighborhoods
+                                    )
+
+                                    runOnUiThread {
+                                        callback(distance, safeRouteWithWaypoints)
+                                    }
+                                } else {
+                                    runOnUiThread {
+                                        callback(distance, routeCoordinates)
+                                    }
+                                }
                             }
-
-                            if (barriosNoSeguros.isNotEmpty()) {
-                                Log.w("barriosNoSeguros", "Ruta pasa por barrios inseguros: $barriosNoSeguros")
-
-                                val safeRouteWithWaypoints = generateSafeRouteWithWaypoints(start, end, barriosNoSeguros, neighborhoods)
-                                return Pair(distance, safeRouteWithWaypoints)
-                            }
-
                             return Pair(distance, routeCoordinates)
                         }
                     }
@@ -292,10 +350,40 @@ class recorrido_peatonal : AppCompatActivity(), OnMapReadyCallback  {
                         Toast.LENGTH_LONG
                     ).show()
                 }
-                callback(result.first, result.second)
+
+                runOnUiThread {
+                    callback(result.first, result.second)
+                }
             }
         }.execute()
     }
+
+
+    private fun obtenerCalificacionesDesdeFirebase(
+        barrios: List<String>,
+        onComplete: (Map<String, Float>) -> Unit
+    ) {
+        val database = FirebaseDatabase.getInstance()
+        val barrioRef = database.getReference("calificaciones")
+
+        val calificaciones = mutableMapOf<String, Float>()
+        val latch = CountDownLatch(barrios.size)  // Espera hasta que todos los barrios sean procesados
+
+        for (barrio in barrios) {
+            barrioRef.child(barrio).child("calificacion").get().addOnSuccessListener { snapshot ->
+                val calificacion = snapshot.getValue(Float::class.java) ?: 0.0f
+                calificaciones[barrio] = calificacion
+            }.addOnFailureListener { e ->
+                Log.e("FirebaseError", "Error al consultar la calificación para el barrio $barrio", e)
+            }.addOnCompleteListener {
+                latch.countDown()  // Decrementa el contador cuando termina el proceso para este barrio
+            }
+        }
+        latch.await()
+        onComplete(calificaciones)
+    }
+
+
 
     //Generar una ruta alterna evitando pasar por barrios peligrosos
     private fun generateSafeRouteWithWaypoints(start: LatLng, end: LatLng, barriosNoSeguros: List<String>, neighborhoods: List<Neighborhood>

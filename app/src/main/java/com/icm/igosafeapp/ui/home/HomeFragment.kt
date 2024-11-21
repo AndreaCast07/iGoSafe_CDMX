@@ -64,6 +64,10 @@ class HomeFragment : Fragment() {
         // Inicializar el LocationCallback
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
+                if (!isAdded) {
+                    Log.w("PlanearViajeFragment", "Fragment no adjunto al contexto. Ignorando resultado de ubicación.")
+                    return
+                }
                 for (location in locationResult.locations) {
                     val latitude = location.latitude
                     val longitude = location.longitude

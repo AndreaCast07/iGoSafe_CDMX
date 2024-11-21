@@ -59,6 +59,9 @@
             android:name=".ruta_peatonal"
             android:exported="false" />
         <activity
+            android:name=".recorrido_peatonal"
+            android:exported="false" />
+        <activity
             android:name=".ruta_vehicular"
             android:exported="false" />
         <activity
