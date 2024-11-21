@@ -6,6 +6,7 @@ import android.content.res.ColorStateList
 import android.os.Bundle
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import com.google.android.material.snackbar.Snackbar
@@ -18,8 +19,12 @@ import androidx.navigation.ui.setupWithNavController
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.google.firebase.auth.FirebaseAuth
 import com.icm.igosafeapp.databinding.ActivityMenuBinding
 import org.json.JSONObject
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.squareup.picasso.Picasso
 
 class Menu : AppCompatActivity() {
 
@@ -63,22 +68,47 @@ class Menu : AppCompatActivity() {
                     navController.navigate(R.id.nav_contactos)
                     true // Indica que el evento fue manejado
                 }
+
                 R.id.nav_viaje -> {
                     // Navega a nav_viaje
                     navController.navigate(R.id.nav_viaje)
                     true // Indica que el evento fue manejado
                 }
+
                 R.id.nav_favoritos -> {
                     // Navegar a fragmento de favoritos
                     navController.navigate(R.id.nav_favoritos) // Navegar al fragmento de favoritos
                     true
                 }
+
                 else -> false // Para otros ítems de menú
             }
         }
+
+
+        // Obtener el usuario actual de Firebase
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+
+        // Verificar si hay un usuario y obtener la URL de la foto
+        if (userId != null) {
+            val databaseReference: DatabaseReference =
+                FirebaseDatabase.getInstance().getReference("usuarios").child(userId)
+
+            // Obtener la URL de la foto de perfil desde Firebase Realtime Database
+            databaseReference.child("fotoPerfilUrl").get().addOnSuccessListener { snapshot ->
+                val photoUrl = snapshot.getValue(String::class.java)
+
+                if (photoUrl != null && photoUrl.isNotEmpty()) {
+                    Picasso.get()
+                        .load(photoUrl) // Cargar la URL de la foto
+                        .into(binding.appBarActivityMenu.fotoPerfil) // Coloca la imagen en el ImageView
+                } else {
+                    // Si la URL es nula o vacía, usa una imagen predeterminada
+                    binding.appBarActivityMenu.fotoPerfil.setImageResource(R.drawable.photo_original_user)
+                }
+            }
+        }
     }
-
-
 
     private fun cambiarColorItem(navigationView: NavigationView, itemId: Int, colorId: Int) {
         val item: MenuItem = navigationView.menu.findItem(itemId)
