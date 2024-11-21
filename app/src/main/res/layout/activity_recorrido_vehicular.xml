@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -7,79 +7,79 @@
     android:id="@+id/recorridoVehicular"
     tools:context=".recorrido_vehicular">
 
-    <ImageView
-        android:id="@+id/imageView4"
-        android:layout_width="482dp"
-        android:layout_height="742dp"
-        android:scaleType="fitXY"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/mapa_vehicular" />
-
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <fragment
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
-        android:layout_height="149dp"
-        android:layout_marginTop="742dp"
-        android:background="@drawable/custom_border_top"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/imageView4"
-        app:layout_constraintVertical_bias="1.0">
+        android:layout_height="match_parent"/>
 
-        <TextView
-            android:id="@+id/Tiempo"
+    <!-- Texto que puede mostrar la distancia o el tiempo de la ruta -->
+    <TextView
+        android:id="@+id/textoRuta"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:background="#AA000000"
+        android:textColor="#FFFFFF"
+        android:padding="10dp"
+        android:text="Calculando la ruta..."
+        android:textSize="16sp"
+        android:layout_marginTop="16dp" />
+
+    <LinearLayout
+        android:id="@+id/calificacionLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:orientation="horizontal"
+        android:layout_marginBottom="80dp"
+        android:background="#AA000000"
+        android:padding="10dp"
+        android:gravity="center_vertical">
+
+        <!-- RatingBar para mostrar estrellas -->
+        <androidx.appcompat.widget.AppCompatRatingBar
+            android:id="@+id/ratingBar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:fontFamily="@font/roboto"
-            android:text=" 45 min"
+            android:numStars="5"
+            android:stepSize="0.5"
+            android:progressTint="@color/azul"
+            android:rating="0"
+            android:layout_marginEnd="8dp"/>
+
+        <!-- TextView para mostrar la calificación -->
+        <TextView
+            android:id="@+id/calificacionText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0"
             android:textColor="@color/white"
-            android:textSize="30sp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.557"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:textSize="16sp" />
 
-        <Button
-            android:id="@+id/finalizar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:backgroundTint="@color/azul"
-            android:text="Finalizar"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.852"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/Tiempo"
-            app:layout_constraintVertical_bias="0.0" />
+    </LinearLayout>
 
-        <ImageView
-            android:id="@+id/imageView6"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_marginTop="25dp"
-            app:layout_constraintEnd_toStartOf="@+id/Tiempo"
-            app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_car"
-            app:tint="@color/white" />
+    <!-- Botón para finalizar la ruta -->
+    <Button
+        android:id="@+id/finalizar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="16dp"
+        android:text="Finalizar Ruta"
+        android:backgroundTint="@color/azul"
+        android:textColor="#FFFFFF"
+        android:padding="10dp" />
 
-        <TextView
-            android:id="@+id/textView4"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Trayecto hacia pablo"
-            android:textColor="@color/verde"
-            android:textSize="18dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/finalizar"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/Tiempo" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    <!-- Indicador de carga mientras se genera la ruta -->
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="gone" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</RelativeLayout>
