@@ -11,6 +11,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.icm.igosafeapp.ContactosAdapter
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.os.Looper
@@ -18,6 +19,7 @@ import android.provider.ContactsContract
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
+import android.view.MotionEvent
 import android.widget.Toast
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -36,6 +38,7 @@ import com.icm.igosafeapp.databinding.FragmentPlanearViajeBinding
 import com.icm.igosafeapp.ruta_peatonal
 import com.icm.igosafeapp.ruta_vehicular
 import org.json.JSONObject
+import java.io.IOException
 import java.util.Locale
 
 class HomeFragment : Fragment() {
@@ -239,8 +242,9 @@ class HomeFragment : Fragment() {
     }
 
     //Configuración campo destino - autocompletar
+    @SuppressLint("ClickableViewAccessibility")
     private fun setupAutoCompleteTextView() {
-        val adapter = ContactosAdapter(requireContext(), contacts) // contacts es la lista de Contactos
+        val adapter = ContactosAdapter(requireContext(), contacts)
         binding.contactLocation.setAdapter(adapter)
 
         binding.contactLocation.setOnClickListener {
@@ -259,6 +263,38 @@ class HomeFragment : Fragment() {
                 obtenerInfoUsuarioFirebase(numeroTelefono, apodoSeleccionado, nombreSeleccionado)
             }
         }
+
+        binding.searchIcon.setOnClickListener {
+            val locationName = binding.contactLocation.text.toString().trim()
+
+            if (locationName.isNotEmpty()) {
+                val geocoder = Geocoder(requireContext())
+                Log.d("geo", "geo: $geocoder")
+
+                try {
+                    val addresses = geocoder.getFromLocationName(locationName, 1)
+
+                    if (addresses != null && addresses.isNotEmpty()) {
+                        val address = addresses[0]
+                        val nombre = address.featureName
+                        val direccion = address.getAddressLine(0)
+                        val latitud = address.latitude
+                        val longitud = address.longitude
+                        val photo = ""
+
+                        setupButtons(direccion, nombre, latitud, longitud, photo)
+                    } else {
+                        Toast.makeText(requireContext(), "Lugar no encontrado", Toast.LENGTH_SHORT).show()
+                    }
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                    Toast.makeText(requireContext(), "Error al obtener la dirección", Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                Toast.makeText(requireContext(), "Por favor, ingresa un lugar", Toast.LENGTH_SHORT).show()
+            }
+        }
+
     }
 
     //Obtener datos del usuario destino para generar la ruta en firebase
@@ -266,10 +302,15 @@ class HomeFragment : Fragment() {
         val database = FirebaseDatabase.getInstance().reference
         val usuariosRef = database.child("usuarios")
 
+
         usuariosRef.orderByChild("celular").equalTo(numeroTelefono).addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists()) {
                     val uid = dataSnapshot.children.firstOrNull()?.key
+                    val firstChild = dataSnapshot.children.firstOrNull()
+                    val photo = firstChild?.child("fotoPerfilUrl")?.getValue(String::class.java)
+                    Log.d("homeCoord", "firstchild: $firstChild, phto: $photo")
+
 
                     if (uid != null) {
                         val usersRef = database.child("users")
@@ -282,8 +323,8 @@ class HomeFragment : Fragment() {
                                         val longitude = locationSnapshot.child("longitude").getValue(Double::class.java)
 
                                         if (latitude != null && longitude != null) {
-                                            Log.d("homeCoord", "lat: $latitude, long: $longitude")
-                                            setupButtons(nombreSeleccionado, apodoSeleccionado, latitude, longitude)
+                                            Log.d("homeCoord", "lat: $latitude, long: $longitude, foto: $photo")
+                                            setupButtons(nombreSeleccionado, apodoSeleccionado, latitude, longitude,photo)
                                         } else {
                                             Log.e("HomeFragment", "No se encontraron coordenadas para el usuario.")
                                         }
@@ -310,7 +351,7 @@ class HomeFragment : Fragment() {
     }
 
     //Envío de datos para generar la ruta
-    private fun setupButtons(name: String?, nickname: String?, latitude: Double, longitude: Double) {
+    private fun setupButtons(name: String?, nickname: String?, latitude: Double, longitude: Double, photo: String?) {
         binding.btnCaminar.setOnClickListener {
             selectedOption = "Caminar"
             binding.btnCaminar.backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.azul)
@@ -333,6 +374,7 @@ class HomeFragment : Fragment() {
                             putExtra("nickname", nickname)
                             putExtra("latitude", latitude)
                             putExtra("longitude", longitude)
+                            putExtra("photo", photo)
                         }
                         startActivity(intent)
                     }
@@ -343,6 +385,7 @@ class HomeFragment : Fragment() {
                             putExtra("nickname", nickname)
                             putExtra("latitude", latitude)
                             putExtra("longitude", longitude)
+                            putExtra("photo", photo)
                         }
                         startActivity(intent)
                     }
@@ -357,76 +400,6 @@ class HomeFragment : Fragment() {
         super.onStop()
         // Detener actualizaciones de ubicación para evitar uso innecesario de recursos
         fusedLocationClient.removeLocationUpdates(locationCallback)
-    }
-
-  /*  override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-        // Asegurarse de detener cualquier tarea en segundo plano o recursos innecesarios
-        fusedLocationClient.removeLocationUpdates(locationCallback)
-    }*/
-
-    private fun loadContactLocation(selectedNickname: String?): Pair<Double?, Double?> {
-        var latitude: Double? = null
-        var longitude: Double? = null
-        try {
-            val inputStream = requireActivity().assets.open("contactos.json")
-            val json = inputStream.bufferedReader().use { it.readText() }
-            val jsonObject = JSONObject(json)
-            val contactsArray = jsonObject.getJSONArray("contacts")
-
-            for (i in 0 until contactsArray.length()) {
-                val contactJson = contactsArray.getJSONObject(i)
-                val nickname = contactJson.getString("nickname")
-
-                // Verifica si el apodo coincide con el contacto seleccionado
-                if (nickname == selectedNickname) {
-                    val locationJson = contactJson.getJSONObject("location")
-                    latitude = locationJson.getDouble("latitude")
-                    longitude = locationJson.getDouble("longitude")
-                    Log.d("LoadContactLocation", "Latitud: $latitude, Longitud: $longitude")
-                    break // Salir del bucle una vez que se encuentra el contacto
-                }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        Log.d("LoadContactLocation", "Retornando -> Latitud: $latitude, Longitud: $longitude")
-        return Pair(latitude, longitude) // Devuelve un par con latitud y longitud
-    }
-
-    private fun loadContactNameAndNickname(selectedNickname: String?): Pair<String?, String?> {
-        var name: String? = null
-        var nickname: String? = null
-
-        try {
-            val inputStream = requireActivity().assets.open("contactos.json")
-            val json = inputStream.bufferedReader().use { it.readText() }
-            val jsonObject = JSONObject(json)
-            val contactsArray = jsonObject.getJSONArray("contacts")
-
-            for (i in 0 until contactsArray.length()) {
-                val contactJson = contactsArray.getJSONObject(i)
-                val currentNickname = contactJson.getString("nickname")
-
-                // Log para verificar los valores en cada iteración
-                Log.d("loadContactNameAndNickname", "Comparando -> selectedNickname: $selectedNickname, currentNickname: $currentNickname")
-
-                // Comparación insensible a mayúsculas/minúsculas
-                if (currentNickname.equals(selectedNickname, ignoreCase = true)) {
-                    name = contactJson.getString("name")
-                    nickname = currentNickname
-                    Log.d("loadContactNameAndNickname", "Nombre encontrado: $name, Apodo: $nickname")
-                    break
-                }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-
-        // Log final para verificar lo que se va a retornar
-        Log.d("loadContactNameAndNickname", "Retornando -> Nombre: $name, Apodo: $nickname")
-        return Pair(name, nickname)
     }
 }
 
