@@ -37,6 +37,15 @@ android {
     buildFeatures {
         viewBinding = true
     }
+    packaging {
+        resources {
+            excludes.add("META-INF/LICENSE.md")
+            excludes += setOf(
+                "META-INF/NOTICE.md",
+                "META-INF/LICENSE.md"
+            )
+        }
+    }
 }
 
 dependencies {
@@ -51,8 +60,13 @@ dependencies {
     implementation("com.google.android.material:material:1.10.0")
     implementation("com.google.code.gson:gson:2.8.9")
     implementation("com.google.android.gms:play-services-location:21.3.0")
-    implementation ("com.squareup.okhttp3:okhttp:4.9.1")
+    implementation ("com.google.maps.android:android-maps-utils:2.2.0")
+    implementation ("com.graphhopper:graphhopper-core:6.2")
+    implementation ("org.osmdroid:osmdroid-wms:6.1.10")
     implementation ("org.osmdroid:osmdroid-android:6.1.10")
+    implementation ("org.osmdroid:osmdroid-geopackage:6.1.10")
+    implementation ("org.osmdroid:osmdroid-mapsforge:6.1.10")
+    implementation("org.osmdroid:osmdroid-android:6.1.20")
     implementation(libs.play.services.auth.api.phone)
     implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)

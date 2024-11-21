@@ -1,7 +1,9 @@
 package com.icm.igosafeapp
 
 import Contactos
+import android.annotation.SuppressLint
 import android.content.Context
+import android.provider.ContactsContract
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -57,6 +59,38 @@ class ContactosAdapter(context: Context, private val originalContacts: List<Cont
                 notifyDataSetChanged()
             }
         }
+    }
+
+    @SuppressLint("Range")
+    fun getPhoneNumberFromContact(contactName: String): String? {
+        val phoneNumber: String? = null
+        val contentResolver = context.contentResolver
+        val uri = ContactsContract.Contacts.CONTENT_URI
+        val projection = arrayOf(ContactsContract.Contacts._ID, ContactsContract.Contacts.DISPLAY_NAME)
+
+        val cursor = contentResolver.query(uri, projection, ContactsContract.Contacts.DISPLAY_NAME + " = ?", arrayOf(contactName), null)
+
+        cursor?.let {
+            if (it.moveToFirst()) {
+                val contactId = it.getString(it.getColumnIndex(ContactsContract.Contacts._ID))
+                val phoneCursor = contentResolver.query(
+                    ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                    arrayOf(ContactsContract.CommonDataKinds.Phone.NUMBER),
+                    ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?",
+                    arrayOf(contactId),
+                    null
+                )
+                if (phoneCursor != null && phoneCursor.moveToFirst()) {
+                    val number = phoneCursor.getString(phoneCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER))
+                    phoneCursor.close()
+                    return number
+                }
+                phoneCursor?.close()
+            }
+            it.close()
+        }
+
+        return phoneNumber
     }
 }
 
