@@ -48,7 +48,7 @@ class ruta_peatonal : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
     private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private lateinit var userMarker: Marker
+    private var userMarker: Marker? = null
     private lateinit var destinationMarker: Marker
     private lateinit var locationCallback: LocationCallback
     private var destinationLatLng: LatLng? = null
@@ -82,12 +82,13 @@ class ruta_peatonal : AppCompatActivity(), OnMapReadyCallback {
         mapFragment.getMapAsync(this)
 
         iniciar.setOnClickListener {
-            val userLocation = userMarker.position
+            val userLocation = userMarker?.position
             val destinationLocation = destinationMarker.position
+            Log.e("RutaPeatonal", "enviando: $userLocation")
 
             val intent = Intent(this, recorrido_peatonal::class.java).apply {
-                putExtra("startLat", userLocation.latitude)
-                putExtra("startLong", userLocation.longitude)
+                putExtra("startLat", userLocation?.latitude)
+                putExtra("startLong", userLocation?.longitude)
                 putExtra("endLat", destinationLocation.latitude)
                 putExtra("endLong", destinationLocation.longitude)
             }
