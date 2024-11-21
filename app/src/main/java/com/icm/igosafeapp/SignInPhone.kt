@@ -54,16 +54,29 @@ class SignInPhone : AppCompatActivity() {
     private fun mostrarLayoutValidarRegistro() {
         btnSend.setOnClickListener {
             val celular = editTxtCelular.text.toString().trim()
+
+            // Validar que el celular no esté vacío
             if (celular.isEmpty()) {
                 Toast.makeText(this, "Por favor, ingrese su número de celular", Toast.LENGTH_SHORT).show()
-            } else {
-                Log.d("SignInPhone", "Button clicked with celular: $celular")
-                val intent = Intent(this, SignInValidateSms::class.java).apply {
-                    putExtra("CELULAR", celular)
-                }
-                startActivity(intent)
+                return@setOnClickListener
             }
+
+            // Validar que el celular contenga solo números del 0 al 9 y tenga al menos 8 dígitos
+            val celularRegex = "^[0-9]{8,}$".toRegex()
+            if (!celular.matches(celularRegex)) {
+                Toast.makeText(this, "El número de celular debe tener al menos 8 dígitos y contener solo números", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            Log.d("SignInPhone", "Button clicked with celular: $celular")
+
+            // Si la validación es correcta, continuar con el envío
+            val intent = Intent(this, SignInValidateSms::class.java).apply {
+                putExtra("CELULAR", celular)
+            }
+            startActivity(intent)
         }
     }
+
 
 }

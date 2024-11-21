@@ -37,6 +37,12 @@ class CreatePassword : AppCompatActivity(){
         val fotoUri = if (fotoUriString != null) Uri.parse(fotoUriString) else null
 
         btnRegistro.setOnClickListener {
+            val contrasenaTexto = contrasena.text.toString()
+            if (contrasenaTexto.length < 6) {
+                Toast.makeText(this, "Al menos 6 caracteres.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             if (validarContrasenas()) {
                 if (fotoUri == null) {
                     Toast.makeText(this, "No se seleccionó una foto de perfil.", Toast.LENGTH_SHORT).show()
