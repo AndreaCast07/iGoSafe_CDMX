@@ -24,8 +24,6 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MapStyleOptions
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import org.json.JSONObject
 import java.io.IOException
 
@@ -179,7 +177,7 @@ class ruta_peatonal : AppCompatActivity(), OnMapReadyCallback {
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f))
 
         destinationLatLng?.let { destination ->
-            trazarRuta(currentLatLng, destination)  // Traza la ruta
+
             mostrarDistancia(location, destination)
         }
     }
@@ -197,37 +195,6 @@ class ruta_peatonal : AppCompatActivity(), OnMapReadyCallback {
         textDistancia.text = "Distancia: %.2f km".format(distanciaKm)
     }
 
-    private fun trazarRuta(origen: LatLng, destino: LatLng) {
-        val url = obtenerOSRMUrl(origen, destino, "foot") // Modo peatonal
-        val client = OkHttpClient()
-
-        val request = Request.Builder()
-            .url(url)
-            .build()
-
-        client.newCall(request).enqueue(object : okhttp3.Callback {
-            override fun onFailure(call: okhttp3.Call, e: IOException) {
-                runOnUiThread {
-                    textDistancia.text = "Error al obtener la ruta"
-                }
-            }
-
-            override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
-                response.body?.let { responseBody ->
-                    val jsonResponse = responseBody.string()
-                    val rutaCoordenadas = decodificarRuta(jsonResponse)
-
-                    // Dibujar la Polyline en el mapa con la ruta decodificada
-                    runOnUiThread {
-                        dibujarRutaEnMapa(rutaCoordenadas)
-
-                        // Enfocar la ruta completa
-                        enfocarRutaCompleta(rutaCoordenadas)
-                    }
-                }
-            }
-        })
-    }
 
     // Nueva función para enfocar la ruta completa
     private fun enfocarRutaCompleta(rutaCoordenadas: List<LatLng>) {

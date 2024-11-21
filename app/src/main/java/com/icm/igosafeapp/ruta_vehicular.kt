@@ -1,21 +1,14 @@
 package com.icm.igosafeapp
 
-//import android.R
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.drawable.Drawable
 import android.location.Location
 import android.os.Bundle
 import android.os.Looper
-import android.view.Gravity
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -31,7 +24,6 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.MarkerOptions
-import java.io.IOException
 import org.json.JSONObject
 
 
@@ -148,55 +140,8 @@ class ruta_vehicular : AppCompatActivity(), OnMapReadyCallback {
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f))
 
         destinationLatLng?.let { destination ->
-            trazarRuta(currentLatLng, destination)  // Traza la ruta
-            mostrarDistancia(location, destination)
 
         }
-    }
-
-    private fun mostrarDistancia(location: Location, destino: LatLng) {
-        val resultados = FloatArray(1)
-        Location.distanceBetween(
-            location.latitude,
-            location.longitude,
-            destino.latitude,
-            destino.longitude,
-            resultados
-        )
-        val distanciaKm = resultados[0] / 1000
-        textDistancia.text = "Distancia: %.2f km".format(distanciaKm)
-    }
-
-    private fun trazarRuta(origen: LatLng, destino: LatLng) {
-        val url = obtenerOSRMUrl(origen, destino, "car") // Modo vehicular
-        val client = OkHttpClient()
-
-        val request = Request.Builder()
-            .url(url)
-            .build()
-
-        client.newCall(request).enqueue(object : okhttp3.Callback {
-            override fun onFailure(call: okhttp3.Call, e: IOException) {
-                runOnUiThread {
-                    textDistancia.text = "Error al obtener la ruta"
-                }
-            }
-
-            override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
-                response.body?.let { responseBody ->
-                    val jsonResponse = responseBody.string()
-                    val rutaCoordenadas = decodificarRuta(jsonResponse)
-
-                    // Dibujar la Polyline en el mapa con la ruta decodificada
-                    runOnUiThread {
-                        dibujarRutaEnMapa(rutaCoordenadas)
-
-                        // Enfocar la ruta completa
-                        enfocarRutaCompleta(rutaCoordenadas)
-                    }
-                }
-            }
-        })
     }
 
     private fun obtenerOSRMUrl(origen: LatLng, destino: LatLng, profile: String): String {
