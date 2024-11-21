@@ -129,7 +129,7 @@ class recorrido_peatonal : AppCompatActivity(), OnMapReadyCallback  {
                     val barriosPorRuta = evaluateRoute(routeCoordinates)
                     calcularPromedio(barriosPorRuta, calificacionManager) { promedioCalificacion ->
                         // Actualizar la UI con el promedio de calificación
-                        calificacionText.text = promedioCalificacion.toString()
+                        calificacionText.text = String.format("%.2f", promedioCalificacion)
                         startsCalificacion.rating = promedioCalificacion.toFloat()
 
                         Log.d("Ruta", "La ruta pasa por los siguientes barrios: $barriosPorRuta")
@@ -141,7 +141,7 @@ class recorrido_peatonal : AppCompatActivity(), OnMapReadyCallback  {
                         val tiempoMinutos = (distanciaKm / velocidadPromedio) * 60
 
                         progressBar.visibility = View.GONE
-                        textoRuta.text = "Distancia: ${distance / 1000} km | Tiempo: ${"%.2f".format(tiempoMinutos)} minutos"
+                        textoRuta.text = "Distancia: ${"%.2f".format(distance / 1000.0)} km | Tiempo: ${"%.2f".format(tiempoMinutos)} minutos"
                     }
                     terminar.setOnClickListener {
                         val intent = Intent(this, review_ruta::class.java)

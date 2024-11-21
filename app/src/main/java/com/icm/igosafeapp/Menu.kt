@@ -9,6 +9,7 @@ import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Toast
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.navigation.NavigationView
 import androidx.navigation.findNavController
@@ -18,12 +19,14 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
 import com.google.firebase.auth.FirebaseAuth
 import com.icm.igosafeapp.databinding.ActivityMenuBinding
 import org.json.JSONObject
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.core.Context
 import com.squareup.picasso.Picasso
 
 class Menu : AppCompatActivity() {
@@ -107,6 +110,15 @@ class Menu : AppCompatActivity() {
                     binding.appBarActivityMenu.fotoPerfil.setImageResource(R.drawable.photo_original_user)
                 }
             }
+        }
+        binding.appBarActivityMenu.fotoPerfil.setOnClickListener {
+            FirebaseAuth.getInstance().signOut() // Cerrar sesión en FirebaseAuth
+            Toast.makeText(this,"Sesión cerrada", Toast.LENGTH_SHORT).show()
+
+            // Redirigir al usuario a la pantalla de inicio de sesión
+            val intent = Intent(this, LoginActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
         }
     }
 
