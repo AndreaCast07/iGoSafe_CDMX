@@ -9,13 +9,12 @@
 
 ## Descripción del Proyecto
 
-**iGoSafe** es una innovadora aplicación para Android que está diseñada para proporcionar rutas seguras en Bogotá. La aplicación permite a los usuarios llegar de manera segura a la ubicación de contactos registrados, asegurando un viaje sin preocupaciones. 
+**iGoSafe** es una innovadora aplicación para Android que está diseñada para proporcionar rutas seguras en CDMX. La aplicación permite a los usuarios llegar de manera segura a la ubicación que se desea, asegurando un viaje sin preocupaciones. 
 
-Con funcionalidades que incluyen la capacidad de calificar y ajustar rutas basadas en la seguridad, **iGoSafe** proporciona tranquilidad durante los desplazamientos al garantizar que solo se pueda seleccionar como destino la ubicación de un contacto registrado.
+Con funcionalidades que incluyen la capacidad de calificar y ajustar rutas basadas en la seguridad, **iGoSafe** proporciona tranquilidad durante los desplazamientos al garantizar que las rutas señaladas prioticen las ubicaciones de C5.
 
 - **Rutas Seguras**: Obtén rutas diseñadas para maximizar la seguridad durante tu viaje.
 - **Calificación de Rutas**: Evalúa y ajusta las rutas basadas en tu experiencia y seguridad.
-- **Ubicación de Contactos**: Solo puedes seleccionar como destino la ubicación de contactos registrados, garantizando un viaje seguro y controlado.
 
 ### Servicios y hardware utilizados:     
 
@@ -39,16 +38,9 @@ Con funcionalidades que incluyen la capacidad de calificar y ajustar rutas basad
 Para consultar las historias de usuario en detalle, por favor, visita el siguiente [enlace](Imagenes/HistoriasUsuario/HU.md)
   
 
-### LEAN CANVAS
+### CANVAS
 ![leancanvas](Imagenes/lean-canva.jpeg)
 
 ### MANUAL DE USUARIO
 
 Para poder que puedas entender el funcionamiento y flujo de nuestra aplicación. Puedes acceder al manual de usuario [aquí](ManualDeUsuario/manual.md).
-
-
-### DESCRIPCIÓN DEL EQUIPO
-Para saber más de los integrantes del grupo puedes verlo [aquí](descripcion_equipo.md).
-
-Comentarios Profesor
-Buen trabajo -> 5.0
