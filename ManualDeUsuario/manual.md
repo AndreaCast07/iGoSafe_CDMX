@@ -90,6 +90,5 @@ Si el usuario dio permiso al aplicativo para ver la lista de sus contactos, pues
   <img src="Pantallas/buscar_contactos.png" alt="Pantalla ruta" style="width: 60%; max-width: 400px;">
   <br><sub>Lista de contactos usando iGoSafe</sub>
 </p>
-</p>
 
 Para una visualización detallada de las pantallas de la aplicación y los mockups, por favor, consulta el siguiente [enlace](https://marvelapp.com/prototype/7g83hhc/screen/95337876)

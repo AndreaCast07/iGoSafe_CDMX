@@ -9,7 +9,6 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
-import android.telephony.SmsManager
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -24,21 +23,17 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.content.IntentSanitizer
 import com.google.android.gms.auth.api.phone.SmsRetriever
-import com.google.android.gms.tasks.Task
 import com.google.android.gms.common.api.CommonStatusCodes
 import com.google.android.gms.common.api.Status
-
 
 class SignInValidateSms : AppCompatActivity() {
     private lateinit var editTexts: Array<EditText>
     private lateinit var btnValidar: Button
-    private lateinit var etPhone: EditText
     private lateinit var timerText: TextView
     private lateinit var resendCode: TextView
     private val SMS_PERMISSION_REQUEST_CODE = 100
-    private lateinit var codigo:String
+    private var codigo: String = ""
 
     private val smsConsentLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == RESULT_OK && result.data != null) {
@@ -51,18 +46,19 @@ class SignInValidateSms : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sign_in_validate)
 
-        // Verificar permisos
         if (checkSmsPermission()) {
-            initializeViews()
-            setupEditTexts()
-            setupValidateButton()
-            startSmsUserConsent()
+            initializeAll()
         } else {
-            // Solicitar permisos si no están concedidos
             requestSmsPermission()
         }
     }
 
+    private fun initializeAll() {
+        initializeViews()
+        setupEditTexts()
+        setupValidateButton()
+        startSmsUserConsent()
+    }
 
     private fun initializeViews() {
         editTexts = arrayOf(
@@ -76,57 +72,47 @@ class SignInValidateSms : AppCompatActivity() {
         timerText = findViewById(R.id.timer)
         resendCode = findViewById(R.id.resendCode)
 
-        resendCode.setOnClickListener {
-            sendOTP()
-        }
+        resendCode.setOnClickListener { sendOTP() }
         sendOTP()
         startCountdownTimer()
     }
 
     private fun startCountdownTimer() {
-        object : CountDownTimer(3 * 60 * 1000, 1000) { // 3 minutes timer
+        object : CountDownTimer(3 * 60 * 1000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 val minutes = millisUntilFinished / 60000
                 val seconds = (millisUntilFinished % 60000) / 1000
                 timerText.text = "Tiempo límite: $minutes:${if (seconds < 10) "0" else ""}$seconds minutos"
             }
-
             override fun onFinish() {
                 timerText.text = "El tiempo ha terminado"
             }
         }.start()
     }
 
-
     private fun setupEditTexts() {
         val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-
         editTexts.forEachIndexed { index, editText ->
-            editText.addTextChangedListener(createTextWatcher(index, imm))
-            editText.setOnKeyListener(createKeyListener(index))
-        }
-    }
-
-    private fun createTextWatcher(index: Int, imm: InputMethodManager) = object : TextWatcher {
-        override fun afterTextChanged(s: Editable?) {
-            if (s?.length == 1 && index < editTexts.size - 1) {
-                editTexts[index + 1].requestFocus()
-            } else if (index == editTexts.size - 1 && s?.length == 1) {
-                imm.hideSoftInputFromWindow(editTexts.last().windowToken, 0)
+            editText.addTextChangedListener(object : TextWatcher {
+                override fun afterTextChanged(s: Editable?) {
+                    if (s?.length == 1 && index < editTexts.size - 1) {
+                        editTexts[index + 1].requestFocus()
+                    } else if (index == editTexts.size - 1 && s?.length == 1) {
+                        imm.hideSoftInputFromWindow(editTexts.last().windowToken, 0)
+                    }
+                }
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            })
+            editText.setOnKeyListener { _, keyCode, event ->
+                if (event.action == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_DEL) {
+                    if (editTexts[index].text.isEmpty() && index > 0) {
+                        editTexts[index - 1].requestFocus()
+                        true
+                    } else false
+                } else false
             }
         }
-
-        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-    }
-
-    private fun createKeyListener(index: Int) = { _: Any, keyCode: Int, event: KeyEvent ->
-        if (event.action == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_DEL) {
-            if (editTexts[index].text.isEmpty() && index > 0) {
-                editTexts[index - 1].requestFocus()
-                true
-            } else false
-        } else false
     }
 
     private fun setupValidateButton() {
@@ -136,27 +122,18 @@ class SignInValidateSms : AppCompatActivity() {
                 Toast.makeText(this, "Código correcto", Toast.LENGTH_SHORT).show()
                 navigateToCreateProfile()
             } else {
-                Toast.makeText(this, "Código incorrecto, prueba de nuvo.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Código incorrecto, prueba de nuevo.", Toast.LENGTH_SHORT).show()
             }
         }
     }
+
     private fun navigateToCreateProfile() {
-        val celular = intent.getStringExtra("CELULAR") // Intent del celular
+        val celular = intent.getStringExtra("CELULAR")
         val intent = Intent(this, Create_profile::class.java).apply {
             putExtra("CELULAR", celular)
         }
         startActivity(intent)
         finish()
-    }
-
-    private fun setupValidateButtons() {
-        btnValidar.setOnClickListener {
-            if (checkSmsPermission()) {
-                sendOTP()
-            } else {
-                requestSmsPermission()
-            }
-        }
     }
 
     private fun checkSmsPermission(): Boolean {
@@ -173,94 +150,44 @@ class SignInValidateSms : AppCompatActivity() {
         )
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == SMS_PERMISSION_REQUEST_CODE) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                sendOTP()
+            if (grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
+                initializeAll()
             } else {
-                Toast.makeText(this, "SMS permission denied", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Permisos de SMS necesarios para validar automáticamente.", Toast.LENGTH_SHORT).show()
+                initializeAll() // Intentamos inicializar de todos modos para permitir ingreso manual
             }
         }
     }
 
     private fun sendOTP() {
-        /*
-        val phone = etPhone.text.toString()
-        val message = "$otp es su código de verificación."
-
-        val smsManager = SmsManager.getDefault()
-        val parts = smsManager.divideMessage(message)
-        smsManager.sendMultipartTextMessage(phone, null, parts, null, null)*/
-        val otp = generateOTP()
+        val otp = (10000..99999).random().toString()
         codigo = otp
         extractOTPFromMessage("$otp is your verification code.")
-
-        Toast.makeText(this, "Código enviado", Toast.LENGTH_SHORT).show()
-    }
-
-    private fun generateOTP(): String {
-        return (10000..99999).random().toString()
+        Toast.makeText(this, "Código enviado: $otp", Toast.LENGTH_LONG).show()
     }
 
     private fun startSmsUserConsent() {
-        val client = SmsRetriever.getClient(this)
-        val task: Task<Void> = client.startSmsUserConsent(null)
-        task.addOnSuccessListener {
-            Log.i("SMS started succesfully","SMS se obtuvo perfectamente")// SMS retriever started successfully
-        }.addOnFailureListener {
-            Log.e("SMS failed to retrieve ","SMS no encontrado, revisar")
-            // Failed to start SMS retriever
-        }
+        SmsRetriever.getClient(this).startSmsUserConsent(null)
     }
 
     private val smsVerificationReceiver = object : BroadcastReceiver() {
-        @RequiresApi(Build.VERSION_CODES.TIRAMISU)
         override fun onReceive(context: Context, intent: Intent) {
             if (SmsRetriever.SMS_RETRIEVED_ACTION == intent.action) {
                 val extras = intent.extras
-                val status = extras?.get(SmsRetriever.EXTRA_STATUS) as Status
-                when (status.statusCode) {
+                val status = extras?.get(SmsRetriever.EXTRA_STATUS) as? Status
+                when (status?.statusCode) {
                     CommonStatusCodes.SUCCESS -> {
-                        val consentIntent: Intent? = extras.getParcelable(SmsRetriever.EXTRA_CONSENT_INTENT, Intent::class.java)
-                        consentIntent?.let {
-                            try {
-                                val sanitizedIntent = IntentSanitizer.Builder()
-                                    .allowAction(SmsRetriever.SMS_RETRIEVED_ACTION)
-                                    .allowExtra(SmsRetriever.EXTRA_STATUS, Status::class.java)
-                                    .allowExtra(SmsRetriever.EXTRA_CONSENT_INTENT, Intent::class.java)
-                                    .build()
-                                    .sanitizeByThrowing(it)
-
-                                smsConsentLauncher.launch(sanitizedIntent)
-                            } catch (e: SecurityException) {
-                                Toast.makeText(context, "Invalid SMS consent intent", Toast.LENGTH_SHORT).show()
-                            } catch (e: Exception) {
-                                Toast.makeText(context, "Failed to launch SMS consent", Toast.LENGTH_SHORT).show()
-                            }
+                        val consentIntent: Intent? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            extras.getParcelable(SmsRetriever.EXTRA_CONSENT_INTENT, Intent::class.java)
+                        } else {
+                            @Suppress("DEPRECATION")
+                            extras.getParcelable(SmsRetriever.EXTRA_CONSENT_INTENT)
                         }
+                        consentIntent?.let { smsConsentLauncher.launch(it) }
                     }
-                    CommonStatusCodes.TIMEOUT -> {
-                        Toast.makeText(context, "SMS retrieval timed out", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
-        }
-    }
-
-
-
-    private fun extractOTPFromMessage(message: String?) {
-        message?.let {
-            val otpPattern = Regex("\\d{5}")
-            val otpMatcher = otpPattern.find(it)
-            otpMatcher?.value?.let { otp ->
-                for (i in otp.indices) {
-                    editTexts[i].setText(otp[i].toString())
                 }
             }
         }
@@ -268,11 +195,32 @@ class SignInValidateSms : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        registerReceiver(smsVerificationReceiver, IntentFilter(SmsRetriever.SMS_RETRIEVED_ACTION))
+        val filter = IntentFilter(SmsRetriever.SMS_RETRIEVED_ACTION)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) { // Android 14+
+            registerReceiver(smsVerificationReceiver, filter, Context.RECEIVER_EXPORTED)
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) { // Android 13
+            registerReceiver(smsVerificationReceiver, filter, Context.RECEIVER_EXPORTED)
+        } else {
+            registerReceiver(smsVerificationReceiver, filter)
+        }
     }
 
     override fun onPause() {
         super.onPause()
-        unregisterReceiver(smsVerificationReceiver)
+        try {
+            unregisterReceiver(smsVerificationReceiver)
+        } catch (e: Exception) {}
+    }
+
+    private fun extractOTPFromMessage(message: String?) {
+        message?.let {
+            val otpPattern = Regex("\\d{5}")
+            val otpMatcher = otpPattern.find(it)
+            otpMatcher?.value?.let { otp ->
+                for (i in otp.indices) {
+                    if (i < editTexts.size) editTexts[i].setText(otp[i].toString())
+                }
+            }
+        }
     }
 }

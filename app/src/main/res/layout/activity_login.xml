@@ -6,14 +6,20 @@
     android:layout_height="match_parent"
     android:background="@color/white">
 
+    <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="match_parent"
+        android:layout_height="174dp"
+        android:scaleType="fitXY"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@drawable/marco_inferior" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="25dp"
-        tools:layout_editor_absoluteX="-16dp"
-        tools:layout_editor_absoluteY="-166dp">
+        android:padding="25dp">
 
         <ImageView
             android:id="@+id/logo"
@@ -58,7 +64,7 @@
             app:layout_constraintTop_toBottomOf="@+id/titleName" />
 
         <EditText
-            android:id="@+id/inputConstraseña"
+            android:id="@+id/inputPassword"
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:layout_marginTop="20dp"
@@ -80,56 +86,46 @@
             android:id="@+id/btnIniciarSesion"
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:layout_marginTop="48dp"
+            android:layout_marginTop="32dp"
             android:backgroundTint="@color/verde"
             android:text="Iniciar sesión"
             app:cornerRadius="10dp"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/inputConstraseña"
-            app:layout_constraintVertical_bias="0.042" />
+            app:layout_constraintTop_toBottomOf="@+id/inputPassword" />
+
+        <com.google.android.gms.common.SignInButton
+            android:id="@+id/btnGoogle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/btnIniciarSesion" />
 
         <TextView
             android:id="@+id/textView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="44dp"
+            android:layout_marginTop="32dp"
             android:fontFamily="@font/roboto"
             android:text="@string/cuenta"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.083"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btnIniciarSesion"
-            app:layout_constraintVertical_bias="0.0" />
+            app:layout_constraintTop_toBottomOf="@+id/btnGoogle" />
 
         <TextView
             android:id="@+id/registrarse"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="44dp"
+            android:layout_marginStart="8dp"
             android:fontFamily="@font/roboto"
             android:text="@string/comienza"
             android:textColor="@color/naranja"
             android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.268"
+            app:layout_constraintBottom_toBottomOf="@+id/textView"
             app:layout_constraintStart_toEndOf="@+id/textView"
-            app:layout_constraintTop_toBottomOf="@+id/btnIniciarSesion"
-            app:layout_constraintVertical_bias="0.0" />
+            app:layout_constraintTop_toTopOf="@+id/textView" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <ImageView
-        android:id="@+id/imageView2"
-        android:layout_width="519dp"
-        android:layout_height="174dp"
-        android:scaleType="fitXY"
-        app:layout_constraintBottom_toBottomOf="@+id/constraintLayout"
-        app:layout_constraintStart_toStartOf="parent"
-        app:srcCompat="@drawable/marco_inferior" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

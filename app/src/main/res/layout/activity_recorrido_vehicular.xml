@@ -27,40 +27,6 @@
         android:textSize="16sp"
         android:layout_marginTop="16dp" />
 
-    <LinearLayout
-        android:id="@+id/calificacionLayout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:orientation="horizontal"
-        android:layout_marginBottom="80dp"
-        android:background="#AA000000"
-        android:padding="10dp"
-        android:gravity="center_vertical">
-
-        <!-- RatingBar para mostrar estrellas -->
-        <androidx.appcompat.widget.AppCompatRatingBar
-            android:id="@+id/ratingBar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:numStars="5"
-            android:stepSize="0.5"
-            android:progressTint="@color/azul"
-            android:rating="0"
-            android:layout_marginEnd="8dp"/>
-
-        <!-- TextView para mostrar la calificación -->
-        <TextView
-            android:id="@+id/calificacionText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="0"
-            android:textColor="@color/white"
-            android:textSize="16sp" />
-
-    </LinearLayout>
-
     <!-- Botón para finalizar la ruta -->
     <Button
         android:id="@+id/finalizar"

@@ -1,17 +1,17 @@
 package entidades
 
-import android.net.Uri
-
 data class DatosUsuario(
-    val nombre: String,
-    val tipoDocumento: String,
-    val documento: String
+    val nombre: String = "",
+    val genero: String = "",
+    val edad: Int = 0,
+    val nacionalidad: String = ""
 )
 
 data class Usuario(
-    val celular: String,
-    val contraseña: String,
-    val datosUsuario: DatosUsuario,
-    val status: String,
-    val imageUrl: Uri?
+    val celular: String = "",
+    val contraseña: String = "",
+    val datosUsuario: DatosUsuario = DatosUsuario(),
+    val status: String = "",
+    val fotoPerfilUrl: String = "",
+    val deviceId: String = ""
 )

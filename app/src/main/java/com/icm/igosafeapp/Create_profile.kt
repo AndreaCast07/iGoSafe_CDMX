@@ -1,272 +1,232 @@
 package com.icm.igosafeapp
 
-
-import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.Environment
-import android.provider.MediaStore
 import android.util.Log
 import android.view.View
-import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
-
 import android.widget.Spinner
-import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.exifinterface.media.ExifInterface
+import com.icm.igosafeapp.manejoArchivos.UsuarioManager
+import com.squareup.picasso.MemoryPolicy
+import com.squareup.picasso.NetworkPolicy
+import com.squareup.picasso.Picasso
+import entidades.DatosUsuario
 import java.io.File
-import java.io.IOException
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 class Create_profile : AppCompatActivity() {
     private lateinit var txtNombre: EditText
-    private lateinit var txtNumDocumento: EditText
-    private lateinit var spinnerDocumento: Spinner
+    private lateinit var txtCelular: EditText
+    private lateinit var txtEdad: EditText
+    private lateinit var spinnerGenero: Spinner
+    private lateinit var spinnerNacionalidad: Spinner
     private lateinit var btnCrearPerfil: Button
 
     private lateinit var photoPerfil: ImageView
     private lateinit var iconCamera: ImageView
     private var pickedPhoto: Uri? = null
-    private var pickedBitMap: Bitmap? = null
-    private lateinit var currentPhotoPath: String
-
-    private lateinit var photoFile: File
     private val FILE_NAME = "profile_photo.jpg"
-    private val CAMERA_REQUEST_CODE = 42
     private lateinit var imageUrl: Uri
+    
+    private lateinit var usuarioManager: UsuarioManager
+    private var isGoogleFlow: Boolean = false
 
     private val cameraContract = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
         if (success) {
-            photoPerfil.setImageURI(null) // Clear the existing image
-            photoPerfil.setImageURI(imageUrl) // Set the new image from the Uri
-        } else {
-            Toast.makeText(this, "Picture not taken", Toast.LENGTH_SHORT).show()
+            pickedPhoto = imageUrl
+            val rotation = getRotationAngle(imageUrl)
+            Picasso.get()
+                .load(imageUrl)
+                .rotate(rotation.toFloat())
+                .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)
+                .networkPolicy(NetworkPolicy.NO_CACHE)
+                .placeholder(R.drawable.photo_original_user)
+                .into(photoPerfil)
         }
     }
-    companion object {
-        private const val PERMISSION_REQUEST_CODE = 10
-        private const val GALLERY_REQUEST_CODE = 2
-        private const val CAMERA_REQUEST_CODE = 3
+
+    private val galleryContract = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        uri?.let {
+            pickedPhoto = it
+            val rotation = getRotationAngle(it)
+            Picasso.get()
+                .load(it)
+                .rotate(rotation.toFloat())
+                .placeholder(R.drawable.photo_original_user)
+                .into(photoPerfil)
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create_profile)
 
-        txtNombre = findViewById(R.id.editTxtName)
-        txtNumDocumento = findViewById(R.id.editTxtDocumento)
-        photoPerfil = findViewById(R.id.photoPerfil)
-        iconCamera = findViewById(R.id.iconCamera)
-        spinnerDocumento = findViewById(R.id.selectTipoDocumento)
-        btnCrearPerfil = findViewById(R.id.btnCreateProfile)
+        usuarioManager = UsuarioManager(this)
+        isGoogleFlow = intent.getBooleanExtra("IS_GOOGLE", false)
 
-        cargarDatosSpinner()
-        setupImageClickListeners()
-        imageUrl = createImageUri()
-        mostrarLayoutCreatePasword()
-
-    }
-
-    private fun cargarDatosSpinner() {
-        val adapter = ArrayAdapter.createFromResource(
-            this,
-            R.array.opcionesDocumentos,
-            android.R.layout.simple_spinner_item
-        )
-
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerDocumento.adapter = adapter
-
-        spinnerDocumento.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                if (position == 0) {
-                    (view as? TextView)?.setTextColor(ContextCompat.getColor(parent.context, android.R.color.darker_gray))
-                } else {
-                    (view as? TextView)?.setTextColor(ContextCompat.getColor(parent.context, R.color.black))
-                }
-            }
-            override fun onNothingSelected(parent: AdapterView<*>) {}
-        }
-    }
-
-    private fun mostrarLayoutCreatePasword() {
-        btnCrearPerfil.setOnClickListener {
-            if (validarCampos()) {
-                val celular = intent.getStringExtra("CELULAR") ?: ""
-                val nombre = txtNombre.text.toString()
-                val tipoDocumento = spinnerDocumento.selectedItem.toString()
-                val numDocumento = txtNumDocumento.text.toString()
-
-                val intent = Intent(this, CreatePassword::class.java).apply {
-                    putExtra("CELULAR", celular)
-                    putExtra("NOMBRE", nombre)
-                    putExtra("TIPO_DOCUMENTO", tipoDocumento)
-                    putExtra("NUM_DOCUMENTO", numDocumento)
-
-                    // Si no hay foto seleccionada, enviamos null.
-                    putExtra("FOTO_URI", imageUrl?.toString())
-                }
-
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                val intent = Intent(this@Create_profile, LoginActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 startActivity(intent)
                 finish()
-            } else {
+            }
+        })
+
+        txtNombre = findViewById(R.id.editTxtName)
+        txtCelular = findViewById(R.id.editTxtCelular)
+        txtEdad = findViewById(R.id.editTxtEdad)
+        spinnerGenero = findViewById(R.id.spinnerGenero)
+        spinnerNacionalidad = findViewById(R.id.spinnerNacionalidad)
+        photoPerfil = findViewById(R.id.photoPerfil)
+        iconCamera = findViewById(R.id.iconCamera)
+        btnCrearPerfil = findViewById(R.id.btnCreateProfile)
+
+        if (isGoogleFlow) {
+            txtNombre.setText(intent.getStringExtra("NOMBRE") ?: "")
+            txtCelular.visibility = View.VISIBLE
+        }
+
+        configurarSpinners()
+        setupImageClickListeners()
+        imageUrl = createImageUri()
+        configurarBotonCrear()
+    }
+
+    private fun configurarSpinners() {
+        val adapterGen = ArrayAdapter.createFromResource(this, R.array.opcionesGenero, android.R.layout.simple_spinner_item)
+        adapterGen.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerGenero.adapter = adapterGen
+
+        val adapterNac = ArrayAdapter.createFromResource(this, R.array.opcionesNacionalidad, android.R.layout.simple_spinner_item)
+        adapterNac.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerNacionalidad.adapter = adapterNac
+    }
+
+    private fun configurarBotonCrear() {
+        btnCrearPerfil.setOnClickListener {
+            val nombre = txtNombre.text.toString().trim()
+            val edadStr = txtEdad.text.toString().trim()
+            val genero = spinnerGenero.selectedItem.toString()
+            val nacionalidad = spinnerNacionalidad.selectedItem.toString()
+            val celular = if (isGoogleFlow) txtCelular.text.toString().trim() else intent.getStringExtra("CELULAR") ?: ""
+
+            if (nombre.isEmpty() || edadStr.isEmpty() || 
+                spinnerGenero.selectedItemPosition == 0 || 
+                spinnerNacionalidad.selectedItemPosition == 0 ||
+                (isGoogleFlow && celular.isEmpty())) {
                 Toast.makeText(this, "Por favor, completa todos los campos.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
             }
-        }
-    }
 
-    private fun validarCampos(): Boolean {
-        return txtNombre.text.isNotEmpty() &&
-                txtNumDocumento.text.isNotEmpty() &&
-                spinnerDocumento.selectedItemPosition != 0
-    }
-
-
-
-    private fun setupImageClickListeners() {
-        photoPerfil.setOnClickListener {
-            if (checkAndRequestPermissions()) {
-                openGallery()
+            val nameParts = nombre.split(" ").filter { it.isNotEmpty() }
+            if (nameParts.size < 2) {
+                Toast.makeText(this, "Por favor, ingresa nombre y apellido.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
             }
-        }
+            if (!nombre.matches("^[a-zA-ZñÑáéíóúÁÉÍÓÚ\\s]+$".toRegex())) {
+                Toast.makeText(this, "El nombre solo puede contener letras.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
 
-        iconCamera.setOnClickListener {
-            if (checkAndRequestPermissions() ) {
-                if (hasCameraHardware()) {
-                    Log.d("CameraDebug", "Device has camera hardware")
-                    cameraContract.launch(imageUrl)
-                } else {
-                    Log.e("CameraDebug", "Device does not have camera hardware")
+            val edad = edadStr.toIntOrNull() ?: 0
+            if (edad < 11 || edad > 99) {
+                Toast.makeText(this, "La edad debe estar entre 11 y 99 años.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val datos = DatosUsuario(nombre, genero, edad, nacionalidad)
+            btnCrearPerfil.isEnabled = false
+            btnCrearPerfil.text = "Validando..."
+
+            if (isGoogleFlow) {
+                usuarioManager.completarRegistroGoogle(celular, pickedPhoto, datos) { exito, error ->
+                    runOnUiThread {
+                        if (exito) {
+                            startActivity(Intent(this@Create_profile, Menu::class.java))
+                            finish()
+                        } else {
+                            btnCrearPerfil.isEnabled = true
+                            btnCrearPerfil.text = "Crear perfil"
+                            Toast.makeText(this@Create_profile, error ?: "Error al crear perfil", Toast.LENGTH_LONG).show()
+                        }
+                    }
+                }
+            } else {
+                usuarioManager.dispositivoVinculado { yaTiene ->
+                    runOnUiThread {
+                        if (yaTiene) {
+                            Toast.makeText(this@Create_profile, "Este dispositivo ya tiene una cuenta asociada.", Toast.LENGTH_LONG).show()
+                            btnCrearPerfil.isEnabled = true
+                            btnCrearPerfil.text = "Crear perfil"
+                        } else {
+                            val intent = Intent(this@Create_profile, CreatePassword::class.java).apply {
+                                putExtra("CELULAR", celular)
+                                putExtra("NOMBRE", nombre)
+                                putExtra("GENERO", genero)
+                                putExtra("EDAD", edad)
+                                putExtra("NACIONALIDAD", nacionalidad)
+                                putExtra("FOTO_URI", pickedPhoto?.toString() ?: "")
+                            }
+                            startActivity(intent)
+                            finish()
+                        }
+                    }
                 }
             }
         }
     }
 
+    private fun getRotationAngle(uri: Uri): Int {
+        try {
+            contentResolver.openInputStream(uri)?.use { 
+                val exif = ExifInterface(it)
+                return when (exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)) {
+                    ExifInterface.ORIENTATION_ROTATE_90 -> 90
+                    ExifInterface.ORIENTATION_ROTATE_180 -> 180
+                    ExifInterface.ORIENTATION_ROTATE_270 -> 270
+                    else -> 0
+                }
+            }
+        } catch (e: Exception) { Log.e("Create_profile", "EXIF Error", e) }
+        return 0
+    }
 
-    private fun checkAndRequestPermissions(): Boolean {
-        val permissions = arrayOf(
-            android.Manifest.permission.READ_EXTERNAL_STORAGE,
-            android.Manifest.permission.CAMERA
-        )
+    private fun setupImageClickListeners() {
+        photoPerfil.setOnClickListener { if (checkAndRequestPermissions("GALLERY")) galleryContract.launch("image/*") }
+        iconCamera.setOnClickListener {
+            if (checkAndRequestPermissions("CAMERA")) cameraContract.launch(imageUrl)
+        }
+    }
 
-        val permissionsToRequest = permissions.filter {
-            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
-        }.toTypedArray()
-
-        if (permissionsToRequest.isNotEmpty()) {
-            ActivityCompat.requestPermissions(this, permissionsToRequest, PERMISSION_REQUEST_CODE)
+    private fun checkAndRequestPermissions(type: String): Boolean {
+        val permissions = if (type == "CAMERA") arrayOf(android.Manifest.permission.CAMERA)
+        else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) arrayOf(android.Manifest.permission.READ_MEDIA_IMAGES)
+        else arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE)
+        
+        val toRequest = permissions.filter { ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED }
+        if (toRequest.isNotEmpty()) {
+            ActivityCompat.requestPermissions(this, toRequest.toTypedArray(), 10)
             return false
         }
         return true
     }
 
-
-
-    private fun openGallery() {
-        val galleryIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-        startActivityForResult(galleryIntent, GALLERY_REQUEST_CODE)
-    }
-
-    private fun hasCameraHardware(): Boolean {
-        return packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)
-    }
-
     private fun createImageUri(): Uri {
         val image = File(filesDir, FILE_NAME)
-        return FileProvider.getUriForFile(
-            this,
-            "com.icm.igosafeapp.fileprovider",
-            image
-        )
+        return FileProvider.getUriForFile(this, "com.icm.igosafeapp.fileprovider", image)
     }
-
-    @Throws(IOException::class)
-    private fun createImageFile(): File {
-        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-        val storageDir: File = getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
-        return File.createTempFile(
-            "JPEG_${timeStamp}_", // Prefix
-            ".jpg", // Suffix
-            storageDir // Directory
-        ).apply {
-            currentPhotoPath = absolutePath
-        }
-    }
-
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == PERMISSION_REQUEST_CODE && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
-            // Permissions granted, you can proceed with camera or gallery operations
-            if (permissions.contains(android.Manifest.permission.CAMERA)) {
-                if (hasCameraHardware()) {
-                    Log.d("CameraDebug", "Device has camera hardware")
-                    cameraContract.launch(imageUrl)
-                } else {
-                    Log.e("CameraDebug", "Device does not have camera hardware")
-                }
-            } else if (permissions.contains(android.Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                openGallery()
-            }
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == CAMERA_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            val takenImage = BitmapFactory.decodeFile(photoFile.absolutePath)
-            photoPerfil.setImageBitmap(takenImage)
-        }
-    }
-
-    private fun getPhotoFile(fileName: String): File {
-        val storageDirectory = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-        return File.createTempFile(fileName, ".jpg", storageDirectory)
-    }
-
-    private fun handleGalleryResult(data: Intent?) {
-        pickedPhoto = data?.data
-        pickedPhoto?.let { uri ->
-            pickedBitMap = if (Build.VERSION.SDK_INT >= 28) {
-                val source = ImageDecoder.createSource(contentResolver, uri)
-                ImageDecoder.decodeBitmap(source)
-            } else {
-                MediaStore.Images.Media.getBitmap(contentResolver, uri)
-            }
-            photoPerfil.setImageBitmap(pickedBitMap)
-        }
-    }
-
-    private fun handleCameraResult() {
-        val file = File(currentPhotoPath)
-        pickedPhoto = FileProvider.getUriForFile(
-            this,
-            "com.icm.igosafeapp.fileprovider",
-            file
-        )
-        pickedBitMap = if (Build.VERSION.SDK_INT >= 28) {
-            val source = ImageDecoder.createSource(contentResolver, pickedPhoto!!)
-            ImageDecoder.decodeBitmap(source)
-        } else {
-            MediaStore.Images.Media.getBitmap(contentResolver, pickedPhoto)
-        }
-        photoPerfil.setImageBitmap(pickedBitMap)
-    }
-
 }

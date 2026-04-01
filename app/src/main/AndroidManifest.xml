@@ -2,24 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-
-    <uses-feature
-        android:name="android.hardware.telephony"
-        android:required="false" />
-    <uses-feature
-        android:name="android.hardware.camera"
-        android:required="false" />
-
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28"/>
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.RECEIVE_SMS" />
-    <uses-permission android:name="android.permission.READ_SMS" />
-    <uses-permission android:name="android.permission.SEND_SMS" />
-    <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.READ_CONTACTS"/>
 
     <application
         android:allowBackup="true"
@@ -28,91 +14,32 @@
         android:label="@string/app_name2"
         android:supportsRtl="true"
         android:networkSecurityConfig="@xml/network_security_config"
-        android:usesCleartextTraffic="false"
+        android:usesCleartextTraffic="true"
         android:theme="@style/AppThemeIgoSafe"
         tools:targetApi="31"
-        tools:replace="android:allowBackup, android:label">
+        tools:replace="android:allowBackup, android:label, android:usesCleartextTraffic">
+
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/codigo"/>
-        <activity
-            android:name=".adapter_comentarios"
-            android:exported="false" />
 
-        <activity
-            android:name=".adapter_contactos"
-            android:exported="false" />
+        <activity android:name=".Menu" android:exported="false" android:theme="@style/AppThemeIgoSafe.NoActionBar" />
+        <activity android:name=".ruta_peatonal" android:exported="false" />
+        <activity android:name=".recorrido_peatonal" android:exported="false" />
+        <activity android:name=".ruta_vehicular" android:exported="false" />
+        <activity android:name=".recorrido_vehicular" android:exported="false" />
 
-        <activity
-            android:name=".Menu"
-            android:exported="false"
-            android:label=""
-            android:theme="@style/AppThemeIgoSafe.NoActionBar"
-            />
-        <activity
-            android:name=".comentarios"
-            android:exported="false" />
-        <activity
-            android:name=".review_ruta"
-            android:exported="false" />
-        <activity
-            android:name=".ruta_peatonal"
-            android:exported="false" />
-        <activity
-            android:name=".recorrido_peatonal"
-            android:exported="false" />
-        <activity
-            android:name=".ruta_vehicular"
-            android:exported="false" />
         <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".LoginActivity"
-            android:exported="false" />
-        <activity
-            android:name=".SignInPhone"
-            android:exported="false" />
-        <activity
-            android:name=".SignInValidateSms"
-            android:exported="false"
-            android:theme="@style/AppThemeregister" />
-        <activity
-            android:name=".Create_profile"
-            android:exported="false"
-            android:theme="@style/AppThemeregister" />
-        <activity
-            android:name=".CreatePassword"
-            android:exported="false"
-            android:theme="@style/AppThemeregister" />
 
+        <activity android:name=".review_ruta" android:exported="false" />
+        <activity android:name=".LoginActivity" android:exported="false" />
 
-        <activity
-            android:name=".recorrido_vehicular"
-            android:exported="false"
-            android:theme="@style/AppThemeregister" />
-
-
-        <meta-data
-            android:name="preloaded_fonts"
-            android:resource="@array/preloaded_fonts" />
-
-        <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="com.icm.igosafeapp.fileprovider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths" />
-
-        </provider>
     </application>
-
 </manifest>

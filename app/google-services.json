@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "371704711119",
+    "firebase_url": "https://igosafe-2b97b-default-rtdb.firebaseio.com",
     "project_id": "igosafe-2b97b",
     "storage_bucket": "igosafe-2b97b.firebasestorage.app"
   },
@@ -12,7 +13,12 @@
           "package_name": "com.icm.igosafeapp"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "371704711119-tpiktdm5u5659egicchpaq5fgqmv0dgv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyD-pXnQRboX2Pv7Xnidx9YfDNGuTt_RiLg"
@@ -20,7 +26,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "371704711119-tpiktdm5u5659egicchpaq5fgqmv0dgv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

@@ -4,10 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="25dp"
-    tools:context=".ui.home.HomeFragment"
-    tools:ignore=".HomeFragment">
-
+    android:padding="20dp"
+    tools:context=".ui.home.HomeFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/container_with_border"
@@ -15,23 +13,19 @@
         android:layout_height="wrap_content"
         android:background="@drawable/border_background"
         android:padding="10dp"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.008">
+        app:layout_constraintTop_toTopOf="parent">
 
         <EditText
             android:id="@+id/actualLocation"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
             android:background="@android:color/transparent"
             android:drawableStart="@drawable/ic_location"
             android:drawablePadding="8dp"
             android:hint="@string/comentarioOrigen"
-            android:padding="10dp"
+            android:padding="12dp"
             android:textColor="@android:color/black"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -41,8 +35,7 @@
             android:id="@+id/divider_line"
             android:layout_width="0dp"
             android:layout_height="1dp"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="10dp"
+            android:layout_marginHorizontal="10dp"
             android:background="@android:color/darker_gray"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -51,18 +44,18 @@
         <AutoCompleteTextView
             android:id="@+id/contactLocation"
             android:layout_width="0dp"
-            android:layout_height="40dp"
-            android:layout_marginTop="5dp"
+            android:layout_height="wrap_content"
             android:background="@android:color/transparent"
             android:drawableStart="@drawable/ic_location"
             android:drawablePadding="8dp"
             android:drawableTint="@color/verde"
             android:hint="@string/comentarioDestino"
-            android:padding="10dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:padding="12dp"
+            android:minHeight="48dp"
+            app:layout_constraintEnd_toStartOf="@+id/searchIcon"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/divider_line"
+            app:layout_constraintBottom_toBottomOf="parent"
             android:focusable="true"
             android:focusableInTouchMode="true"/>
 
@@ -70,8 +63,7 @@
             android:id="@+id/searchIcon"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
             android:src="@drawable/ic_search"
             app:layout_constraintBottom_toBottomOf="@id/contactLocation"
             app:layout_constraintEnd_toEndOf="parent"
@@ -84,73 +76,72 @@
         android:id="@+id/textView5"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
         android:fontFamily="@font/roboto"
         android:text="@string/formaViaje"
         android:textSize="16sp"
-        app:layout_constraintBottom_toTopOf="@+id/btnCaminar"
+        android:textColor="@android:color/black"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.493"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/container_with_border"
-        app:layout_constraintVertical_bias="0.85" />
+        app:layout_constraintTop_toBottomOf="@+id/container_with_border" />
 
     <Button
         android:id="@+id/btnCaminar"
-        android:layout_width="150dp"
-        android:layout_height="50dp"
+        android:layout_width="0dp"
+        android:layout_height="55dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
         android:background="@drawable/custom_shape_right"
-        android:drawableRight="@drawable/ic_walk"
+        android:drawableEnd="@drawable/ic_walk"
         android:drawablePadding="8dp"
         android:drawableTint="@color/white"
         android:text="Caminar"
+        android:textAllCaps="false"
         app:backgroundTint="@color/azul2"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.146"
+        app:layout_constraintEnd_toStartOf="@+id/btnCarro"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.269" />
+        app:layout_constraintTop_toBottomOf="@+id/textView5" />
 
     <Button
         android:id="@+id/btnCarro"
-        android:layout_width="150dp"
-        android:layout_height="50dp"
+        android:layout_width="0dp"
+        android:layout_height="55dp"
+        android:layout_marginStart="8dp"
         android:background="@drawable/custom_shape_left"
-        android:drawableRight="@drawable/ic_car"
+        android:drawableEnd="@drawable/ic_car"
         android:drawablePadding="8dp"
         android:drawableTint="@color/white"
         android:text="Carro"
+        android:textAllCaps="false"
         app:backgroundTint="@color/azul2"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toBottomOf="@+id/btnCaminar"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.857"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.269" />
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/btnCaminar"
+        app:layout_constraintTop_toTopOf="@+id/btnCaminar" />
 
     <ImageView
         android:id="@+id/imageBanner"
-        android:layout_width="300dp"
-        android:layout_height="300dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginVertical="24dp"
+        android:scaleType="centerInside"
         android:src="@drawable/banner"
         app:layout_constraintBottom_toTopOf="@+id/btnSolicitarUbicacion"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.508"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/container_with_border"
-        app:layout_constraintVertical_bias="0.681" />
+        app:layout_constraintTop_toBottomOf="@+id/btnCaminar" />
 
     <Button
         android:id="@+id/btnSolicitarUbicacion"
         android:layout_width="match_parent"
         android:layout_height="60dp"
+        android:layout_marginBottom="8dp"
         android:backgroundTint="@color/verde"
         android:text="Solicitar ubicación"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/container_with_border"
-        app:layout_constraintVertical_bias="0.871" />
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

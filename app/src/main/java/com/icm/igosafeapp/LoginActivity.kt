@@ -1,159 +1,106 @@
 package com.icm.igosafeapp
 
-import Contactos
-import android.annotation.SuppressLint
 import android.content.Intent
-import android.Manifest
-import android.content.pm.PackageManager
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import androidx.navigation.fragment.findNavController
-import android.text.InputType
+import android.provider.Settings
 import android.util.Log
-import android.view.MotionEvent
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import androidx.navigation.Navigation
-import androidx.navigation.findNavController
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
-import com.google.gson.Gson
+import com.google.firebase.auth.GoogleAuthProvider
+import com.icm.igosafeapp.databinding.ActivityLoginBinding
 import com.icm.igosafeapp.manejoArchivos.UsuarioManager
-import com.icm.igosafeapp.ui.home.HomeFragment
-import entidades.Usuario
-import org.json.JSONObject
-import java.io.File
 
 class LoginActivity : AppCompatActivity() {
-    private lateinit var logo: ImageView
-    private lateinit var bienvenida: TextView
-    private lateinit var celularInput: EditText
-    private lateinit var passwordInput: EditText
-    private lateinit var txtOlvidarContraseña: TextView
-    private lateinit var btnInciar: Button
-    private lateinit var txt: TextView
-    private lateinit var txtRegistrarse: TextView
 
+    private lateinit var binding: ActivityLoginBinding
+    private lateinit var auth: FirebaseAuth
+    private lateinit var googleSignInClient: GoogleSignInClient
     private lateinit var usuarioManager: UsuarioManager
+
+    private val googleSignInLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+            try {
+                val account = task.getResult(ApiException::class.java)!!
+                val idToken = account.idToken
+                if (idToken != null) {
+                    firebaseAuthWithGoogle(idToken)
+                } else {
+                    Toast.makeText(this, "Error: Token de Google no obtenido", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: ApiException) {
+                Log.e("Login", "Google sign in failed. Code: ${e.statusCode}", e)
+                val msg = when (e.statusCode) {
+                    12500 -> "Error 12500: Verifique la huella SHA-1 en Firebase."
+                    10 -> "Error 10: Configuración de Google Sign-In incorrecta."
+                    else -> "Error de Google (Code: ${e.statusCode})"
+                }
+                Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_login)
-
-        // Verificar si hay un usuario autenticado
-        if (FirebaseAuth.getInstance().currentUser != null) {
-            // Si hay una sesión activa, redirigir al menú principal
-            val intent = Intent(this, Menu::class.java)
-            startActivity(intent)
-            finish()
-            return
-        }
-
-        // Inicializar las vistas
-        logo = findViewById(R.id.logo)
-        bienvenida = findViewById(R.id.titleName)
-        celularInput = findViewById(R.id.inputCelular)
-        passwordInput = findViewById(R.id.inputConstraseña)
-        btnInciar = findViewById(R.id.btnIniciarSesion)
-        txt = findViewById(R.id.textView)
-        txtRegistrarse = findViewById(R.id.registrarse)
-
+        
+        auth = FirebaseAuth.getInstance()
         usuarioManager = UsuarioManager(this)
 
-     //   checkPermissions()
-
-        ocultarContrasena()
-        mostrarLayoutRegisterPhone()
-        mostrarLayoutMenu()
-
-    }
-
-  /*  private fun checkPermissions() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
-            requestContactsPermission()
-        }
-    }
-
-    private fun requestContactsPermission() {
-        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_CONTACTS)) {
-            Toast.makeText(this, "Necesitamos acceso a los contactos para funcionalidades completas.", Toast.LENGTH_SHORT).show()
-        }
-        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_CONTACTS), PERMISSION_REQUEST_CODE)
-    }**/
-
-   /* override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-
-        if (requestCode == PERMISSION_REQUEST_CODE) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            } else {
-                // Permiso denegado
-                Toast.makeText(this, "Funcionalidades reducidas.", Toast.LENGTH_SHORT).show()
+        // Manejo del botón Atrás para salir de la app
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                finishAffinity()
             }
-        }
-    }
+        })
 
-    companion object {
-        private const val PERMISSION_REQUEST_CODE = 777
-    }*/
+        // LOG DIAGNÓSTICO: Imprimir el Device ID actual
+        val currentDeviceId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+        Log.d("DeviceId", "El ID de este dispositivo es: $currentDeviceId")
 
-    @SuppressLint("ClickableViewAccessibility")
-    private fun ocultarContrasena() {
-        passwordInput.setOnTouchListener { _, event ->
-            val drawableEndIndex = 2
-            if (event.rawX >= (passwordInput.right - passwordInput.compoundDrawables[drawableEndIndex].bounds.width())) {
-                when (event.action) {
-                    MotionEvent.ACTION_DOWN -> {
-                        passwordInput.inputType =
-                            InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
-                    }
+        // Siempre inflamos la vista primero para mantener al usuario aquí si es necesario
+        binding = ActivityLoginBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-                    MotionEvent.ACTION_UP -> {
-                        passwordInput.inputType =
-                            InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
-                    }
+        val currentUser = auth.currentUser
+        if (currentUser != null) {
+            usuarioManager.usuarioExiste(currentUser.uid) { existe ->
+                if (existe) {
+                    startActivity(Intent(this, Menu::class.java))
+                    finish()
+                } else {
+                    auth.signOut()
+                    Log.d("Login", "Sesión cerrada: El usuario no tenía un perfil completo.")
                 }
-                true
-            } else {
-                false
             }
         }
+
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getString(R.string.default_web_client_id)) 
+            .requestEmail()
+            .build()
+        googleSignInClient = GoogleSignIn.getClient(this, gso)
+
+        setupEventListeners()
     }
 
-    private fun mostrarLayoutRegisterPhone() {
-        txtRegistrarse.setOnClickListener {
-            Log.d("LoginActivity", "Botón de registrarse clickeado")
-            val intent = Intent(this, SignInPhone::class.java)
-            startActivity(intent)
-        }
-    }
+    private fun setupEventListeners() {
+        binding.btnIniciarSesion.setOnClickListener {
+            val celular = binding.inputCelular.text.toString().trim()
+            val contrasena = binding.inputPassword.text.toString().trim()
 
-
-    private fun mostrarLayoutMenu() {
-        btnInciar.setOnClickListener {
-            if (validarCampos()) {
-                val celular = celularInput.text.toString()
-                val contrasena = passwordInput.text.toString()
-
-                // Verificar si el celular está registrado
+            if (celular.isNotEmpty() && contrasena.isNotEmpty()) {
                 usuarioManager.celularRegistrado(celular) { registrado ->
                     if (registrado) {
-                        // Intentar iniciar sesión
                         usuarioManager.iniciarSesion(celular, contrasena) { exito ->
                             if (exito) {
-                                val intent = Intent(this, Menu::class.java)
-                                startActivity(intent)
+                                startActivity(Intent(this, Menu::class.java))
                                 finish()
                             } else {
                                 Toast.makeText(this, "Error al iniciar sesión. Verifique sus credenciales.", Toast.LENGTH_SHORT).show()
@@ -167,44 +114,39 @@ class LoginActivity : AppCompatActivity() {
                 Toast.makeText(this, "Por favor, llena todos los campos.", Toast.LENGTH_SHORT).show()
             }
         }
-    }
 
-
-    override fun onBackPressed() {
-        super.onBackPressed()
-        finishAffinity()
-    }
-
-    private fun validarCampos(): Boolean {
-        return celularInput.text.toString().isNotEmpty() && passwordInput.text.toString().isNotEmpty()
-    }
-
-   /* private fun loadContactsFromAssets(): List<Contactos> {
-        val contactsList = mutableListOf<Contactos>()
-        try {
-            val inputStream = assets.open("contactos.json") // Asegúrate de que el archivo se llama contacts.json
-            val json = inputStream.bufferedReader().use { it.readText() }
-            val jsonObject = JSONObject(json)
-            val contactsArray = jsonObject.getJSONArray("contacts")
-
-            for (i in 0 until contactsArray.length()) {
-                val contactJson = contactsArray.getJSONObject(i)
-                val name = contactJson.getString("name")
-                val nickname = contactJson.getString("nickname")
-                // Puedes usar un ícono predeterminado o cargar uno dinámicamente
-                val icon = R.drawable.ic_person // Asegúrate de tener este ícono en tus recursos
-
-                val locationJson = contactJson.getJSONObject("location")
-                val latitude = locationJson.getDouble("latitude")
-                val longitude = locationJson.getDouble("longitude")
-
-                // Crea un objeto Contactos y agrégalo a la lista
-                contactsList.add(Contactos(icon, nickname, name))
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
+        binding.btnGoogle.setOnClickListener {
+            googleSignInLauncher.launch(googleSignInClient.signInIntent)
         }
-        return contactsList
-    }*/
 
+        binding.registrarse.setOnClickListener {
+            startActivity(Intent(this, SignInPhone::class.java))
+        }
+    }
+
+    private fun firebaseAuthWithGoogle(idToken: String) {
+        val credential = GoogleAuthProvider.getCredential(idToken, null)
+        auth.signInWithCredential(credential)
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
+                    val user = task.result?.user
+                    if (user != null) {
+                        usuarioManager.usuarioExiste(user.uid) { existe ->
+                            if (existe) {
+                                startActivity(Intent(this, Menu::class.java))
+                                finish()
+                            } else {
+                                val intent = Intent(this, Create_profile::class.java)
+                                intent.putExtra("IS_GOOGLE", true)
+                                intent.putExtra("NOMBRE", user.displayName)
+                                startActivity(intent)
+                                finish()
+                            }
+                        }
+                    }
+                } else {
+                    Toast.makeText(this, "Error de autenticación con Firebase", Toast.LENGTH_LONG).show()
+                }
+            }
+    }
 }

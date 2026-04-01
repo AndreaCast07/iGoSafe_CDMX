@@ -2,6 +2,7 @@ package com.icm.igosafeapp.manejoArchivos
 
 import android.content.Context
 import android.net.Uri
+import android.provider.Settings
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -16,138 +17,122 @@ import java.util.UUID
 
 class UsuarioManager(private val context: Context) {
 
-    private val auth = FirebaseAuth.getInstance() // Firebase Authentication
-    private val database = FirebaseDatabase.getInstance().reference.child("usuarios") // Firebase Realtime Database
-    private val storage = FirebaseStorage.getInstance().reference // Firebase Storage
+    private val auth = FirebaseAuth.getInstance()
+    private val database = FirebaseDatabase.getInstance().reference.child("usuarios")
+    private val storage = FirebaseStorage.getInstance().reference
 
-    // Registrar usuario con foto de perfil
-    fun registrarUsuario(celular: String, contrasena: String, fotoUri: Uri?, datosUsuario: DatosUsuario, onResultado: (Boolean) -> Unit) {
-        val emailFicticio = "$celular@myapp.com"  // Usar el celular como correo
-
-        // Crear usuario en Firebase Authentication
-        auth.createUserWithEmailAndPassword(emailFicticio, contrasena)
-            .addOnSuccessListener { authResult ->
-                val user = authResult.user
-                val userId = user?.uid ?: return@addOnSuccessListener onResultado(false)
-
-                // Subir foto de perfil si se proporciona
-                if (fotoUri != null) {
-                    subirFotoPerfil(fotoUri) { fotoUrl ->
-                        guardarDatosUsuario(
-                            userId, celular, emailFicticio, datosUsuario, fotoUrl ?: "", onResultado
-                        )
-                    }
-                } else {
-                    guardarDatosUsuario(userId, celular, emailFicticio, datosUsuario, "", onResultado)
-                }
-            }
-            .addOnFailureListener { e ->
-                Log.e("UsuarioManager", "Error al crear usuario: ${e.message}")
-                onResultado(false)
-            }
-    }
-    private fun guardarDatosUsuario(
-        userId: String,
-        celular: String,
-        email: String,
-        datosUsuario: DatosUsuario,
-        fotoUrl: String,
-        onResultado: (Boolean) -> Unit
-    ) {
-        val usuarioData = mapOf(
-            "datosUsuario" to mapOf(
-                "nombre" to datosUsuario.nombre,
-                "tipoDocumento" to datosUsuario.tipoDocumento,
-                "numDocumento" to datosUsuario.documento
-            ),
-            "celular" to celular,
-            "email" to email,
-            "fotoPerfilUrl" to fotoUrl,
-            "status" to "INACTIVO",
-        )
-
-        database.child(userId).setValue(usuarioData)
-            .addOnSuccessListener {
-                Log.d("UsuarioManager", "Usuario registrado correctamente")
-                onResultado(true)
-            }
-            .addOnFailureListener { e ->
-                Log.e("UsuarioManager", "Error al guardar datos en Firebase: ${e.message}")
-                onResultado(false)
-            }
+    private val deviceId: String by lazy {
+        Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
     }
 
-    // Subir la foto de perfil a Firebase Storage
-    private fun subirFotoPerfil(uri: Uri, onResultado: (String?) -> Unit) {
-        val storageReference = storage.child("perfilFotos/${UUID.randomUUID()}.jpg")
-        storageReference.putFile(uri)
-            .addOnSuccessListener { taskSnapshot ->
-                taskSnapshot.metadata?.reference?.downloadUrl?.addOnSuccessListener { url ->
-                    // Retornar la URL de la foto subida
-                    onResultado(url.toString())
-                }
-            }
-            .addOnFailureListener { e ->
-                Log.e("UsuarioManager", "Error al subir foto de perfil: ${e.message}")
-                onResultado(null)
-            }
-    }
-
-    // Iniciar sesión con correo/contraseña
-    fun iniciarSesion(celular: String, contrasena: String, onResultado: (Boolean) -> Unit) {
-        val emailFicticio = "$celular@myapp.com"  // Usar el celular como correo
-
-        auth.signInWithEmailAndPassword(emailFicticio, contrasena)
-            .addOnSuccessListener {
-                Log.d("UsuarioManager", "Inicio de sesión exitoso")
-                onResultado(true)
-            }
-            .addOnFailureListener { e ->
-                Log.e("UsuarioManager", "Error al iniciar sesión: ${e.message}")
-                onResultado(false)
-            }
-    }
-
-    // Verificar si el celular está registrado (usando el correo ficticio)
-    fun celularRegistrado(celular: String, onResultado: (Boolean) -> Unit) {
-        val emailFicticio = "$celular@myapp.com"  // Usar el celular como correo
-
-        database.orderByChild("email").equalTo(emailFicticio)
+    fun dispositivoVinculado(onResultado: (Boolean) -> Unit) {
+        database.orderByChild("deviceId").equalTo(deviceId)
             .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    onResultado(snapshot.exists()) // True si el usuario existe
+                    onResultado(snapshot.exists())
                 }
-
                 override fun onCancelled(error: DatabaseError) {
-                    Log.e("UsuarioManager", "Error al verificar celular: ${error.message}")
                     onResultado(false)
                 }
             })
     }
 
-    // Obtener datos del usuario logueado
-    fun obtenerUsuarioActual(onResultado: (Usuario?) -> Unit) {
-        val user = auth.currentUser
-        if (user != null) {
-            val userId = user.uid
-            database.child(userId).get()
-                .addOnSuccessListener { snapshot ->
-                    val usuario = snapshot.getValue(Usuario::class.java)
-                    onResultado(usuario)
+    fun registrarUsuario(celular: String, contrasena: String, fotoUri: Uri?, datosUsuario: DatosUsuario, onResultado: (Boolean, String?) -> Unit) {
+        dispositivoVinculado { yaTieneCuenta ->
+            if (yaTieneCuenta) {
+                onResultado(false, "Este dispositivo ya tiene una cuenta asociada.")
+                return@dispositivoVinculado
+            }
+
+            val emailFicticio = "${celular.trim()}@myapp.com"
+            auth.createUserWithEmailAndPassword(emailFicticio, contrasena)
+                .addOnSuccessListener { authResult ->
+                    val userId = authResult.user?.uid ?: return@addOnSuccessListener onResultado(false, "Error de sistema")
+                    procesarGuardado(userId, celular, emailFicticio, datosUsuario, fotoUri, onResultado)
                 }
-                .addOnFailureListener { e ->
-                    Log.e("UsuarioManager", "Error al obtener usuario: ${e.message}")
-                    onResultado(null)
-                }
-        } else {
-            onResultado(null)
+                .addOnFailureListener { e -> onResultado(false, e.message) }
         }
     }
 
-    // Cerrar sesión
-    fun cerrarSesion() {
-        auth.signOut()
-        Log.d("UsuarioManager", "Sesión cerrada exitosamente")
+    fun completarRegistroGoogle(celular: String, fotoUri: Uri?, datosUsuario: DatosUsuario, onResultado: (Boolean, String?) -> Unit) {
+        val userId = auth.currentUser?.uid ?: return onResultado(false, "No hay sesión activa")
+        
+        dispositivoVinculado { yaTieneCuenta ->
+            if (yaTieneCuenta) {
+                onResultado(false, "Este dispositivo ya tiene una cuenta asociada.")
+                return@dispositivoVinculado
+            }
+            val email = auth.currentUser?.email ?: ""
+            procesarGuardado(userId, celular, email, datosUsuario, fotoUri, onResultado)
+        }
     }
-}
 
+    private fun procesarGuardado(userId: String, celular: String, email: String, datosUsuario: DatosUsuario, fotoUri: Uri?, onResultado: (Boolean, String?) -> Unit) {
+        if (fotoUri != null) {
+            subirFotoPerfil(fotoUri) { fotoUrl ->
+                guardarDatosUsuario(userId, celular, email, datosUsuario, fotoUrl ?: "", onResultado)
+            }
+        } else {
+            guardarDatosUsuario(userId, celular, email, datosUsuario, "", onResultado)
+        }
+    }
+
+    private fun guardarDatosUsuario(userId: String, celular: String, email: String, datosUsuario: DatosUsuario, fotoUrl: String, onResultado: (Boolean, String?) -> Unit) {
+        val usuarioData = mapOf(
+            "datosUsuario" to mapOf(
+                "nombre" to datosUsuario.nombre,
+                "genero" to datosUsuario.genero,
+                "edad" to datosUsuario.edad,
+                "nacionalidad" to datosUsuario.nacionalidad
+            ),
+            "celular" to celular,
+            "email" to email,
+            "fotoPerfilUrl" to fotoUrl,
+            "deviceId" to deviceId,
+            "status" to "ACTIVO",
+        )
+
+        database.child(userId).setValue(usuarioData)
+            .addOnSuccessListener { onResultado(true, null) }
+            .addOnFailureListener { e -> onResultado(false, e.message) }
+    }
+
+    private fun subirFotoPerfil(uri: Uri, onResultado: (String?) -> Unit) {
+        val storageReference = storage.child("perfilFotos/${UUID.randomUUID()}.jpg")
+        storageReference.putFile(uri)
+            .addOnSuccessListener { it.metadata?.reference?.downloadUrl?.addOnSuccessListener { url -> onResultado(url.toString()) } }
+            .addOnFailureListener { onResultado(null) }
+    }
+
+    fun iniciarSesion(celular: String, contrasena: String, onResultado: (Boolean) -> Unit) {
+        val emailFicticio = "${celular.trim()}@myapp.com"
+        auth.signInWithEmailAndPassword(emailFicticio, contrasena)
+            .addOnSuccessListener { onResultado(true) }
+            .addOnFailureListener { onResultado(false) }
+    }
+
+    fun celularRegistrado(celular: String, onResultado: (Boolean) -> Unit) {
+        database.orderByChild("celular").equalTo(celular.trim())
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) { onResultado(snapshot.exists()) }
+                override fun onCancelled(error: DatabaseError) { onResultado(false) }
+            })
+    }
+
+    fun usuarioExiste(uid: String, onResultado: (Boolean) -> Unit) {
+        Log.d("UsuarioExiste", "Buscando datos para el UID: $uid")
+        database.child(uid).addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val existe = snapshot.exists()
+                Log.d("UsuarioExiste", "Resultado para $uid: $existe")
+                onResultado(existe)
+            }
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("UsuarioExiste", "Error de Firebase: ${error.message}")
+                onResultado(false)
+            }
+        })
+    }
+
+    fun cerrarSesion() { auth.signOut() }
+}

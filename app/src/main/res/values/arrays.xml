@@ -1,9 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string-array name="opcionesDocumentos">
-        <item>Tipo de documento</item>
-        <item>Cédula ciudadanía</item>
-        <item>Cédula extranjería</item>
+    <string-array name="opcionesGenero">
+        <item>Género</item>
+        <item>Femenino</item>
+        <item>Masculino</item>
+        <item>No binario</item>
+        <item>Prefiero no decir</item>
+    </string-array>
+
+    <string-array name="opcionesNacionalidad">
+        <item>Nacionalidad</item>
+        <item>México</item>
+        <item>Colombia</item>
+        <item>Estados Unidos</item>
+        <item>España</item>
+        <item>Argentina</item>
+        <item>Chile</item>
         <item>Otro</item>
     </string-array>
 </resources>

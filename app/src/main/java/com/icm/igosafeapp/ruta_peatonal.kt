@@ -49,9 +49,10 @@ class ruta_peatonal : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mMap: GoogleMap
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private var userMarker: Marker? = null
-    private lateinit var destinationMarker: Marker
+    private var destinationMarker: Marker? = null
     private lateinit var locationCallback: LocationCallback
     private var destinationLatLng: LatLng? = null
+    private var hasAnimatedOnce = false
 
     private lateinit var auth: FirebaseAuth
     private lateinit var database: DatabaseReference
@@ -83,16 +84,20 @@ class ruta_peatonal : AppCompatActivity(), OnMapReadyCallback {
 
         iniciar.setOnClickListener {
             val userLocation = userMarker?.position
-            val destinationLocation = destinationMarker.position
+            val destinationLocation = destinationMarker?.position
             Log.e("RutaPeatonal", "enviando: $userLocation")
 
-            val intent = Intent(this, recorrido_peatonal::class.java).apply {
-                putExtra("startLat", userLocation?.latitude)
-                putExtra("startLong", userLocation?.longitude)
-                putExtra("endLat", destinationLocation.latitude)
-                putExtra("endLong", destinationLocation.longitude)
+            if (userLocation != null && destinationLocation != null) {
+                val intent = Intent(this, recorrido_peatonal::class.java).apply {
+                    putExtra("startLat", userLocation.latitude)
+                    putExtra("startLong", userLocation.longitude)
+                    putExtra("endLat", destinationLocation.latitude)
+                    putExtra("endLong", destinationLocation.longitude)
+                }
+                startActivity(intent)
+            } else {
+                Log.e("RutaPeatonal", "No se puede iniciar el viaje: ubicaciones nulas")
             }
-            startActivity(intent)
         }
 
         obtenerFotoPerfil()
@@ -121,6 +126,7 @@ class ruta_peatonal : AppCompatActivity(), OnMapReadyCallback {
                         consultarUbicacionUsuario(photoUrl)
                     } else {
                         Log.e("RutaPeatonal", "No se encontró la URL de la foto")
+                        consultarUbicacionUsuario("")
                     }
                 }
 
@@ -146,11 +152,22 @@ class ruta_peatonal : AppCompatActivity(), OnMapReadyCallback {
                     val userLocation = LatLng(latitude, longitude)
                     updateUserMarker(userLocation, photoUrl)
 
-                    // Asumimos que la ubicación de destino se pasa desde los extras
-                    destinationLatLng = LatLng(intent.getDoubleExtra("latitude", 0.0), intent.getDoubleExtra("longitude", 0.0))
-                    destinationLatLng?.let { createDestinationMarker(it) }
-
-                    realizarTransicionZoom(userLocation, destinationLatLng!!)
+                    val destLat = intent.getDoubleExtra("endLat", 0.0)
+                    val destLng = intent.getDoubleExtra("endLong", 0.0)
+                    
+                    if (destLat != 0.0 && destLng != 0.0) {
+                        destinationLatLng = LatLng(destLat, destLng)
+                        destinationLatLng?.let { 
+                            createDestinationMarker(it)
+                            // Solo animar la cámara la primera vez que se obtienen las ubicaciones
+                            if (!hasAnimatedOnce) {
+                                realizarTransicionZoom(userLocation, it)
+                                hasAnimatedOnce = true
+                            }
+                        }
+                    } else {
+                        Log.e("RutaPeatonal", "Ubicación de destino no recibida correctamente (0.0, 0.0)")
+                    }
                 }
             }
 
@@ -165,6 +182,12 @@ class ruta_peatonal : AppCompatActivity(), OnMapReadyCallback {
     private fun updateUserMarker(location: LatLng, photoUrl: String) {
         Log.d("RutaPeatonal", "Cargando imagen para el marcador: $photoUrl")
         userMarker?.remove()
+        
+        if (photoUrl.isEmpty()) {
+            userMarker = mMap.addMarker(MarkerOptions().position(location).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)))
+            return
+        }
+
         Thread {
             try {
                 val bitmap = Picasso.get()
@@ -175,16 +198,19 @@ class ruta_peatonal : AppCompatActivity(), OnMapReadyCallback {
                     .get()
 
                 runOnUiThread {
-                    userMarker = mMap.addMarker(MarkerOptions().position(location).icon(BitmapDescriptorFactory.fromBitmap(bitmap)))!!
-                    //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 15f))
+                    userMarker = mMap.addMarker(MarkerOptions().position(location).icon(BitmapDescriptorFactory.fromBitmap(bitmap)))
                 }
             } catch (e: Exception) {
                 Log.e("RutaPeatonal", "Error al cargar la imagen: ${e.message}")
+                runOnUiThread {
+                    userMarker = mMap.addMarker(MarkerOptions().position(location).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)))
+                }
             }
         }.start()
     }
 
     private fun createDestinationMarker(location: LatLng) {
+        destinationMarker?.remove()
         val photo = intent.getStringExtra("photo") ?: ""
         Thread {
             try {
@@ -193,11 +219,9 @@ class ruta_peatonal : AppCompatActivity(), OnMapReadyCallback {
                         destinationMarker = mMap.addMarker(
                             MarkerOptions().position(location)
                                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
-                        )!!
-                        //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 15f))
+                        )
                     }
                 } else {
-                    // Si hay una URL, cargar la imagen con Picasso
                     val bitmap = Picasso.get()
                         .load(photo)
                         .placeholder(R.drawable.photo_original_user)
@@ -209,18 +233,22 @@ class ruta_peatonal : AppCompatActivity(), OnMapReadyCallback {
                         destinationMarker = mMap.addMarker(
                             MarkerOptions().position(location)
                                 .icon(BitmapDescriptorFactory.fromBitmap(bitmap))
-                        )!!
-                        //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 15f))
+                        )
                     }
                 }
             } catch (e: Exception) {
                 Log.e("RutaPeatonal", "Error al cargar la imagen de destino: ${e.message}")
+                runOnUiThread {
+                    destinationMarker = mMap.addMarker(
+                        MarkerOptions().position(location)
+                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
+                    )
+                }
             }
         }.start()
     }
 
 
-    // Realiza la transición de zoom entre los dos marcadores
     private fun realizarTransicionZoom(userLocation: LatLng, destinationLocation: LatLng) {
         val handler = Handler(Looper.getMainLooper())
 
@@ -243,4 +271,3 @@ class ruta_peatonal : AppCompatActivity(), OnMapReadyCallback {
     }
 
 }
-
