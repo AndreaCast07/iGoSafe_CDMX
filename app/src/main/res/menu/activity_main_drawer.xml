@@ -22,5 +22,10 @@
             android:icon="@drawable/ic_important"
             android:title="@string/menu_premium" />
 
+        <item
+            android:id="@+id/cerrar_sesion"
+            android:icon="@drawable/ic_close"
+            android:title="Cerrar sesion" />
+
     </group>
 </menu>

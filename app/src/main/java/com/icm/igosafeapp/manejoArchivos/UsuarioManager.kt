@@ -11,9 +11,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
 import entidades.DatosUsuario
-import entidades.Usuario
 import java.util.UUID
-
 
 class UsuarioManager(private val context: Context) {
 
@@ -37,18 +35,26 @@ class UsuarioManager(private val context: Context) {
             })
     }
 
-    fun registrarUsuario(celular: String, contrasena: String, fotoUri: Uri?, datosUsuario: DatosUsuario, onResultado: (Boolean, String?) -> Unit) {
+    // CORRECCIÓN: Ahora acepta el parámetro 'email' real
+    fun registrarUsuario(
+        celular: String,
+        contrasena: String,
+        email: String,
+        fotoUri: Uri?,
+        datosUsuario: DatosUsuario,
+        onResultado: (Boolean, String?) -> Unit
+    ) {
         dispositivoVinculado { yaTieneCuenta ->
             if (yaTieneCuenta) {
                 onResultado(false, "Este dispositivo ya tiene una cuenta asociada.")
                 return@dispositivoVinculado
             }
 
-            val emailFicticio = "${celular.trim()}@myapp.com"
-            auth.createUserWithEmailAndPassword(emailFicticio, contrasena)
+            // Usamos el email real proporcionado en Create_profile
+            auth.createUserWithEmailAndPassword(email, contrasena)
                 .addOnSuccessListener { authResult ->
                     val userId = authResult.user?.uid ?: return@addOnSuccessListener onResultado(false, "Error de sistema")
-                    procesarGuardado(userId, celular, emailFicticio, datosUsuario, fotoUri, onResultado)
+                    procesarGuardado(userId, celular, email, datosUsuario, fotoUri, onResultado)
                 }
                 .addOnFailureListener { e -> onResultado(false, e.message) }
         }
@@ -56,7 +62,7 @@ class UsuarioManager(private val context: Context) {
 
     fun completarRegistroGoogle(celular: String, fotoUri: Uri?, datosUsuario: DatosUsuario, onResultado: (Boolean, String?) -> Unit) {
         val userId = auth.currentUser?.uid ?: return onResultado(false, "No hay sesión activa")
-        
+
         dispositivoVinculado { yaTieneCuenta ->
             if (yaTieneCuenta) {
                 onResultado(false, "Este dispositivo ya tiene una cuenta asociada.")
@@ -78,18 +84,17 @@ class UsuarioManager(private val context: Context) {
     }
 
     private fun guardarDatosUsuario(userId: String, celular: String, email: String, datosUsuario: DatosUsuario, fotoUrl: String, onResultado: (Boolean, String?) -> Unit) {
+        // CORRECCIÓN: Estructura plana para que ProfileActivity pueda leer los datos
         val usuarioData = mapOf(
-            "datosUsuario" to mapOf(
-                "nombre" to datosUsuario.nombre,
-                "genero" to datosUsuario.genero,
-                "edad" to datosUsuario.edad,
-                "nacionalidad" to datosUsuario.nacionalidad
-            ),
+            "nombre" to datosUsuario.nombre,
+            "genero" to datosUsuario.genero,
+            "edad" to datosUsuario.edad,
+            "nacionalidad" to datosUsuario.nacionalidad,
             "celular" to celular,
             "email" to email,
             "fotoPerfilUrl" to fotoUrl,
             "deviceId" to deviceId,
-            "status" to "ACTIVO",
+            "status" to "ACTIVO"
         )
 
         database.child(userId).setValue(usuarioData)
@@ -100,14 +105,30 @@ class UsuarioManager(private val context: Context) {
     private fun subirFotoPerfil(uri: Uri, onResultado: (String?) -> Unit) {
         val storageReference = storage.child("perfilFotos/${UUID.randomUUID()}.jpg")
         storageReference.putFile(uri)
-            .addOnSuccessListener { it.metadata?.reference?.downloadUrl?.addOnSuccessListener { url -> onResultado(url.toString()) } }
+            .addOnSuccessListener { task ->
+                task.metadata?.reference?.downloadUrl?.addOnSuccessListener { url ->
+                    onResultado(url.toString())
+                }
+            }
             .addOnFailureListener { onResultado(null) }
     }
 
+    // CORRECCIÓN: Al usar emails reales, debemos buscar el email asociado al celular antes de loguear
     fun iniciarSesion(celular: String, contrasena: String, onResultado: (Boolean) -> Unit) {
-        val emailFicticio = "${celular.trim()}@myapp.com"
-        auth.signInWithEmailAndPassword(emailFicticio, contrasena)
-            .addOnSuccessListener { onResultado(true) }
+        database.orderByChild("celular").equalTo(celular.trim()).get()
+            .addOnSuccessListener { snapshot ->
+                if (snapshot.exists()) {
+                    // Obtenemos el email real de la base de datos
+                    val userSnapshot = snapshot.children.first()
+                    val emailReal = userSnapshot.child("email").value.toString()
+
+                    auth.signInWithEmailAndPassword(emailReal, contrasena)
+                        .addOnSuccessListener { onResultado(true) }
+                        .addOnFailureListener { onResultado(false) }
+                } else {
+                    onResultado(false)
+                }
+            }
             .addOnFailureListener { onResultado(false) }
     }
 
@@ -120,19 +141,17 @@ class UsuarioManager(private val context: Context) {
     }
 
     fun usuarioExiste(uid: String, onResultado: (Boolean) -> Unit) {
-        Log.d("UsuarioExiste", "Buscando datos para el UID: $uid")
         database.child(uid).addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val existe = snapshot.exists()
-                Log.d("UsuarioExiste", "Resultado para $uid: $existe")
-                onResultado(existe)
-            }
-            override fun onCancelled(error: DatabaseError) {
-                Log.e("UsuarioExiste", "Error de Firebase: ${error.message}")
-                onResultado(false)
-            }
+            override fun onDataChange(snapshot: DataSnapshot) { onResultado(snapshot.exists()) }
+            override fun onCancelled(error: DatabaseError) { onResultado(false) }
         })
     }
 
     fun cerrarSesion() { auth.signOut() }
+
+    fun celularYaRegistrado(celular: String, callback: (Boolean) -> Unit) {
+        database.orderByChild("celular").equalTo(celular).get()
+            .addOnSuccessListener { snapshot -> callback(snapshot.exists()) }
+            .addOnFailureListener { callback(false) }
+    }
 }

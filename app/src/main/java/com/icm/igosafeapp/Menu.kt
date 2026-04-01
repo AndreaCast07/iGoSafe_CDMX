@@ -1,7 +1,9 @@
 package com.icm.igosafeapp
 
 import Contactos
+import android.content.Context
 import android.content.Intent
+import android.widget.Toast
 import android.content.res.ColorStateList
 import android.os.Bundle
 import android.text.SpannableString
@@ -9,7 +11,6 @@ import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.Toast
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.navigation.NavigationView
 import androidx.navigation.findNavController
@@ -21,12 +22,12 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
+import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 import com.icm.igosafeapp.databinding.ActivityMenuBinding
 import org.json.JSONObject
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.core.Context
 import com.squareup.picasso.Picasso
 
 class Menu : AppCompatActivity() {
@@ -83,28 +84,28 @@ class Menu : AppCompatActivity() {
                     navController.navigate(R.id.nav_favoritos) // Navegar al fragmento de favoritos
                     true
                 }
+                R.id.cerrar_sesion ->{
+                    navController.CerrarSesion(this)
+                    true
+                }
 
                 else -> false // Para otros ítems de menú
             }
         }
 
-
-        // Obtener el usuario actual de Firebase
         val userId = FirebaseAuth.getInstance().currentUser?.uid
 
-        // Verificar si hay un usuario y obtener la URL de la foto
         if (userId != null) {
             val databaseReference: DatabaseReference =
                 FirebaseDatabase.getInstance().getReference("usuarios").child(userId)
 
-            // Obtener la URL de la foto de perfil desde Firebase Realtime Database
             databaseReference.child("fotoPerfilUrl").get().addOnSuccessListener { snapshot ->
                 val photoUrl = snapshot.getValue(String::class.java)
 
                 if (photoUrl != null && photoUrl.isNotEmpty()) {
                     Picasso.get()
-                        .load(photoUrl) // Cargar la URL de la foto
-                        .into(binding.appBarActivityMenu.fotoPerfil) // Coloca la imagen en el ImageView
+                        .load(photoUrl)
+                        .into(binding.appBarActivityMenu.fotoPerfil)
                 } else {
                     // Si la URL es nula o vacía, usa una imagen predeterminada
                     binding.appBarActivityMenu.fotoPerfil.setImageResource(R.drawable.photo_original_user)
@@ -112,14 +113,17 @@ class Menu : AppCompatActivity() {
             }
         }
         binding.appBarActivityMenu.fotoPerfil.setOnClickListener {
-            FirebaseAuth.getInstance().signOut() // Cerrar sesión en FirebaseAuth
-            Toast.makeText(this,"Sesión cerrada", Toast.LENGTH_SHORT).show()
-
-            // Redirigir al usuario a la pantalla de inicio de sesión
-            val intent = Intent(this, LoginActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            val intent = Intent(this, ProfileActivity::class.java)
             startActivity(intent)
         }
+    }
+
+    fun NavController.CerrarSesion(context: Context) {
+        FirebaseAuth.getInstance().signOut()
+        Toast.makeText(context, "Sesión cerrada correctamente", Toast.LENGTH_SHORT).show()
+        val intent = Intent(context, LoginActivity::class.java) // Cambiado 'this' por 'context'
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        context.startActivity(intent) // Cambiado a context.startActivity
     }
 
     private fun cambiarColorItem(navigationView: NavigationView, itemId: Int, colorId: Int) {
@@ -130,7 +134,11 @@ class Menu : AppCompatActivity() {
         item.title = s
     }
 
-    override fun onBackPressed() {
-        super.onBackPressed()
-        finishAffinity()    }
+    fun androidx.navigation.NavController.cerrarSesionApp(context: android.content.Context) {
+        com.google.firebase.auth.FirebaseAuth.getInstance().signOut()
+        android.widget.Toast.makeText(context, "Sesión cerrada correctamente", android.widget.Toast.LENGTH_SHORT).show()
+        val intent = android.content.Intent(context, LoginActivity::class.java)
+        intent.flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK
+        context.startActivity(intent)
+    }
 }
