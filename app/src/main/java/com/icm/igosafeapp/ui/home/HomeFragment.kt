@@ -56,46 +56,18 @@ class HomeFragment : Fragment() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
     private lateinit var placesClient: PlacesClient
-    private var contacts: List<Contactos> = emptyList()
 
-    // Ubicación Actual (Origen)
     private var currentLat: Double? = null
     private var currentLng: Double? = null
-
-    // Ubicación Destino
     private var destName: String? = null
     private var destLat: Double? = null
     private var destLng: Double? = null
+    private var destAddress: String? = null
 
-    // Bounds aproximados para la Ciudad de México
-    private val cdmxBounds = RectangularBounds.newInstance(
-        LatLng(19.0482, -99.3649), // Suroeste
-        LatLng(19.5928, -98.9403)  // Noreste
-    )
+    private val cdmxBounds = RectangularBounds.newInstance(LatLng(19.0482, -99.3649), LatLng(19.5928, -98.9403))
 
     private val requestLocationPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-        if (isGranted) {
-            obtenerUbicacion()
-        } else {
-            Toast.makeText(requireContext(), "Permiso de ubicación necesario para autocompletar origen", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private val requestContactsPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-        if (isGranted) {
-            cargarContactos()
-        }
-    }
-
-    private val autocompleteLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val place = Autocomplete.getPlaceFromIntent(result.data!!)
-            establecerDestino(place)
-        } else if (result.resultCode == AutocompleteActivity.RESULT_ERROR) {
-            val status = Autocomplete.getStatusFromIntent(result.data!!)
-            Log.e("Places", "Error: ${status.statusMessage}")
-            Toast.makeText(requireContext(), "Error al buscar: ${status.statusMessage}", Toast.LENGTH_SHORT).show()
-        }
+        if (isGranted) obtenerUbicacion()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -124,6 +96,7 @@ class HomeFragment : Fragment() {
                 currentLat = location.latitude
                 currentLng = location.longitude
                 
+                // Nodo "users" para la ubicación en tiempo real
                 subirUbicacionAFirebase(location.latitude, location.longitude)
                 
                 val currentText = binding.actualLocation.text.toString()
@@ -134,9 +107,7 @@ class HomeFragment : Fragment() {
                             val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
                             if (!addresses.isNullOrEmpty()) {
                                 Handler(Looper.getMainLooper()).post {
-                                    if (isAdded) {
-                                        binding.actualLocation.setText(addresses[0].getAddressLine(0))
-                                    }
+                                    if (isAdded) binding.actualLocation.setText(addresses[0].getAddressLine(0))
                                 }
                             }
                         } catch (e: Exception) { Log.e("GPS", "Error Geocoder: ${e.message}") }
@@ -147,70 +118,43 @@ class HomeFragment : Fragment() {
     }
 
     private fun setupClickListeners() {
-        binding.btnCaminar.setOnClickListener {
-            selectedOption = "Caminar"
-            actualizarEstadoBotones()
-        }
-
-        binding.btnCarro.setOnClickListener {
-            selectedOption = "Carro"
-            actualizarEstadoBotones()
-        }
+        binding.btnCaminar.setOnClickListener { selectedOption = "Caminar"; actualizarEstadoBotones() }
+        binding.btnCarro.setOnClickListener { selectedOption = "Carro"; actualizarEstadoBotones() }
 
         binding.btnSolicitarUbicacion.setOnClickListener {
-            if (currentLat == null) {
-                Toast.makeText(requireContext(), "Obteniendo tu ubicación actual...", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            if (destLat == null) {
-                Toast.makeText(requireContext(), "Por favor, busca un destino primero", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            if (selectedOption == null) {
-                Toast.makeText(requireContext(), "Elige modo de transporte: Caminar o Carro", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
+            if (currentLat == null) { Toast.makeText(requireContext(), "Obteniendo ubicación...", Toast.LENGTH_SHORT).show(); return@setOnClickListener }
+            if (destLat == null) { Toast.makeText(requireContext(), "Busca un destino", Toast.LENGTH_SHORT).show(); return@setOnClickListener }
+            if (selectedOption == null) { Toast.makeText(requireContext(), "Elige modo de transporte", Toast.LENGTH_SHORT).show(); return@setOnClickListener }
 
             val intentClass = if (selectedOption == "Caminar") ruta_peatonal::class.java else ruta_vehicular::class.java
-            val intent = Intent(requireContext(), intentClass).apply {
+            startActivity(Intent(requireContext(), intentClass).apply {
                 putExtra("startLat", currentLat!!)
                 putExtra("startLong", currentLng!!)
                 putExtra("endLat", destLat!!)
                 putExtra("endLong", destLng!!)
                 putExtra("name", destName)
-            }
-            startActivity(intent)
+                putExtra("address", destAddress)
+            })
         }
 
         binding.searchIcon.setOnClickListener {
             val fields = listOf(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG, Place.Field.ADDRESS)
-            val intent = Autocomplete.IntentBuilder(AutocompleteActivityMode.FULLSCREEN, fields)
-                .setLocationRestriction(cdmxBounds)
-                .setCountries(listOf("MX"))
-                .build(requireContext())
+            val intent = Autocomplete.IntentBuilder(AutocompleteActivityMode.FULLSCREEN, fields).setLocationRestriction(cdmxBounds).setCountries(listOf("MX")).build(requireContext())
             autocompleteLauncher.launch(intent)
         }
     }
 
+    private val autocompleteLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) establecerDestino(Autocomplete.getPlaceFromIntent(result.data!!))
+    }
+
     private fun setupAutoCompleteTextView() {
         if (!isAdded) return
-        
         val adapter = PlaceAutocompleteAdapter(requireContext(), placesClient)
         binding.contactLocation.setAdapter(adapter)
-        
         binding.contactLocation.setOnItemClickListener { _, _, position, _ ->
-            val prediction = adapter.getItem(position)
-            val placeId = prediction.placeId
-            val fields = listOf(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG, Place.Field.ADDRESS)
-            
-            val request = FetchPlaceRequest.builder(placeId, fields).build()
-            placesClient.fetchPlace(request).addOnSuccessListener { response ->
-                establecerDestino(response.place)
-                // Ocultar el teclado después de seleccionar
-                binding.contactLocation.clearFocus()
-            }.addOnFailureListener { e ->
-                Log.e("Places", "Error fetching place details: ${e.message}")
-            }
+            val request = FetchPlaceRequest.builder(adapter.getItem(position).placeId, listOf(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG, Place.Field.ADDRESS)).build()
+            placesClient.fetchPlace(request).addOnSuccessListener { establecerDestino(it.place); binding.contactLocation.clearFocus() }
         }
     }
 
@@ -218,9 +162,8 @@ class HomeFragment : Fragment() {
         destLat = place.latLng?.latitude
         destLng = place.latLng?.longitude
         destName = place.name ?: place.address
-        // El segundo parámetro false evita que se dispare el filtro (sugerencias) de nuevo al escribir el texto
+        destAddress = place.address ?: ""
         binding.contactLocation.setText(destName, false)
-        Toast.makeText(requireContext(), "Destino fijado: $destName", Toast.LENGTH_SHORT).show()
     }
 
     private fun actualizarEstadoBotones() {
@@ -233,32 +176,24 @@ class HomeFragment : Fragment() {
     private fun verificarYSolicitarPermisos() {
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             requestLocationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-        } else {
-            obtenerUbicacion()
-        }
-        
-        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
-            requestContactsPermissionLauncher.launch(Manifest.permission.READ_CONTACTS)
-        }
+        } else obtenerUbicacion()
     }
 
     private fun obtenerUbicacion() {
         try {
             val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 5000).build()
             fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
-        } catch (e: SecurityException) {
-            Log.e("GPS", "SecurityException: ${e.message}")
-        }
+        } catch (e: SecurityException) {}
     }
 
     private fun subirUbicacionAFirebase(latitude: Double, longitude: Double) {
         FirebaseAuth.getInstance().currentUser?.uid?.let { uid ->
+            // Usando de nuevo el nodo "users" específico para ubicaciones
             FirebaseDatabase.getInstance().getReference("users").child(uid).child("location")
                 .setValue(mapOf("latitude" to latitude, "longitude" to longitude))
+                .addOnFailureListener { Log.e("Firebase", "Fallo al subir a users: ${it.message}") }
         }
     }
-
-    private fun cargarContactos() { }
 
     override fun onDestroyView() {
         super.onDestroyView()

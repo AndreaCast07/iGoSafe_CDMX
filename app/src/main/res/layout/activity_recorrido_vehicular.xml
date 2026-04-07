@@ -25,16 +25,15 @@
         android:padding="10dp"
         android:text="Calculando la ruta..."
         android:textSize="16sp"
-        android:layout_marginTop="16dp" />
+        android:layout_marginTop="48dp" />
 
-    <!-- Botón para finalizar la ruta -->
     <Button
         android:id="@+id/finalizar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="64dp"
         android:text="Finalizar Ruta"
         android:backgroundTint="@color/azul"
         android:textColor="#FFFFFF"

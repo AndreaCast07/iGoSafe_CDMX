@@ -1,45 +1,32 @@
 package com.icm.igosafeapp
+
 import android.content.Intent
-import android.os.Bundle
-import android.widget.Button
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
-import android.Manifest
-import android.content.pm.PackageManager
-import android.graphics.Bitmap
 import android.graphics.Color
-import android.graphics.drawable.Drawable
-import android.location.Location
+import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.view.View
+import android.widget.Button
 import android.widget.TextView
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationResult
-import com.google.android.gms.location.LocationServices
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.maps.model.MarkerOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.storage.FirebaseStorage
 import com.squareup.picasso.Picasso
-import org.json.JSONObject
-import java.io.IOException
 
 class ruta_peatonal : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var iniciar: Button
@@ -47,18 +34,15 @@ class ruta_peatonal : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var apodo: TextView
 
     private lateinit var mMap: GoogleMap
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
     private var userMarker: Marker? = null
     private var destinationMarker: Marker? = null
-    private lateinit var locationCallback: LocationCallback
-    private var destinationLatLng: LatLng? = null
     private var hasAnimatedOnce = false
 
     private lateinit var auth: FirebaseAuth
-    private lateinit var database: DatabaseReference
-    private lateinit var storage: FirebaseStorage
-
-    private val LOCATION_PERMISSION_REQUEST_CODE = 1
+    private var userLocationRef: DatabaseReference? = null
+    private var locationListener: ValueEventListener? = null
+    
+    private val transitionHandler = Handler(Looper.getMainLooper())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,206 +52,88 @@ class ruta_peatonal : AppCompatActivity(), OnMapReadyCallback {
         nombre = findViewById(R.id.textViewNombre)
         apodo = findViewById(R.id.Contacto)
 
-        val nombreUsuario = intent.getStringExtra("name") ?: "Nombre no disponible"
-        val apodoUsuario = intent.getStringExtra("nickname") ?: "Apodo no disponible"
-
-        nombre.text = nombreUsuario
-        apodo.text = apodoUsuario
+        val destinationName = intent.getStringExtra("name") ?: "Ubicación destino"
+        apodo.text = destinationName // Nombre en azul grande
+        nombre.text = intent.getStringExtra("address") ?: destinationName // Dirección en gris abajo
 
         auth = FirebaseAuth.getInstance()
-        Picasso.get().setIndicatorsEnabled(true)
-
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-        val mapFragment = supportFragmentManager
-            .findFragmentById(R.id.map) as SupportMapFragment
+        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
         iniciar.setOnClickListener {
-            val userLocation = userMarker?.position
-            val destinationLocation = destinationMarker?.position
-            Log.e("RutaPeatonal", "enviando: $userLocation")
+            val sLat = intent.getDoubleExtra("startLat", 0.0)
+            val sLng = intent.getDoubleExtra("startLong", 0.0)
+            val eLat = intent.getDoubleExtra("endLat", 0.0)
+            val eLng = intent.getDoubleExtra("endLong", 0.0)
 
-            if (userLocation != null && destinationLocation != null) {
+            if (sLat != 0.0 && eLat != 0.0) {
                 val intent = Intent(this, recorrido_peatonal::class.java).apply {
-                    putExtra("startLat", userLocation.latitude)
-                    putExtra("startLong", userLocation.longitude)
-                    putExtra("endLat", destinationLocation.latitude)
-                    putExtra("endLong", destinationLocation.longitude)
+                    putExtra("startLat", sLat)
+                    putExtra("startLong", sLng)
+                    putExtra("endLat", eLat)
+                    putExtra("endLong", eLng)
                 }
                 startActivity(intent)
             } else {
-                Log.e("RutaPeatonal", "No se puede iniciar el viaje: ubicaciones nulas")
+                Toast.makeText(this, "Ubicaciones no válidas", Toast.LENGTH_SHORT).show()
             }
         }
-
-        obtenerFotoPerfil()
-
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-        mMap.uiSettings.isZoomGesturesEnabled = true
         mMap.uiSettings.isZoomControlsEnabled = true
         mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.standard))
-    }
 
-    //Obtener foto del usuario
-    private fun obtenerFotoPerfil() {
-        val userUid = FirebaseAuth.getInstance().currentUser?.uid
+        val sLat = intent.getDoubleExtra("startLat", 0.0)
+        val sLng = intent.getDoubleExtra("startLong", 0.0)
+        val eLat = intent.getDoubleExtra("endLat", 0.0)
+        val eLng = intent.getDoubleExtra("endLong", 0.0)
 
-        if (userUid != null) {
-            val userRef = FirebaseDatabase.getInstance().getReference("usuarios").child(userUid)
+        if (sLat != 0.0 && eLat != 0.0) {
+            val startLoc = LatLng(sLat, sLng)
+            val endLoc = LatLng(eLat, eLng)
 
-            userRef.addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val photoUrl = snapshot.child("fotoPerfilUrl").getValue(String::class.java)
-                    if (photoUrl != null) {
-                        Log.d("RutaPeatonal", "URL de la foto de perfil: $photoUrl")
-                        consultarUbicacionUsuario(photoUrl)
-                    } else {
-                        Log.e("RutaPeatonal", "No se encontró la URL de la foto")
-                        consultarUbicacionUsuario("")
-                    }
-                }
+            // Colocar marcadores de inmediato usando los datos del Intent
+            userMarker = mMap.addMarker(MarkerOptions().position(startLoc).title("Mi ubicación").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)))
+            destinationMarker = mMap.addMarker(MarkerOptions().position(endLoc).title(nombre.text.toString()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)))
 
-                override fun onCancelled(error: DatabaseError) {
-                    Log.e("RutaPeatonal", "Error al acceder a los datos del usuario: ${error.message}")
-                }
-            })
+            // Realizar zoom inmediato
+            realizarTransicionZoom(startLoc, endLoc)
+            
+            // Intentar actualizar la foto del usuario en segundo plano (Opcional)
+            obtenerFotoPerfil(startLoc)
         }
     }
 
-    //Obtener ubicación constantemente del usuario
-    private fun consultarUbicacionUsuario(photoUrl: String) {
-        val userUid = FirebaseAuth.getInstance().currentUser?.uid
-        val userRef = FirebaseDatabase.getInstance().getReference("users").child(userUid!!).child("location")
-
-        userRef.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val latitude = snapshot.child("latitude").getValue(Double::class.java)
-                val longitude = snapshot.child("longitude").getValue(Double::class.java)
-                Log.d("RutaPeatonal", "Latitud: $latitude, Longitud: $longitude")
-
-                if (latitude != null && longitude != null) {
-                    val userLocation = LatLng(latitude, longitude)
-                    updateUserMarker(userLocation, photoUrl)
-
-                    val destLat = intent.getDoubleExtra("endLat", 0.0)
-                    val destLng = intent.getDoubleExtra("endLong", 0.0)
-                    
-                    if (destLat != 0.0 && destLng != 0.0) {
-                        destinationLatLng = LatLng(destLat, destLng)
-                        destinationLatLng?.let { 
-                            createDestinationMarker(it)
-                            // Solo animar la cámara la primera vez que se obtienen las ubicaciones
-                            if (!hasAnimatedOnce) {
-                                realizarTransicionZoom(userLocation, it)
-                                hasAnimatedOnce = true
-                            }
-                        }
-                    } else {
-                        Log.e("RutaPeatonal", "Ubicación de destino no recibida correctamente (0.0, 0.0)")
-                    }
-                }
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                Log.e("RutaPeatonal", "Error al consultar ubicación: ${error.message}")
-            }
-        })
-    }
-
-
-    //Adaptando el marcador del usuario
-    private fun updateUserMarker(location: LatLng, photoUrl: String) {
-        Log.d("RutaPeatonal", "Cargando imagen para el marcador: $photoUrl")
-        userMarker?.remove()
+    private fun realizarTransicionZoom(userLoc: LatLng, destLoc: LatLng) {
+        if (hasAnimatedOnce) return
+        hasAnimatedOnce = true
         
-        if (photoUrl.isEmpty()) {
-            userMarker = mMap.addMarker(MarkerOptions().position(location).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)))
-            return
-        }
-
-        Thread {
-            try {
-                val bitmap = Picasso.get()
-                    .load(photoUrl)
-                    .placeholder(R.drawable.photo_original_user)
-                    .error(R.drawable.ic_person)
-                    .transform(CircleTransform(90, borderColor = Color.BLUE, borderWidth = 8f))
-                    .get()
-
-                runOnUiThread {
-                    userMarker = mMap.addMarker(MarkerOptions().position(location).icon(BitmapDescriptorFactory.fromBitmap(bitmap)))
-                }
-            } catch (e: Exception) {
-                Log.e("RutaPeatonal", "Error al cargar la imagen: ${e.message}")
-                runOnUiThread {
-                    userMarker = mMap.addMarker(MarkerOptions().position(location).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)))
-                }
-            }
-        }.start()
+        transitionHandler.postDelayed({ mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userLoc, 17f)) }, 500)
+        transitionHandler.postDelayed({ mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(destLoc, 17f)) }, 3000)
+        transitionHandler.postDelayed({
+            val bounds = LatLngBounds.Builder().include(userLoc).include(destLoc).build()
+            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 150))
+        }, 5500)
     }
 
-    private fun createDestinationMarker(location: LatLng) {
-        destinationMarker?.remove()
-        val photo = intent.getStringExtra("photo") ?: ""
-        Thread {
-            try {
-                if (photo.isNullOrEmpty()) {
-                    runOnUiThread {
-                        destinationMarker = mMap.addMarker(
-                            MarkerOptions().position(location)
-                                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
-                        )
-                    }
-                } else {
-                    val bitmap = Picasso.get()
-                        .load(photo)
-                        .placeholder(R.drawable.photo_original_user)
-                        .error(R.drawable.ic_person)
-                        .transform(CircleTransform(90, borderColor = Color.RED, borderWidth = 8f))
-                        .get()
-
-                    runOnUiThread {
-                        destinationMarker = mMap.addMarker(
-                            MarkerOptions().position(location)
-                                .icon(BitmapDescriptorFactory.fromBitmap(bitmap))
-                        )
+    private fun obtenerFotoPerfil(currentLoc: LatLng) {
+        val userUid = auth.currentUser?.uid ?: return
+        FirebaseDatabase.getInstance().getReference("usuarios").child(userUid)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val url = snapshot.child("fotoPerfilUrl").getValue(String::class.java) ?: ""
+                    if (url.isNotEmpty()) {
+                        Thread {
+                            try {
+                                val bitmap = Picasso.get().load(url).transform(CircleTransform(90, Color.BLUE, 8f)).get()
+                                runOnUiThread { userMarker?.setIcon(BitmapDescriptorFactory.fromBitmap(bitmap)) }
+                            } catch (e: Exception) {}
+                        }.start()
                     }
                 }
-            } catch (e: Exception) {
-                Log.e("RutaPeatonal", "Error al cargar la imagen de destino: ${e.message}")
-                runOnUiThread {
-                    destinationMarker = mMap.addMarker(
-                        MarkerOptions().position(location)
-                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
-                    )
-                }
-            }
-        }.start()
+                override fun onCancelled(error: DatabaseError) {}
+            })
     }
-
-
-    private fun realizarTransicionZoom(userLocation: LatLng, destinationLocation: LatLng) {
-        val handler = Handler(Looper.getMainLooper())
-
-        handler.postDelayed({
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 18f))
-        }, 0)
-
-        handler.postDelayed({
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(destinationLocation, 18f))
-        }, 3000)
-
-        handler.postDelayed({
-            val builder = LatLngBounds.Builder()
-            builder.include(userLocation)
-            builder.include(destinationLocation)
-            val bounds = builder.build()
-            val padding = 140
-            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding))
-        }, 6000)
-    }
-
 }

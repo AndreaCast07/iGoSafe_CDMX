@@ -32,7 +32,10 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:background="@color/white"
-        android:padding="16dp">
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="48dp">
 
         <TextView
             android:id="@+id/Contactov"
@@ -42,58 +45,68 @@
             android:textColor="@color/azul3"
             android:textSize="26sp"
             android:textStyle="bold"
+            android:maxLines="2"
+            android:ellipsize="end"
+            app:layout_constrainedWidth="true"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintEnd_toStartOf="@+id/imageView3"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
-
-        <Button
-            android:id="@+id/iniciarViajev"
-            android:layout_width="wrap_content"
-            android:layout_height="55dp"
-            android:layout_marginTop="16dp"
-            android:backgroundTint="@color/naranja"
-            android:text="Generar ruta"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textViewNombrev" />
 
         <ImageView
             android:id="@+id/imageView3"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:layout_marginStart="13dp"
-            app:layout_constraintBottom_toBottomOf="@+id/Contactov"
+            android:layout_marginStart="8dp"
+            app:layout_constraintBottom_toBottomOf="@id/Contactov"
             app:layout_constraintStart_toEndOf="@id/Contactov"
-            app:layout_constraintTop_toTopOf="@+id/Contactov"
+            app:layout_constraintTop_toTopOf="@id/Contactov"
             app:srcCompat="@drawable/ic_location"
             app:tint="#e64032" />
 
         <TextView
             android:id="@+id/textViewNombrev"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="Nombre completo"
+            android:text="Dirección completa"
             android:textColor="@android:color/darker_gray"
             android:textSize="16sp"
+            android:maxLines="2"
+            android:ellipsize="end"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/Contactov" />
 
         <androidx.cardview.widget.CardView
             android:id="@+id/cardView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_height="55dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp"
             app:cardBackgroundColor="@color/azulClaro"
             app:cardCornerRadius="16dp"
             app:cardElevation="2dp"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/iniciarViajev"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textViewNombrev">
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="16dp">
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:id="@+id/imageView5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/rutaVehicularText"
+                    app:layout_constraintHorizontal_chainStyle="packed"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/ic_car"
+                    app:tint="@color/black" />
 
                 <TextView
                     android:id="@+id/rutaVehicularText"
@@ -101,24 +114,29 @@
                     android:layout_height="wrap_content"
                     android:text="RUTA VEHICULAR"
                     android:textColor="@color/black"
+                    android:textSize="12sp"
                     android:textStyle="bold"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/imageView5"
                     app:layout_constraintTop_toTopOf="parent" />
 
-                <ImageView
-                    android:id="@+id/imageView5"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="4dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/rutaVehicularText"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/ic_car"
-                    app:tint="@color/black" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.cardview.widget.CardView>
+
+        <Button
+            android:id="@+id/iniciarViajev"
+            android:layout_width="0dp"
+            android:layout_height="55dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="16dp"
+            android:backgroundTint="@color/naranja"
+            android:text="Generar ruta"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/cardView"
+            app:layout_constraintTop_toBottomOf="@+id/textViewNombrev" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </RelativeLayout>
