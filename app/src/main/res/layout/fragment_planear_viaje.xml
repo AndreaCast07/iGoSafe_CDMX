@@ -17,7 +17,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <EditText
+        <AutoCompleteTextView
             android:id="@+id/actualLocation"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -27,6 +27,7 @@
             android:hint="@string/comentarioOrigen"
             android:padding="12dp"
             android:textColor="@android:color/black"
+            android:minHeight="48dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -121,6 +122,29 @@
         app:layout_constraintStart_toEndOf="@+id/btnCaminar"
         app:layout_constraintTop_toTopOf="@+id/btnCaminar" />
 
+    <TextView
+        android:id="@+id/historyLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:fontFamily="@font/roboto"
+        android:text="Destinos recientes"
+        android:textColor="@android:color/black"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnCaminar" />
+
+    <LinearLayout
+        android:id="@+id/historyContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="vertical"
+        app:layout_constraintTop_toBottomOf="@id/historyLabel"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <ImageView
         android:id="@+id/imageBanner"
         android:layout_width="0dp"
@@ -131,7 +155,7 @@
         app:layout_constraintBottom_toTopOf="@+id/btnSolicitarUbicacion"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnCaminar" />
+        app:layout_constraintTop_toBottomOf="@+id/historyContainer" />
 
     <Button
         android:id="@+id/btnSolicitarUbicacion"

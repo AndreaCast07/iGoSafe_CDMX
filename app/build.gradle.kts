@@ -17,6 +17,13 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        
+        ndk {
+            abiFilters.add("armeabi-v7a")
+            abiFilters.add("arm64-v8a")
+            abiFilters.add("x86")
+            abiFilters.add("x86_64")
+        }
     }
 
     buildTypes {
@@ -38,6 +45,9 @@ android {
         viewBinding = true
     }
     packaging {
+        jniLibs {
+            useLegacyPackaging = true
+        }
         resources {
             excludes.add("META-INF/LICENSE.md")
             excludes += setOf(
@@ -70,7 +80,7 @@ dependencies {
     implementation("androidx.exifinterface:exifinterface:1.4.2")
     implementation("com.google.code.gson:gson:2.13.2")
     implementation("com.google.android.gms:play-services-location:21.3.0")
-    implementation("com.google.maps.android:android-maps-utils:4.1.1")
+    implementation("com.google.maps.android:android-maps-utils:4.2.0")
     implementation("com.graphhopper:graphhopper-core:11.0")
     
     implementation("org.osmdroid:osmdroid-wms:6.1.20")
@@ -81,7 +91,8 @@ dependencies {
     }
     implementation("org.osmdroid:osmdroid-mapsforge:6.1.20")
     
-    implementation("com.google.android.libraries.places:places:2.5.0")
+    implementation(libs.places)
+    implementation("com.uber:h3-android:4.4.0")
     
     implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)

@@ -13,10 +13,14 @@ import android.widget.PopupWindow
 import android.widget.RatingBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatActivity.LAYOUT_INFLATER_SERVICE
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 
 class review_ruta : AppCompatActivity() {
+
+    private var ratingSeleccionado: Float = 0f
+    private var comentarioEscrito: String = ""
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_review_ruta)
@@ -26,27 +30,54 @@ class review_ruta : AppCompatActivity() {
     fun showVentana() {
         val closeButton: Button = findViewById(R.id.cerrarReview)
         val ratingBar: RatingBar = findViewById(R.id.ratingRutaSegura)
-        val editText: EditText =findViewById(R.id.review)
+        val editText: EditText = findViewById(R.id.review)
 
         val barriosPorRuta = intent.getStringArrayListExtra("barriosPorRuta")
 
         closeButton.setOnClickListener {
-            val rating = ratingBar.rating
-            val reviewText = editText.text.toString()
+            ratingSeleccionado = ratingBar.rating
+            comentarioEscrito = editText.text.toString()
 
-            if (rating > 0 && reviewText.isNotBlank() && barriosPorRuta != null) {
-                actualizarCalificaciones(barriosPorRuta, rating) {
-                    Toast.makeText(this, "Reseña guardada", Toast.LENGTH_SHORT).show()
-                    val intent = Intent(this, Menu::class.java)
-                    startActivity(intent)
-                    finish()
+            if (ratingSeleccionado > 0 && comentarioEscrito.isNotBlank()) {
+                // Guardar la reseña en una ubicación general vinculada al usuario
+                guardarResenaEnFirebase(ratingSeleccionado, comentarioEscrito)
+
+                if (barriosPorRuta != null && barriosPorRuta.isNotEmpty()) {
+                    actualizarCalificaciones(barriosPorRuta, ratingSeleccionado) {
+                        irAMenuPrincipal()
+                    }
+                } else {
+                    irAMenuPrincipal()
                 }
             } else {
                 Toast.makeText(this, "Por favor, completa el rating y el comentario.", Toast.LENGTH_SHORT).show()
             }
         }
-
     }
+
+    private fun guardarResenaEnFirebase(rating: Float, review: String) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: "desconocido"
+        val ref = FirebaseDatabase.getInstance().getReference("resenas_viajes").child(userId).push()
+        
+        val resenaData = mapOf(
+            "calificacion" to rating,
+            "comentario" to review,
+            "fecha" to System.currentTimeMillis()
+        )
+        
+        ref.setValue(resenaData).addOnFailureListener {
+            Log.e("ReviewRuta", "Error al guardar reseña: ${it.message}")
+        }
+    }
+
+    private fun irAMenuPrincipal() {
+        Toast.makeText(this, "¡Gracias por tu reseña!", Toast.LENGTH_SHORT).show()
+        val intent = Intent(this, Menu::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+        startActivity(intent)
+        finish()
+    }
+
     private fun actualizarCalificaciones(barriosPorRuta: ArrayList<String>, rating: Float, onComplete: () -> Unit) {
         val database = FirebaseDatabase.getInstance()
         val barrioRef = database.getReference("calificaciones")
@@ -57,18 +88,18 @@ class review_ruta : AppCompatActivity() {
 
             barrioRef.child(nombreBarrio).child("calificacion").get().addOnSuccessListener { snapshot ->
                 val calificacionActual = snapshot.getValue(Float::class.java) ?: 0.0f
-
                 val nuevaCalificacion = (calificacionActual + rating) / 2
 
                 barrioRef.child(nombreBarrio).child("calificacion").setValue(nuevaCalificacion).addOnCompleteListener {
                     barriosProcesados++
-
                     if (barriosProcesados == barriosPorRuta.size) {
                         onComplete()
                     }
                 }
             }.addOnFailureListener {
                 Log.e("ReviewRuta", "Error al obtener datos del barrio $nombreBarrio", it)
+                barriosProcesados++
+                if (barriosProcesados == barriosPorRuta.size) onComplete()
             }
         }
     }

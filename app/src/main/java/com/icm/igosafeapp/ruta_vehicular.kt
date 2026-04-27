@@ -67,10 +67,16 @@ class ruta_vehicular : AppCompatActivity(), OnMapReadyCallback {
                     putExtra("endLong", eLng)
                 }
                 startActivity(intent)
+                finish() // Finish this activity when moving to the next one
             } else {
                 Toast.makeText(this, "Cargando coordenadas...", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        transitionHandler.removeCallbacksAndMessages(null)
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
@@ -116,7 +122,11 @@ class ruta_vehicular : AppCompatActivity(), OnMapReadyCallback {
                         Thread {
                             try {
                                 val bitmap = Picasso.get().load(url).transform(CircleTransform(90, Color.BLUE, 8f)).get()
-                                runOnUiThread { userMarker?.setIcon(BitmapDescriptorFactory.fromBitmap(bitmap)) }
+                                runOnUiThread {
+                                    if (!isFinishing && !isDestroyed) {
+                                        userMarker?.setIcon(BitmapDescriptorFactory.fromBitmap(bitmap))
+                                    }
+                                }
                             } catch (e: Exception) {}
                         }.start()
                     }

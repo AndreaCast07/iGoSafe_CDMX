@@ -17,6 +17,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        // Motor de Riesgo se inicializa en MainApplication
+
         //Animaciones
         val animacionArriba = AnimationUtils.loadAnimation(this, R.anim.desplazamiento_arriba)
         val animacionAbajo = AnimationUtils.loadAnimation(this, R.anim.desplazamiento_abajo)
