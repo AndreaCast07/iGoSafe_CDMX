@@ -117,10 +117,6 @@ object RiskManager {
         val label: String
     )
 
-    /**
-     * Devuelve las cámaras que están sobre el trayecto.
-     * Si el índice falla, hace una búsqueda filtrada por área para seguridad.
-     */
     fun getCamerasOnPath(points: List<LatLng>): List<LatLng> {
         if (points.isEmpty()) return emptyList()
         
@@ -129,24 +125,16 @@ object RiskManager {
         
         val result = mutableListOf<LatLng>()
         
-        // Si tenemos datos indexados, los usamos (rápido)
-        if (indexedCameras.isNotEmpty()) {
-            uniqueHexagons.forEach { hex ->
-                // También revisamos vecinos inmediatos para no perder cámaras en bordes
-                val neighbors = try { h3?.gridDisk(hex, 1) ?: listOf(hex) } catch (e: Exception) { listOf(hex) }
-                neighbors.forEach { n ->
-                    indexedCameras[n]?.forEach { if (PolyUtil.isLocationOnPath(it, points, true, 80.0)) result.add(it) }
-                }
+        // Usar exclusivamente los datos indexados con vecinos para velocidad y ahorro de memoria
+        uniqueHexagons.forEach { hex ->
+            val neighbors = try { h3?.gridDisk(hex, 1) ?: listOf(hex) } catch (e: Exception) { listOf(hex) }
+            neighbors.forEach { n ->
+                indexedCameras[n]?.forEach { if (PolyUtil.isLocationOnPath(it, points, true, 70.0)) result.add(it) }
             }
         }
-        
-        // Si por alguna razón el índice falló o no dio nada en una ruta larga, 
-        // y tenemos la lista completa, hacemos un último intento filtrado
-        if (result.isEmpty() && allCameras.isNotEmpty() && points.size > 5) {
-            allCameras.forEach { if (PolyUtil.isLocationOnPath(it, points, true, 60.0)) result.add(it) }
-        }
 
-        return result.distinct()
+        // Limitar a las 40 cámaras más relevantes para no colapsar el mapa
+        return result.distinct().take(40)
     }
 
     fun getPathsOnPath(points: List<LatLng>): List<LatLng> {
