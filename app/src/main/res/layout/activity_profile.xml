@@ -32,7 +32,7 @@
         android:layout_marginTop="16dp"
         android:textSize="22sp"
         android:textStyle="bold"
-        android:textColor="@color/azul3"
+        android:textColor="@color/azul5"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imgProfileDetail"
@@ -125,7 +125,7 @@
             android:layout_height="55dp"
             android:layout_marginTop="1dp"
             android:text="Cambiar Contraseña"
-            android:backgroundTint="@color/azul4"
+            android:backgroundTint="@color/verde"
             app:layout_constraintTop_toBottomOf="@+id/btnBackMenu" />
 
         <Button
@@ -134,7 +134,7 @@
             android:layout_height="55dp"
             android:layout_marginTop="1dp"
             android:text="Eliminar Cuenta"
-            android:backgroundTint="@color/azul4"
+            android:backgroundTint="@color/azul5"
             app:layout_constraintTop_toBottomOf="@+id/btnChangePassword" />
         <Button
             android:id="@+id/btnCerrarSesion"
@@ -142,7 +142,7 @@
             android:layout_height="55dp"
             android:layout_marginTop="7dp"
             android:text="Cerrar sesion"
-            android:backgroundTint="@color/azul4"
+            android:backgroundTint="@color/azul5"
             app:layout_constraintTop_toBottomOf="@+id/infoLayout" />
 
     </LinearLayout>

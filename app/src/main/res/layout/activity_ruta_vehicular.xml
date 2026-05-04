@@ -31,7 +31,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:background="@color/white"
+        android:background="@color/claro"
         android:padding="16dp">
 
         <TextView
@@ -39,7 +39,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Nombre"
-            android:textColor="@color/azul3"
+            android:textColor="@color/azul4"
             android:textSize="26sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
@@ -50,7 +50,7 @@
             android:layout_width="wrap_content"
             android:layout_height="55dp"
             android:layout_marginTop="16dp"
-            android:backgroundTint="@color/naranja"
+            android:backgroundTint="@color/azul1"
             android:text="Generar ruta"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -66,14 +66,14 @@
             app:layout_constraintStart_toEndOf="@id/Contactov"
             app:layout_constraintTop_toTopOf="@+id/Contactov"
             app:srcCompat="@drawable/ic_location"
-            app:tint="#e64032" />
+            app:tint="@color/rojo" />
 
         <TextView
             android:id="@+id/textViewNombrev"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="Nombre completo"
+            android:text="-"
             android:textColor="@android:color/darker_gray"
             android:textSize="16sp"
             app:layout_constraintStart_toStartOf="parent"
@@ -83,7 +83,7 @@
             android:id="@+id/cardView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:cardBackgroundColor="@color/azulClaro"
+            app:cardBackgroundColor="@color/azul4"
             app:cardCornerRadius="16dp"
             app:cardElevation="2dp"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -100,7 +100,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="RUTA VEHICULAR"
-                    android:textColor="@color/black"
+                    android:textColor="@color/claro"
                     android:textStyle="bold"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -116,7 +116,7 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:srcCompat="@drawable/ic_car"
-                    app:tint="@color/black" />
+                    app:tint="@color/claro" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.cardview.widget.CardView>
 

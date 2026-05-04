@@ -63,32 +63,46 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private fun setupButtons() {
+        // Botón Cerrar Sesión Estándar
         binding.btnCerrarSesion.setOnClickListener {
             auth.signOut()
-            val intent = Intent(this, LoginActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            startActivity(intent)
-            finish()
+            irAMain()
         }
 
+        // Lógica de Cambio de Contraseña solicitada
         binding.btnChangePassword.setOnClickListener {
             val email = auth.currentUser?.email
             if (email != null) {
                 auth.sendPasswordResetEmail(email).addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        Toast.makeText(this, "Se ha enviado un correo para restablecer tu contraseña", Toast.LENGTH_LONG).show()
+                        Toast.makeText(this, "Correo enviado. Por seguridad, la sesión se cerrará.", Toast.LENGTH_LONG).show()
+
+                        // 1. Cerramos la sesión de Firebase
+                        auth.signOut()
+
+                        // 2. Mandamos al usuario a la pantalla principal
+                        irAMain()
                     } else {
                         Toast.makeText(this, "Error: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
                     }
                 }
             } else {
-                Toast.makeText(this, "No hay un correo asociado para recuperar la contraseña", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "No hay un correo asociado", Toast.LENGTH_SHORT).show()
             }
         }
 
         binding.btnDeleteAccount.setOnClickListener {
             mostrarDialogoEliminacion()
         }
+    }
+
+    // Función auxiliar para no repetir código de navegación
+    private fun irAMain() {
+        val intent = Intent(this, MainActivity::class.java)
+        // Limpiamos el stack de actividades para que no pueda volver atrás
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
     }
 
     private fun mostrarDialogoEliminacion() {
@@ -99,18 +113,13 @@ class ProfileActivity : AppCompatActivity() {
             .setTitle("Eliminar Cuenta")
             .setMessage("¿Estás seguro? Esta acción eliminará permanentemente tu perfil y datos de iGoSafe.")
             .setPositiveButton("Eliminar") { _, _ ->
-                // 1. Eliminar datos de Realtime Database
                 database.getReference("usuarios").child(uid).removeValue().addOnCompleteListener {
-                    // 2. Eliminar de Firebase Authentication
                     user.delete().addOnCompleteListener { task ->
                         if (task.isSuccessful) {
                             Toast.makeText(this, "Cuenta eliminada con éxito", Toast.LENGTH_SHORT).show()
-                            val intent = Intent(this, LoginActivity::class.java)
-                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                            startActivity(intent)
-                            finish()
+                            irAMain()
                         } else {
-                            Toast.makeText(this, "Error de seguridad. Por favor, vuelve a iniciar sesión para eliminar la cuenta.", Toast.LENGTH_LONG).show()
+                            Toast.makeText(this, "Vuelve a iniciar sesión para eliminar la cuenta.", Toast.LENGTH_LONG).show()
                         }
                     }
                 }

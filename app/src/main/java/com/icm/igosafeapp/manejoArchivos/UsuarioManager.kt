@@ -23,19 +23,11 @@ class UsuarioManager(private val context: Context) {
         Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
     }
 
+    // Ya no lo usamos para bloquear, pero lo dejamos por si alguna otra parte del código lo llama
     fun dispositivoVinculado(onResultado: (Boolean) -> Unit) {
-        database.orderByChild("deviceId").equalTo(deviceId)
-            .addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    onResultado(snapshot.exists())
-                }
-                override fun onCancelled(error: DatabaseError) {
-                    onResultado(false)
-                }
-            })
+        onResultado(false) // Forzamos que siempre diga que NO está vinculado para no bloquear
     }
 
-    // CORRECCIÓN: Ahora acepta el parámetro 'email' real
     fun registrarUsuario(
         celular: String,
         contrasena: String,
@@ -44,33 +36,21 @@ class UsuarioManager(private val context: Context) {
         datosUsuario: DatosUsuario,
         onResultado: (Boolean, String?) -> Unit
     ) {
-        dispositivoVinculado { yaTieneCuenta ->
-            if (yaTieneCuenta) {
-                onResultado(false, "Este dispositivo ya tiene una cuenta asociada.")
-                return@dispositivoVinculado
+        // ELIMINADO: Ya no llamamos a dispositivoVinculado aquí
+        auth.createUserWithEmailAndPassword(email, contrasena)
+            .addOnSuccessListener { authResult ->
+                val userId = authResult.user?.uid ?: return@addOnSuccessListener onResultado(false, "Error de sistema")
+                procesarGuardado(userId, celular, email, datosUsuario, fotoUri, onResultado)
             }
-
-            // Usamos el email real proporcionado en Create_profile
-            auth.createUserWithEmailAndPassword(email, contrasena)
-                .addOnSuccessListener { authResult ->
-                    val userId = authResult.user?.uid ?: return@addOnSuccessListener onResultado(false, "Error de sistema")
-                    procesarGuardado(userId, celular, email, datosUsuario, fotoUri, onResultado)
-                }
-                .addOnFailureListener { e -> onResultado(false, e.message) }
-        }
+            .addOnFailureListener { e -> onResultado(false, e.message) }
     }
 
     fun completarRegistroGoogle(celular: String, fotoUri: Uri?, datosUsuario: DatosUsuario, onResultado: (Boolean, String?) -> Unit) {
         val userId = auth.currentUser?.uid ?: return onResultado(false, "No hay sesión activa")
 
-        dispositivoVinculado { yaTieneCuenta ->
-            if (yaTieneCuenta) {
-                onResultado(false, "Este dispositivo ya tiene una cuenta asociada.")
-                return@dispositivoVinculado
-            }
-            val email = auth.currentUser?.email ?: ""
-            procesarGuardado(userId, celular, email, datosUsuario, fotoUri, onResultado)
-        }
+        // ELIMINADO: Bloqueo de dispositivo quitado para permitir múltiples cuentas
+        val email = auth.currentUser?.email ?: ""
+        procesarGuardado(userId, celular, email, datosUsuario, fotoUri, onResultado)
     }
 
     private fun procesarGuardado(userId: String, celular: String, email: String, datosUsuario: DatosUsuario, fotoUri: Uri?, onResultado: (Boolean, String?) -> Unit) {
@@ -84,7 +64,7 @@ class UsuarioManager(private val context: Context) {
     }
 
     private fun guardarDatosUsuario(userId: String, celular: String, email: String, datosUsuario: DatosUsuario, fotoUrl: String, onResultado: (Boolean, String?) -> Unit) {
-        // CORRECCIÓN: Estructura plana para que ProfileActivity pueda leer los datos
+        // Seguimos guardando el deviceId como información, pero ya no es un filtro
         val usuarioData = mapOf(
             "nombre" to datosUsuario.nombre,
             "genero" to datosUsuario.genero,
@@ -102,6 +82,8 @@ class UsuarioManager(private val context: Context) {
             .addOnFailureListener { e -> onResultado(false, e.message) }
     }
 
+    // ... (El resto de tus funciones de subirFoto e iniciarSesion se mantienen igual)
+
     private fun subirFotoPerfil(uri: Uri, onResultado: (String?) -> Unit) {
         val storageReference = storage.child("perfilFotos/${UUID.randomUUID()}.jpg")
         storageReference.putFile(uri)
@@ -113,12 +95,10 @@ class UsuarioManager(private val context: Context) {
             .addOnFailureListener { onResultado(null) }
     }
 
-    // CORRECCIÓN: Al usar emails reales, debemos buscar el email asociado al celular antes de loguear
     fun iniciarSesion(celular: String, contrasena: String, onResultado: (Boolean) -> Unit) {
         database.orderByChild("celular").equalTo(celular.trim()).get()
             .addOnSuccessListener { snapshot ->
                 if (snapshot.exists()) {
-                    // Obtenemos el email real de la base de datos
                     val userSnapshot = snapshot.children.first()
                     val emailReal = userSnapshot.child("email").value.toString()
 

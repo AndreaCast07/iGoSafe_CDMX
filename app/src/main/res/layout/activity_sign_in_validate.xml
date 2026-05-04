@@ -4,14 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="25dp"
+    android:padding="20dp"
     android:background="@color/azul4">
 
     <ImageView
         android:id="@+id/logo"
         android:layout_width="85dp"
         android:layout_height="63dp"
-        android:layout_marginStart="8dp"
         android:layout_marginTop="36dp"
         android:src="@drawable/logo_gris"
         app:layout_constraintStart_toStartOf="parent"
@@ -22,15 +21,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="56dp"
-        android:layout_marginEnd="108dp"
         android:text="Validar registro"
         android:fontFamily="@font/roboto"
         android:textColor="#FFFFFF"
         android:textSize="20sp"
         android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@+id/logo"
+        app:layout_constraintHorizontal_bias="0.2"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <View
@@ -39,19 +37,18 @@
         android:layout_height="2dp"
         android:layout_marginTop="28dp"
         android:background="@color/azul1"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/title" />
+        app:layout_constraintTop_toBottomOf="@+id/title"
+        tools:layout_editor_absoluteX="25dp" />
 
     <TextView
         android:id="@+id/instruction"
-        android:layout_width="321dp"
-        android:layout_height="43dp"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:fontFamily="@font/roboto"
-        android:text="Ingrese el código de 5 dígitos que se le ha enviado por SMS"
+        android:text="Ingrese el código de 6 dígitos enviado por SMS"
         android:textColor="@color/white"
+        android:textAlignment="center"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/line" />
@@ -68,11 +65,10 @@
 
         <EditText
             android:id="@+id/editText1"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:layout_marginEnd="5dp"
+            android:layout_width="45dp"
+            android:layout_height="55dp"
+            android:layout_margin="4dp"
             android:background="@drawable/custom_input"
-            android:focusableInTouchMode="true"
             android:inputType="number"
             android:gravity="center"
             android:maxLength="1"
@@ -81,50 +77,59 @@
 
         <EditText
             android:id="@+id/editText2"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="45dp"
+            android:layout_height="55dp"
+            android:layout_margin="4dp"
             android:background="@drawable/custom_input"
-            android:layout_marginEnd="5dp"
             android:gravity="center"
             android:textColor="@color/azul4"
             android:textSize="18sp"
             android:maxLength="1"
-            android:focusableInTouchMode="true"
             android:inputType="number"/>
 
         <EditText
             android:id="@+id/editText3"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="45dp"
+            android:layout_height="55dp"
+            android:layout_margin="4dp"
             android:background="@drawable/custom_input"
-            android:layout_marginEnd="5dp"
             android:gravity="center"
             android:textColor="@color/azul4"
             android:textSize="18sp"
-            android:focusableInTouchMode="true"
             android:inputType="number"
             android:maxLength="1" />
 
         <EditText
             android:id="@+id/editText4"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="45dp"
+            android:layout_height="55dp"
+            android:layout_margin="4dp"
             android:background="@drawable/custom_input"
             android:gravity="center"
             android:textColor="@color/azul4"
             android:textSize="18sp"
-            android:focusableInTouchMode="true"
             android:inputType="number"
             android:maxLength="1" />
 
         <EditText
             android:id="@+id/editText5"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="45dp"
+            android:layout_height="55dp"
+            android:layout_margin="4dp"
             android:background="@drawable/custom_input"
-            android:layout_marginStart="5dp"
             android:gravity="center"
-            android:focusableInTouchMode="true"
+            android:inputType="number"
+            android:maxLength="1"
+            android:textColor="@color/azul4"
+            android:textSize="18sp" />
+
+        <EditText
+            android:id="@+id/editText6"
+            android:layout_width="45dp"
+            android:layout_height="55dp"
+            android:layout_margin="4dp"
+            android:background="@drawable/custom_input"
+            android:gravity="center"
             android:inputType="number"
             android:maxLength="1"
             android:textColor="@color/azul4"
@@ -136,11 +141,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="44dp"
-        android:text="Tiempo límite: 3:00 minutos"
+        android:text="Tiempo límite: 1:00 minuto"
         android:textColor="@color/white"
         android:fontFamily="@font/roboto"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/codeContainer" />
 
@@ -148,25 +152,24 @@
         android:id="@+id/btnValidate"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:layout_marginTop="164dp"
+        android:layout_marginTop="80dp"
         android:backgroundTint="@color/verde"
         android:text="Validar"
         android:textColor="@color/white"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@+id/timer"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/timer" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <TextView
         android:id="@+id/resendCode"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
-        android:text="@string/volverEnviarCodigo"
+        android:text="¿No recibiste el código? Reenviar"
         android:textColor="@color/azul1"
         android:fontFamily="@font/roboto"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.496"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btnValidate" />
 

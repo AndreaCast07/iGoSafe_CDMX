@@ -2,16 +2,13 @@ package com.icm.igosafeapp
 
 import android.content.Intent
 import android.os.Bundle
-import android.provider.Settings
 import android.util.Log
 import android.view.MotionEvent
 import android.text.method.HideReturnsTransformationMethod
 import android.text.method.PasswordTransformationMethod
-import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -30,6 +27,7 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var googleSignInClient: GoogleSignInClient
     private lateinit var usuarioManager: UsuarioManager
 
+    // Lanzador para el resultado de la ventana de Google
     private val googleSignInLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == RESULT_OK) {
             val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
@@ -40,8 +38,8 @@ class LoginActivity : AppCompatActivity() {
                     firebaseAuthWithGoogle(idToken)
                 }
             } catch (e: ApiException) {
-                Log.e("Login", "Google sign in failed", e)
-                Toast.makeText(this, "Error de Google (Code: ${e.statusCode})", Toast.LENGTH_SHORT).show()
+                Log.e("iGoSafe_Login", "Google sign in failed", e)
+                Toast.makeText(this, "Error de Google (Código: ${e.statusCode})", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -54,25 +52,26 @@ class LoginActivity : AppCompatActivity() {
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // --- CONFIGURACIÓN DE GOOGLE ---
+        // Se recomienda mover este ID a strings.xml por seguridad
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(getString(R.string.default_web_client_id))
+            .requestIdToken("371704711119-tpiktdm5u5659egicchpaq5fgqmv0dgv.apps.googleusercontent.com")
             .requestEmail()
             .build()
         googleSignInClient = GoogleSignIn.getClient(this, gso)
 
+        // 1. Verificamos sesión persistente al abrir la app
         verificarSesionExistente()
 
         setupPasswordVisibility()
         setupEventListeners()
 
+        // Manejo del botón atrás para cerrar la app por completo
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 finishAffinity()
             }
         })
-
-        val currentDeviceId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
-        Log.d("DeviceId", "ID: $currentDeviceId")
     }
 
     private fun verificarSesionExistente() {
@@ -80,8 +79,7 @@ class LoginActivity : AppCompatActivity() {
         if (currentUser != null) {
             usuarioManager.usuarioExiste(currentUser.uid) { existe ->
                 if (existe) {
-                    startActivity(Intent(this, Menu::class.java))
-                    finish()
+                    irAlMenu()
                 } else {
                     auth.signOut()
                 }
@@ -90,6 +88,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun setupEventListeners() {
+        // Inicio de sesión con Celular y Contraseña
         binding.btnIniciarSesion.setOnClickListener {
             val celular = binding.inputCelular.text.toString().trim()
             val contrasena = binding.inputPassword.text.toString().trim()
@@ -99,40 +98,49 @@ class LoginActivity : AppCompatActivity() {
                     if (registrado) {
                         usuarioManager.iniciarSesion(celular, contrasena) { exito ->
                             if (exito) {
-                                startActivity(Intent(this, Menu::class.java))
-                                finish()
+                                irAlMenu()
                             } else {
-                                Toast.makeText(this, "Credenciales incorrectas", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(this, "Contraseña incorrecta", Toast.LENGTH_SHORT).show()
                             }
                         }
                     } else {
-                        Toast.makeText(this, "El número no está registrado", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "El número no está registrado en iGoSafe", Toast.LENGTH_SHORT).show()
                     }
                 }
             } else {
-                Toast.makeText(this, "Completa todos los campos", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Por favor, completa todos los campos", Toast.LENGTH_SHORT).show()
             }
         }
 
-        // Google Sign-In
+        // Inicio de sesión con Google
         binding.btnGoogle.setOnClickListener {
-            googleSignInLauncher.launch(googleSignInClient.signInIntent)
+            googleSignInClient.signOut().addOnCompleteListener {
+                val signInIntent = googleSignInClient.signInIntent
+                googleSignInLauncher.launch(signInIntent)
+            }
         }
 
-        // Apple Sign-In
+        // Inicio de sesión con Apple
         binding.btnApple.setOnClickListener {
             iniciarSesionApple()
         }
 
-        // Recuperar Contraseña
+        // Recuperar contraseña
         binding.forgotPassword.setOnClickListener {
-            mostrarDialogoRecuperacion()
+            startActivity(Intent(this, ForgotPassActivity::class.java))
         }
 
-        // Ir a Registro
+        // Crear cuenta nueva
         binding.registrarse.setOnClickListener {
-            startActivity(Intent(this, SignInPhone::class.java))
+            startActivity(Intent(this, Create_profile::class.java))
         }
+    }
+
+    private fun irAlMenu() {
+        val intent = Intent(this, Menu::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
     }
 
     private fun firebaseAuthWithGoogle(idToken: String) {
@@ -140,7 +148,11 @@ class LoginActivity : AppCompatActivity() {
         auth.signInWithCredential(credential).addOnCompleteListener(this) { task ->
             if (task.isSuccessful) {
                 val user = task.result?.user
-                manejarFlujoPostLogin(user?.uid, user?.displayName)
+                // CORRECCIÓN: Ahora pasamos el email también
+                manejarFlujoPostLogin(user?.uid, user?.displayName, user?.email)
+            } else {
+                Log.e("iGoSafe_Error", "Firebase Auth falló", task.exception)
+                Toast.makeText(this, "Error de Firebase: ${task.exception?.message}", Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -148,57 +160,46 @@ class LoginActivity : AppCompatActivity() {
     private fun iniciarSesionApple() {
         val provider = OAuthProvider.newBuilder("apple.com")
         provider.scopes = listOf("email", "name")
+        provider.addCustomParameter("locale", "es_MX")
 
-        auth.startActivityForSignInWithProvider(this, provider.build())
-            .addOnSuccessListener { authResult ->
+        // CORRECCIÓN: Manejo de resultados pendientes para mayor robustez
+        val pending = auth.pendingAuthResult
+        if (pending != null) {
+            pending.addOnSuccessListener { authResult ->
                 val user = authResult.user
-                manejarFlujoPostLogin(user?.uid, user?.displayName)
+                manejarFlujoPostLogin(user?.uid, user?.displayName, user?.email)
+            }.addOnFailureListener { e ->
+                Log.e("iGoSafe_Apple", "Error en flujo pendiente", e)
             }
-            .addOnFailureListener { e ->
-                Log.e("AppleAuth", "Error", e)
-                Toast.makeText(this, "Error al conectar con Apple", Toast.LENGTH_SHORT).show()
-            }
+        } else {
+            auth.startActivityForSignInWithProvider(this, provider.build())
+                .addOnSuccessListener { authResult ->
+                    val user = authResult.user
+                    manejarFlujoPostLogin(user?.uid, user?.displayName, user?.email)
+                }
+                .addOnFailureListener { e ->
+                    Log.e("iGoSafe_Apple", "Error en Apple Auth", e)
+                    Toast.makeText(this, "Fallo al conectar con Apple", Toast.LENGTH_SHORT).show()
+                }
+        }
     }
 
-    private fun manejarFlujoPostLogin(uid: String?, nombre: String?) {
+    private fun manejarFlujoPostLogin(uid: String?, nombre: String?, email: String?) {
         if (uid == null) return
         usuarioManager.usuarioExiste(uid) { existe ->
             if (existe) {
-                startActivity(Intent(this, Menu::class.java))
-                finish()
+                irAlMenu()
             } else {
+                // CORRECCIÓN: Mandamos nombre Y email para autocompletar el perfil
                 val intent = Intent(this, Create_profile::class.java).apply {
                     putExtra("IS_SOCIAL_LOGIN", true)
                     putExtra("NOMBRE", nombre)
+                    putExtra("EMAIL", email)
                 }
                 startActivity(intent)
                 finish()
             }
         }
-    }
-
-    private fun mostrarDialogoRecuperacion() {
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle("Recuperar contraseña")
-
-        val input = EditText(this)
-        input.hint = "Correo electrónico"
-        builder.setView(input)
-
-        builder.setPositiveButton("Enviar") { _, _ ->
-            val email = input.text.toString().trim()
-            if (email.isNotEmpty()) {
-                auth.sendPasswordResetEmail(email).addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        Toast.makeText(this, "Enlace enviado a su correo", Toast.LENGTH_LONG).show()
-                    } else {
-                        Toast.makeText(this, "Error: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
-        }
-        builder.setNegativeButton("Cancelar") { d, _ -> d.dismiss() }
-        builder.show()
     }
 
     private fun setupPasswordVisibility() {
@@ -208,10 +209,13 @@ class LoginActivity : AppCompatActivity() {
                 val drawable = binding.inputPassword.compoundDrawables[DRAWABLE_RIGHT]
                 if (event.rawX >= (binding.inputPassword.right - drawable.bounds.width())) {
                     val selection = binding.inputPassword.selectionEnd
+
                     if (binding.inputPassword.transformationMethod is PasswordTransformationMethod) {
+                        // CORRECCIÓN: Cambio de icono a 'Visible'
                         binding.inputPassword.transformationMethod = HideReturnsTransformationMethod.getInstance()
                         binding.inputPassword.setCompoundDrawablesWithIntrinsicBounds(R.drawable.custom_lock_icon, 0, R.drawable.ic_eye_hide, 0)
                     } else {
+                        // CORRECCIÓN: Cambio de icono a 'Oculto'
                         binding.inputPassword.transformationMethod = PasswordTransformationMethod.getInstance()
                         binding.inputPassword.setCompoundDrawablesWithIntrinsicBounds(R.drawable.custom_lock_icon, 0, R.drawable.ic_eye_hide, 0)
                     }

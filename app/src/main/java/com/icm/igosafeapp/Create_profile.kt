@@ -2,19 +2,20 @@ package com.icm.igosafeapp
 
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.TextPaint
+import android.text.method.LinkMovementMethod
+import android.text.style.ClickableSpan
 import android.view.View
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.Spinner
-import android.widget.Toast
+import android.widget.*
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -36,6 +37,7 @@ class Create_profile : AppCompatActivity() {
     private lateinit var spinnerGenero: Spinner
     private lateinit var spinnerNacionalidad: Spinner
     private lateinit var btnCrearPerfil: Button
+    private lateinit var cbTerminos: CheckBox
 
     private lateinit var photoPerfil: ImageView
     private lateinit var iconCamera: ImageView
@@ -46,33 +48,20 @@ class Create_profile : AppCompatActivity() {
     private lateinit var usuarioManager: UsuarioManager
     private var isGoogleFlow: Boolean = false
 
-    private val cameraContract =
-        registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
-            if (success) {
-                pickedPhoto = imageUrl
-                val rotation = getRotationAngle(imageUrl)
-                Picasso.get()
-                    .load(imageUrl)
-                    .rotate(rotation.toFloat())
-                    .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)
-                    .networkPolicy(NetworkPolicy.NO_CACHE)
-                    .placeholder(R.drawable.photo_original_user)
-                    .into(photoPerfil)
-            }
+    // Contratos para Cámara y Galería
+    private val cameraContract = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+        if (success) {
+            pickedPhoto = imageUrl
+            actualizarFotoEnVista(imageUrl)
         }
+    }
 
-    private val galleryContract =
-        registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-            uri?.let {
-                pickedPhoto = it
-                val rotation = getRotationAngle(it)
-                Picasso.get()
-                    .load(it)
-                    .rotate(rotation.toFloat())
-                    .placeholder(R.drawable.photo_original_user)
-                    .into(photoPerfil)
-            }
+    private val galleryContract = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        uri?.let {
+            pickedPhoto = it
+            actualizarFotoEnVista(it)
         }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,7 +69,8 @@ class Create_profile : AppCompatActivity() {
 
         usuarioManager = UsuarioManager(this)
         isGoogleFlow = intent.getBooleanExtra("IS_GOOGLE", false)
-        // Inicialización de vistas
+
+        // Inicializar vistas[cite: 2, 22]
         txtNombre = findViewById(R.id.editTxtName)
         txtCelular = findViewById(R.id.editTxtCelular)
         txtEdad = findViewById(R.id.editTxtEdad)
@@ -90,21 +80,17 @@ class Create_profile : AppCompatActivity() {
         photoPerfil = findViewById(R.id.photoPerfil)
         iconCamera = findViewById(R.id.iconCamera)
         btnCrearPerfil = findViewById(R.id.btnCreateProfile)
+        cbTerminos = findViewById(R.id.cbTerminos)
 
         val celularSms = intent.getStringExtra("CELULAR") ?: ""
         if (celularSms.isNotEmpty()) {
             txtCelular.setText(celularSms)
-            txtCelular.visibility = View.VISIBLE
             txtCelular.isEnabled = false
-        }
-
-        if (isGoogleFlow) {
-            txtNombre.setText(intent.getStringExtra("NOMBRE") ?: "")
-            txtCelular.visibility = View.VISIBLE
         }
 
         configurarSpinners()
         setupImageClickListeners()
+        setupTerminosClickable()
         imageUrl = createImageUri()
         configurarBotonCrear()
 
@@ -118,74 +104,106 @@ class Create_profile : AppCompatActivity() {
         })
     }
 
-    private fun configurarSpinners() {
-        val adapterGen = ArrayAdapter.createFromResource(this, R.array.opcionesGenero, android.R.layout.simple_spinner_item)
-        adapterGen.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerGenero.adapter = adapterGen
+    // Muestra diálogo para elegir origen de imagen[cite: 22]
+    private fun mostrarOpcionesImagen() {
+        val opciones = arrayOf("Cámara", "Galería")
+        AlertDialog.Builder(this)
+            .setTitle("Seleccionar foto de perfil")
+            .setItems(opciones) { _, which ->
+                when (which) {
+                    0 -> if (checkAndRequestPermissions("CAMERA")) cameraContract.launch(imageUrl)
+                    1 -> if (checkAndRequestPermissions("GALLERY")) galleryContract.launch("image/*")
+                }
+            }
+            .show()
+    }
 
-        val adapterNac = ArrayAdapter.createFromResource(this, R.array.opcionesNacionalidad, android.R.layout.simple_spinner_item)
-        adapterNac.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerNacionalidad.adapter = adapterNac
+    private fun setupImageClickListeners() {
+        photoPerfil.setOnClickListener { mostrarOpcionesImagen() }
+        iconCamera.setOnClickListener { mostrarOpcionesImagen() }
+    }
+
+    private fun setupTerminosClickable() {
+        val texto = "Acepto los términos y condiciones"
+        val spannable = SpannableString(texto)
+        val linkText = "términos y condiciones"
+
+        val clickableSpan = object : ClickableSpan() {
+            override fun onClick(widget: View) {
+                // Ir a la actividad de términos[cite: 22]
+                val intent = Intent(this@Create_profile, TerminosActivity::class.java)
+                startActivity(intent)
+            }
+            override fun updateDrawState(ds: TextPaint) {
+                super.updateDrawState(ds)
+                ds.color = Color.BLUE
+                ds.isUnderlineText = true
+            }
+        }
+
+        val start = texto.indexOf(linkText)
+        val end = start + linkText.length
+        spannable.setSpan(clickableSpan, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+        cbTerminos.text = spannable
+        cbTerminos.movementMethod = LinkMovementMethod.getInstance()
     }
 
     private fun configurarBotonCrear() {
         btnCrearPerfil.setOnClickListener {
             val nombre = txtNombre.text.toString().trim()
             val edadStr = txtEdad.text.toString().trim()
-            val email = txtEmail.text.toString().trim() // Capturamos el correo
-            val genero = spinnerGenero.selectedItem.toString()
-            val nacionalidad = spinnerNacionalidad.selectedItem.toString()
-            val celular = txtCelular.text.toString().replace(" ", "").trim()
+            val email = txtEmail.text.toString().trim()
+            val celular = txtCelular.text.toString().trim()
 
-            if (nombre.isEmpty() || edadStr.isEmpty() || email.isEmpty() ||
-                spinnerGenero.selectedItemPosition == 0 ||
-                spinnerNacionalidad.selectedItemPosition == 0
-            ) {
-                Toast.makeText(this@Create_profile, "Completa todos los campos obligatorios", Toast.LENGTH_SHORT).show()
+            // Validaciones obligatorias[cite: 22]
+            if (nombre.isEmpty() || edadStr.isEmpty() || email.isEmpty() || celular.isEmpty()) {
+                Toast.makeText(this, "Completa todos los campos", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                Toast.makeText(this, "Por favor, ingresa un correo electrónico válido", Toast.LENGTH_SHORT).show()
+
+            if (!cbTerminos.isChecked) {
+                Toast.makeText(this, "Debes aceptar los términos y condiciones", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
             btnCrearPerfil.isEnabled = false
-            btnCrearPerfil.text = "Validando..."
+            btnCrearPerfil.text = "Procesando..."
 
             usuarioManager.celularYaRegistrado(celular) { existe ->
                 runOnUiThread {
                     if (existe && !isGoogleFlow) {
-                        Toast.makeText(this@Create_profile, "Este número ya está registrado", Toast.LENGTH_LONG).show()
+                        Toast.makeText(this@Create_profile, "Número ya registrado", Toast.LENGTH_LONG).show()
                         btnCrearPerfil.isEnabled = true
                         btnCrearPerfil.text = "Crear perfil"
                     } else {
-                        val edadInt = edadStr.toIntOrNull() ?: 0
-                        continuarRegistro(nombre, edadInt, genero, nacionalidad, celular, email)
+                        continuarRegistro(nombre, edadStr.toIntOrNull() ?: 0,
+                            spinnerGenero.selectedItem.toString(),
+                            spinnerNacionalidad.selectedItem.toString(), celular, email)
                     }
                 }
             }
         }
     }
 
+    private fun actualizarFotoEnVista(uri: Uri) {
+        val rotation = getRotationAngle(uri)
+        Picasso.get()
+            .load(uri)
+            .rotate(rotation.toFloat())
+            .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)
+            .placeholder(R.drawable.photo_original_user)
+            .into(photoPerfil)
+    }
+
     private fun continuarRegistro(nombre: String, edad: Int, genero: String, nacionalidad: String, celular: String, email: String) {
         val datos = DatosUsuario(nombre, genero, edad, nacionalidad)
-
         if (isGoogleFlow) {
-            usuarioManager.completarRegistroGoogle(celular, pickedPhoto, datos) { exito, error ->
-                runOnUiThread {
-                    if (exito) {
-                        startActivity(Intent(this@Create_profile, Menu::class.java))
-                        finish()
-                    } else {
-                        btnCrearPerfil.isEnabled = true
-                        btnCrearPerfil.text = "Crear perfil"
-                        Toast.makeText(this@Create_profile, error ?: "Error", Toast.LENGTH_LONG).show()
-                    }
-                }
+            usuarioManager.completarRegistroGoogle(celular, pickedPhoto, datos) { exito, _ ->
+                if (exito) startActivity(Intent(this, Menu::class.java)).also { finish() }
             }
         } else {
-            // Pasamos el correo a la siguiente actividad para habilitar recuperación de contraseña
-            val intent = Intent(this@Create_profile, CreatePassword::class.java).apply {
+            val intent = Intent(this, SignInValidateSms::class.java).apply {
                 putExtra("CELULAR", celular)
                 putExtra("NOMBRE", nombre)
                 putExtra("EMAIL", email)
@@ -199,23 +217,17 @@ class Create_profile : AppCompatActivity() {
         }
     }
 
+    // Funciones de utilidad (Permisos, Rotación, URI) se mantienen[cite: 22]
     private fun getRotationAngle(uri: Uri): Int {
-        return try {
-            contentResolver.openInputStream(uri)?.use {
-                val exif = ExifInterface(it)
-                when (exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)) {
-                    ExifInterface.ORIENTATION_ROTATE_90 -> 90
-                    ExifInterface.ORIENTATION_ROTATE_180 -> 180
-                    ExifInterface.ORIENTATION_ROTATE_270 -> 270
-                    else -> 0
-                }
-            } ?: 0
-        } catch (e: Exception) { 0 }
-    }
-
-    private fun setupImageClickListeners() {
-        photoPerfil.setOnClickListener { if (checkAndRequestPermissions("GALLERY")) galleryContract.launch("image/*") }
-        iconCamera.setOnClickListener { if (checkAndRequestPermissions("CAMERA")) cameraContract.launch(imageUrl) }
+        return try { contentResolver.openInputStream(uri)?.use {
+            val exif = ExifInterface(it)
+            when (exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)) {
+                ExifInterface.ORIENTATION_ROTATE_90 -> 90
+                ExifInterface.ORIENTATION_ROTATE_180 -> 180
+                ExifInterface.ORIENTATION_ROTATE_270 -> 270
+                else -> 0
+            }
+        } ?: 0 } catch (e: Exception) { 0 }
     }
 
     private fun checkAndRequestPermissions(type: String): Boolean {
@@ -234,5 +246,15 @@ class Create_profile : AppCompatActivity() {
     private fun createImageUri(): Uri {
         val image = File(filesDir, FILE_NAME)
         return FileProvider.getUriForFile(this, "com.icm.igosafeapp.fileprovider", image)
+    }
+
+    private fun configurarSpinners() {
+        val adapterGen = ArrayAdapter.createFromResource(this, R.array.opcionesGenero, android.R.layout.simple_spinner_item)
+        adapterGen.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerGenero.adapter = adapterGen
+
+        val adapterNac = ArrayAdapter.createFromResource(this, R.array.opcionesNacionalidad, android.R.layout.simple_spinner_item)
+        adapterNac.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerNacionalidad.adapter = adapterNac
     }
 }

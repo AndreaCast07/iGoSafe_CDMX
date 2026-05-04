@@ -20,8 +20,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:background="#AA000000"
-        android:textColor="#FFFFFF"
+        android:background="@color/verde"
+        android:textColor="@color/claro"
         android:padding="10dp"
         android:text="Calculando la ruta..."
         android:textSize="16sp"
@@ -35,7 +35,7 @@
     android:layout_centerHorizontal="true"
     android:orientation="horizontal"
     android:layout_marginBottom="80dp"
-        android:background="#AA000000"
+        android:background="@color/azul5"
     android:padding="10dp"
     android:gravity="center_vertical">
 
@@ -46,7 +46,7 @@
         android:layout_height="wrap_content"
         android:numStars="5"
         android:stepSize="0.5"
-        android:progressTint="@color/azul"
+        android:progressTint="@color/azul1"
         android:rating="0"
         android:layout_marginEnd="8dp"/>
 
@@ -70,7 +70,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="16dp"
         android:text="Finalizar Ruta"
-        android:backgroundTint="@color/azul"
+        android:backgroundTint="@color/azul1"
         android:textColor="#FFFFFF"
         android:padding="10dp" />
 
