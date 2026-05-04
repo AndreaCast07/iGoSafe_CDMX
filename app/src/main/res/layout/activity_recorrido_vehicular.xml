@@ -13,97 +13,30 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
-    <!-- Banner Informativo Amigable -->
-    <androidx.cardview.widget.CardView
-        android:id="@+id/cardInfo"
-        android:layout_width="match_parent"
+    <!-- Texto que puede mostrar la distancia o el tiempo de la ruta -->
+    <TextView
+        android:id="@+id/textoRuta"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="20dp"
-        android:layout_marginTop="48dp"
-        app:cardCornerRadius="15dp"
-        app:cardElevation="8dp"
-        app:cardBackgroundColor="#FDFDFD">
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:background="@color/verde"
+        android:textColor="@color/claro"
+        android:padding="10dp"
+        android:text="Calculando la ruta..."
+        android:textSize="16sp"
+        android:layout_marginTop="16dp" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="12dp">
-
-            <TextView
-                android:id="@+id/tipoRutaTitulo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Ruta Seleccionada"
-                android:textColor="@color/azul3"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/textoRuta"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Analizando seguridad..."
-                android:textColor="@android:color/darker_gray"
-                android:textSize="13sp" />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="#EEEEEE"
-                android:layout_marginVertical="8dp" />
-
-            <TextView
-                android:id="@+id/diffTiempo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Calculando comparativa..."
-                android:textColor="@color/naranja"
-                android:textSize="12sp"
-                android:textStyle="italic" />
-        </LinearLayout>
-    </androidx.cardview.widget.CardView>
-
-    <!-- Botones de Alternativa de Ruta -->
-    <LinearLayout
-        android:id="@+id/routeOptions"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_above="@id/finalizar"
-        android:layout_marginBottom="16dp"
-        android:gravity="center"
-        android:paddingHorizontal="16dp">
-
-        <Button
-            android:id="@+id/btnFastest"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:text="Más Rápida"
-            android:backgroundTint="@color/azul2"
-            android:layout_marginEnd="8dp"
-            android:textSize="12sp" />
-
-        <Button
-            android:id="@+id/btnSafest"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:text="Más Vigilada"
-            android:backgroundTint="@color/verde"
-            android:textSize="12sp" />
-    </LinearLayout>
-
+    <!-- Botón para finalizar la ruta -->
     <Button
         android:id="@+id/finalizar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="64dp"
+        android:layout_marginBottom="16dp"
         android:text="Finalizar Ruta"
-        android:backgroundTint="@color/azul"
+        android:backgroundTint="@color/azul1"
         android:textColor="#FFFFFF"
         android:padding="10dp" />
 

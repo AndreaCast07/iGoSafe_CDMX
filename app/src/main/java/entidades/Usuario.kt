@@ -4,7 +4,8 @@ data class DatosUsuario(
     val nombre: String = "",
     val genero: String = "",
     val edad: Int = 0,
-    val nacionalidad: String = ""
+    val nacionalidad: String = "",
+    val email : String =""
 )
 
 data class Usuario(

@@ -298,7 +298,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun actualizarEstadoBotones() {
-        val colorSel = ContextCompat.getColorStateList(requireContext(), R.color.azul)
+        val colorSel = ContextCompat.getColorStateList(requireContext(), R.color.azul1)
         val colorOff = ContextCompat.getColorStateList(requireContext(), R.color.azul2)
         binding.btnCaminar.backgroundTintList = if (selectedOption == "Caminar") colorSel else colorOff
         binding.btnCarro.backgroundTintList = if (selectedOption == "Carro") colorSel else colorOff

@@ -14,7 +14,7 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="65dp"
-            android:background="@color/azul4">
+            android:background="@color/azul5">
 
             <ImageView
                 android:id="@+id/logoBar"

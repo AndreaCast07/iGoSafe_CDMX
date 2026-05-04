@@ -22,12 +22,17 @@ class CreatePassword : AppCompatActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create_password)
-        
+
+        // 1. Recuperar el email del paso anterior
+        val emailRecuperado = intent.getStringExtra("EMAIL") ?: ""
+
+        // Inicialización de vistas
         campoCelular = findViewById(R.id.celular)
         contrasena = findViewById(R.id.registrarContrasena)
         confirmarContrasena = findViewById(R.id.confirmarContrasena)
         btnRegistro = findViewById(R.id.btnRegistrarse)
 
+        // Configurar el campo celular con el dato validado por SMS
         val celular = intent.getStringExtra("CELULAR") ?: ""
         campoCelular.setText(celular)
         campoCelular.isEnabled = false
@@ -39,7 +44,8 @@ class CreatePassword : AppCompatActivity(){
 
         btnRegistro.setOnClickListener {
             val contrasenaTexto = contrasena.text.toString().trim()
-            
+
+            // Validaciones de seguridad
             if (contrasenaTexto.length < 6) {
                 Toast.makeText(this, "La contraseña debe tener al menos 6 caracteres.", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
@@ -54,16 +60,18 @@ class CreatePassword : AppCompatActivity(){
                 nombre = intent.getStringExtra("NOMBRE") ?: "Usuario",
                 genero = intent.getStringExtra("GENERO") ?: "",
                 edad = intent.getIntExtra("EDAD", 0),
-                nacionalidad = intent.getStringExtra("NACIONALIDAD") ?: ""
+                nacionalidad = intent.getStringExtra("NACIONALIDAD") ?: "",
+                email = emailRecuperado // <--- CAMBIO CLAVE
             )
 
-            Log.d("CreatePassword", "Iniciando registro para $celular")
+            Log.d("CreatePassword", "Iniciando registro para $celular con email $emailRecuperado")
             btnRegistro.isEnabled = false
             btnRegistro.text = "Registrando..."
 
             usuarioManager.registrarUsuario(
                 celular = celular,
                 contrasena = contrasenaTexto,
+                email = emailRecuperado,
                 fotoUri = fotoUri,
                 datosUsuario = datosUsuario
             ) { exito, error ->
@@ -72,12 +80,13 @@ class CreatePassword : AppCompatActivity(){
                     btnRegistro.text = "Registrarse"
                     if (exito) {
                         Toast.makeText(this@CreatePassword, "¡Usuario registrado con éxito!", Toast.LENGTH_LONG).show()
+
                         val intent = Intent(this@CreatePassword, LoginActivity::class.java)
                         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                         startActivity(intent)
                         finish()
                     } else {
-                        Toast.makeText(this@CreatePassword, "Error: $error", Toast.LENGTH_LONG).show()
+                        Toast.makeText(this@CreatePassword, "Error en registro: $error", Toast.LENGTH_LONG).show()
                     }
                 }
             }

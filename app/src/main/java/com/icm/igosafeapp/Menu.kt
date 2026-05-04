@@ -1,136 +1,102 @@
 package com.icm.igosafeapp
 
-import Contactos
 import android.content.Intent
-import android.content.res.ColorStateList
 import android.os.Bundle
-import android.text.SpannableString
-import android.text.style.ForegroundColorSpan
-import android.util.Log
-import android.view.Menu
 import android.view.MenuItem
+import android.widget.ImageView
 import android.widget.Toast
-import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.navigation.NavigationView
-import androidx.navigation.findNavController
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.navigateUp
-import androidx.navigation.ui.setupActionBarWithNavController
-import androidx.navigation.ui.setupWithNavController
-import androidx.drawerlayout.widget.DrawerLayout
+import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContentProviderCompat.requireContext
-import androidx.core.content.ContextCompat
+import androidx.appcompat.widget.Toolbar
+import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
+import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
-import com.icm.igosafeapp.databinding.ActivityMenuBinding
-import org.json.JSONObject
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.core.Context
-import com.squareup.picasso.Picasso
 
-class Menu : AppCompatActivity() {
+class Menu : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
-    private lateinit var appBarConfiguration: AppBarConfiguration
-    private lateinit var binding: ActivityMenuBinding
+    private lateinit var drawerLayout: DrawerLayout
+    private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_menu)
 
-        binding = ActivityMenuBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        auth = FirebaseAuth.getInstance()
 
-        setSupportActionBar(binding.appBarActivityMenu.toolbar)
+        // 1. Configuración de la Toolbar
+        val toolbar: Toolbar = findViewById(R.id.toolbar)
+        setSupportActionBar(toolbar)
 
+        // CORRECCIÓN: Esto quita el "iGoSafeApp" extra de la izquierda
+        supportActionBar?.setDisplayShowTitleEnabled(false)
 
-        binding.appBarActivityMenu.logoBar.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null)
-                .setAnchorView(R.id.logoBar).show()
-        }
-        val navView: NavigationView = binding.navView
-        val navController = findNavController(R.id.nav_host_fragment_content_activity_menu)
-        appBarConfiguration = AppBarConfiguration(
-            setOf(
-                R.id.nav_viaje, R.id.nav_contactos, R.id.nav_favoritos
-            )
-        )
-        setupActionBarWithNavController(navController, appBarConfiguration)
-        navView.setupWithNavController(navController)
-
-        // Cambiar color a itemPremium
-        val navigationView: NavigationView = findViewById(R.id.nav_view)
-        cambiarColorItem(navigationView, R.id.nav_premium, R.color.verde)
-
-        navController.navigate(R.id.nav_viaje)
-        // Configura el listener para el NavigationView
-        navView.setNavigationItemSelectedListener { menuItem ->
-            when (menuItem.itemId) {
-                R.id.nav_contactos -> {
-                    // Navega a nav_contactos con el bundle
-                    navController.navigate(R.id.nav_contactos)
-                    true // Indica que el evento fue manejado
-                }
-
-                R.id.nav_viaje -> {
-                    // Navega a nav_viaje
-                    navController.navigate(R.id.nav_viaje)
-                    true // Indica que el evento fue manejado
-                }
-
-                R.id.nav_favoritos -> {
-                    // Navegar a fragmento de favoritos
-                    navController.navigate(R.id.nav_favoritos) // Navegar al fragmento de favoritos
-                    true
-                }
-
-                else -> false // Para otros ítems de menú
-            }
-        }
-
-
-        // Obtener el usuario actual de Firebase
-        val userId = FirebaseAuth.getInstance().currentUser?.uid
-
-        // Verificar si hay un usuario y obtener la URL de la foto
-        if (userId != null) {
-            val databaseReference: DatabaseReference =
-                FirebaseDatabase.getInstance().getReference("usuarios").child(userId)
-
-            // Obtener la URL de la foto de perfil desde Firebase Realtime Database
-            databaseReference.child("fotoPerfilUrl").get().addOnSuccessListener { snapshot ->
-                val photoUrl = snapshot.getValue(String::class.java)
-
-                if (photoUrl != null && photoUrl.isNotEmpty()) {
-                    Picasso.get()
-                        .load(photoUrl) // Cargar la URL de la foto
-                        .into(binding.appBarActivityMenu.fotoPerfil) // Coloca la imagen en el ImageView
-                } else {
-                    // Si la URL es nula o vacía, usa una imagen predeterminada
-                    binding.appBarActivityMenu.fotoPerfil.setImageResource(R.drawable.photo_original_user)
-                }
-            }
-        }
-        binding.appBarActivityMenu.fotoPerfil.setOnClickListener {
-            FirebaseAuth.getInstance().signOut() // Cerrar sesión en FirebaseAuth
-            Toast.makeText(this,"Sesión cerrada", Toast.LENGTH_SHORT).show()
-
-            // Redirigir al usuario a la pantalla de inicio de sesión
-            val intent = Intent(this, LoginActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        // 2. Clic en el círculo de perfil para ir a ProfileActivity
+        val fotoPerfil: ImageView = findViewById(R.id.fotoPerfil)
+        fotoPerfil.setOnClickListener {
+            val intent = Intent(this, ProfileActivity::class.java)
             startActivity(intent)
         }
+
+        // 3. Configuración del Sidebar (Drawer)
+        drawerLayout = findViewById(R.id.drawer_layout)
+        val navigationView: NavigationView = findViewById(R.id.nav_view)
+        navigationView.setNavigationItemSelectedListener(this)
+
+        // Botón de "hamburguesa" sincronizado
+        val toggle = ActionBarDrawerToggle(
+            this, drawerLayout, toolbar,
+            R.string.navigation_drawer_open,
+            R.string.navigation_drawer_close
+        )
+        drawerLayout.addDrawerListener(toggle)
+        toggle.syncState()
+
+        // 4. Abrir el menú lateral automáticamente al iniciar
+        if (savedInstanceState == null) {
+            drawerLayout.openDrawer(GravityCompat.START)
+        }
     }
 
-    private fun cambiarColorItem(navigationView: NavigationView, itemId: Int, colorId: Int) {
-        val item: MenuItem = navigationView.menu.findItem(itemId)
-        item.iconTintList = ColorStateList.valueOf(ContextCompat.getColor(this, colorId))
-        val s = SpannableString(item.title)
-        s.setSpan(ForegroundColorSpan(ContextCompat.getColor(this, colorId)), 0, s.length, 0)
-        item.title = s
+    // Maneja los clics en las opciones del menú lateral (IDs del XML real)
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.nav_viaje -> {
+                // Ya estamos en la pantalla principal
+            }
+            R.id.nav_favoritos -> {
+                Toast.makeText(this, "Favoritos próximamente", Toast.LENGTH_SHORT).show()
+            }
+            R.id.nav_contactos -> {
+                Toast.makeText(this, "Contactos de emergencia", Toast.LENGTH_SHORT).show()
+            }
+            R.id.nav_premium -> {
+                Toast.makeText(this, "iGoSafe Premium", Toast.LENGTH_SHORT).show()
+            }
+            R.id.cerrar_sesion -> {
+                cerrarSesion()
+            }
+        }
+
+        // Cerramos el menú después de elegir
+        drawerLayout.closeDrawer(GravityCompat.START)
+        return true
     }
 
+    private fun cerrarSesion() {
+        auth.signOut()
+        val intent = Intent(this, LoginActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
+    }
+
+    // Cerrar el menú si está abierto al presionar "atrás"
     override fun onBackPressed() {
-        super.onBackPressed()
-        finishAffinity()    }
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            drawerLayout.closeDrawer(GravityCompat.START)
+        } else {
+            super.onBackPressed()
+        }
+    }
 }

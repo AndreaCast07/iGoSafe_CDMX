@@ -7,6 +7,14 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
+    <uses-permission android:name="android.permission.SEND_SMS" />
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
+    <uses-permission android:name="android.permission.READ_SMS" />
+
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+
     <application
         android:name=".MainApplication"
         android:allowBackup="true"
@@ -24,12 +32,6 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/codigo"/>
 
-        <activity android:name=".Menu" android:exported="false" android:theme="@style/AppThemeIgoSafe.NoActionBar" />
-        <activity android:name=".ruta_peatonal" android:exported="false" />
-        <activity android:name=".recorrido_peatonal" android:exported="false" />
-        <activity android:name=".ruta_vehicular" android:exported="false" />
-        <activity android:name=".recorrido_vehicular" android:exported="false" />
-
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -39,8 +41,35 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".review_ruta" android:exported="false" />
         <activity android:name=".LoginActivity" android:exported="false" />
+        <activity android:name=".ForgotPassActivity" android:exported="false" />
+
+        <activity android:name=".ResetPasswordActivity" android:exported="false" />
+
+        <activity android:name=".SignInPhone" android:exported="false" />
+        <activity android:name=".SignInValidateSms" android:exported="false" />
+        <activity android:name=".Create_profile" android:exported="false" />
+        <activity android:name=".CreatePassword" android:exported="false" />
+
+        <activity android:name=".Menu" android:exported="false" android:theme="@style/AppThemeIgoSafe.NoActionBar" />
+        <activity android:name=".ProfileActivity" android:exported="false" />
+        <activity android:name=".comentarios" android:exported="false" />
+
+        <activity android:name=".ruta_peatonal" android:exported="false" />
+        <activity android:name=".recorrido_peatonal" android:exported="false" />
+        <activity android:name=".ruta_vehicular" android:exported="false" />
+        <activity android:name=".recorrido_vehicular" android:exported="false" />
+        <activity android:name=".review_ruta" android:exported="false" />
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.icm.igosafeapp.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
 
     </application>
 </manifest>
