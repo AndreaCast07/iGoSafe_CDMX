@@ -13,7 +13,35 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
-    <!-- Texto que puede mostrar la distancia o el tiempo de la ruta -->
+    <LinearLayout
+        android:id="@+id/routeOptions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="10dp"
+        android:gravity="center"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="70dp">
+
+        <Button
+            android:id="@+id/btnFastest"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Más Rápida"
+            android:layout_marginEnd="5dp"
+            android:backgroundTint="@color/azul3"/>
+
+        <Button
+            android:id="@+id/btnSafest"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Más Segura"
+            android:layout_marginStart="5dp"
+            android:backgroundTint="@color/verde"/>
+    </LinearLayout>
+
     <TextView
         android:id="@+id/textoRuta"
         android:layout_width="wrap_content"
@@ -24,23 +52,54 @@
         android:textColor="@color/claro"
         android:padding="10dp"
         android:text="Calculando la ruta..."
-        android:textSize="16sp"
+        android:textSize="14sp"
         android:layout_marginTop="16dp" />
 
-    <!-- Botón para finalizar la ruta -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/finalizar"
+        android:layout_margin="10dp"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="4dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="10dp">
+
+            <TextView
+                android:id="@+id/tipoRutaTitulo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tipo de Ruta"
+                android:textStyle="bold"
+                android:textSize="16sp"/>
+
+            <TextView
+                android:id="@+id/diffTiempo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Diferencia de tiempo"
+                android:textSize="12sp"
+                android:textColor="@color/naranja"/>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
     <Button
         android:id="@+id/finalizar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="32dp"
         android:text="Finalizar Ruta"
         android:backgroundTint="@color/azul1"
         android:textColor="#FFFFFF"
         android:padding="10dp" />
 
-    <!-- Indicador de carga mientras se genera la ruta -->
     <ProgressBar
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"

@@ -38,6 +38,9 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.DashPathEffect
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -60,32 +63,29 @@ class recorrido_peatonal : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
-    private var userMarker: com.google.android.gms.maps.model.Marker? = null
+    private var actualUserMarker: com.google.android.gms.maps.model.Marker? = null
     private var fullRoutePoints: List<LatLng> = emptyList()
     private var walkedPolyline: Polyline? = null
-    private val walkedPoints = mutableListOf<LatLng>()
+    private var walkedPoints: MutableList<LatLng> = mutableListOf()
 
-    private var startLocation = LatLng(0.0, 0.0)
-    private var endLocation = LatLng(0.0, 0.0)
+    private lateinit var startLocation: LatLng
+    private lateinit var endLocation: LatLng
     private var fastestDuration: Double = 0.0
-    
-    @Volatile
-    private var isActivityActive = true
+
+    private var isActivityActive = false
     private val mainHandler = Handler(Looper.getMainLooper())
 
     data class SafetyFeature(val location: LatLng, val title: String, val type: Int)
 
     private val chapultepecPolygon = listOf(
-        LatLng(19.4244, -99.1755), LatLng(19.4290, -99.1780),
-        LatLng(19.4310, -99.1850), LatLng(19.4260, -99.1930),
-        LatLng(19.4180, -99.1950), LatLng(19.4100, -99.1910),
-        LatLng(19.4110, -99.1800), LatLng(19.4180, -99.1760)
+        LatLng(19.4230, -99.1750), LatLng(19.4210, -99.1850), LatLng(19.4150, -99.1950),
+        LatLng(19.4050, -99.1900), LatLng(19.4100, -99.1750), LatLng(19.4230, -99.1750)
     )
 
     private val priorityCorridors = listOf(
-        listOf(LatLng(19.4325, -99.1545), LatLng(19.4270, -99.1675), LatLng(19.4235, -99.1755), LatLng(19.4210, -99.1930)), // Reforma
+        listOf(LatLng(19.4325, -99.1545), LatLng(19.4270, -99.1675), LatLng(19.4235, -99.1755), LatLng(19.4210, -99.1930)), // Reforma Centro
+        listOf(LatLng(19.4210, -99.1930), LatLng(19.4180, -99.2150), LatLng(19.3900, -99.2600)), // Paseo de la Reforma (Lomas/Santa Fe)
         listOf(LatLng(19.4208, -99.1762), LatLng(19.4115, -99.1760), LatLng(19.4085, -99.1910), LatLng(19.4042, -99.2025)), // Constituyentes
-        listOf(LatLng(19.4205, -99.1760), LatLng(19.4150, -99.1762), LatLng(19.4115, -99.1760)), // Circuito Interior
         listOf(LatLng(19.4150, -99.1650), LatLng(19.4130, -99.1750), LatLng(19.4110, -99.1780))  // Michoacán
     )
 
@@ -116,18 +116,21 @@ class recorrido_peatonal : AppCompatActivity(), OnMapReadyCallback {
         terminar.setOnClickListener { cerrarPantallaLimpia() }
         btnFastest.setOnClickListener { generarRuta(false) }
         btnSafest.setOnClickListener { generarRuta(true) }
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.recorridoPeatonal)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.updatePadding(bottom = systemBars.bottom)
+            insets
+        }
     }
 
     private fun cerrarPantallaLimpia() {
         isActivityActive = false
         fusedLocationClient.removeLocationUpdates(locationCallback)
-        if (::mMap.isInitialized) mMap.stopAnimation()
-        
         progressBar.visibility = View.VISIBLE
+        
         Thread {
-            // Calcular barrios recorridos para la reseña en segundo plano
             val barriosRecorridos = identificarBarrios(walkedPoints)
-            
             runOnUiThread {
                 if (!isFinishing) {
                     val intent = Intent(this, review_ruta::class.java).apply {
@@ -142,7 +145,6 @@ class recorrido_peatonal : AppCompatActivity(), OnMapReadyCallback {
 
     private fun identificarBarrios(puntos: List<LatLng>): List<String> {
         val barrios = mutableSetOf<String>()
-        // Lógica simplificada: obtener el nombre del hexágono o barrio de los puntos recorridos
         puntos.forEach { 
             RiskManager.getHexAddress(it)?.let { addr -> barrios.add(addr) }
         }
@@ -154,9 +156,7 @@ class recorrido_peatonal : AppCompatActivity(), OnMapReadyCallback {
             override fun onLocationResult(locationResult: LocationResult) {
                 if (!isActivityActive) return
                 val location = locationResult.lastLocation ?: return
-                val currentLatLng = LatLng(location.latitude, location.longitude)
-                
-                actualizarPosicionUsuario(currentLatLng)
+                actualizarPosicionUsuario(LatLng(location.latitude, location.longitude))
             }
         }
     }
@@ -164,72 +164,54 @@ class recorrido_peatonal : AppCompatActivity(), OnMapReadyCallback {
     private fun actualizarPosicionUsuario(pos: LatLng) {
         if (!::mMap.isInitialized) return
 
-        // Ocultar opciones de ruta solo si ya se alejó significativamente (evitar desaparición por ruido GPS)
-        val startPos = startLocation
-        val distanceResults = FloatArray(1)
-        Location.distanceBetween(startPos.latitude, startPos.longitude, pos.latitude, pos.longitude, distanceResults)
-        
-        if (distanceResults[0] > 25.0) {
-            findViewById<View>(R.id.routeOptions).visibility = View.GONE
-        }
-
-        // Actualizar o crear marcador de usuario
-        if (userMarker == null) {
-            userMarker = mMap.addMarker(MarkerOptions()
+        if (actualUserMarker == null) {
+            actualUserMarker = mMap.addMarker(MarkerOptions()
                 .position(pos)
                 .title("Tú")
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
                 .anchor(0.5f, 0.5f))
         } else {
-            userMarker?.position = pos
+            actualUserMarker?.position = pos
         }
 
-        // Añadir punto a la ruta recorrida si se ha movido significativamente (ej. 2 metros)
-        if (walkedPoints.isEmpty()) {
+        if (walkedPoints.isEmpty() || calcularDistancia(walkedPoints.last(), pos) > 2.0) {
             walkedPoints.add(pos)
-        } else {
-            val lastPos = walkedPoints.last()
-            val results = FloatArray(1)
-            Location.distanceBetween(lastPos.latitude, lastPos.longitude, pos.latitude, pos.longitude, results)
-            if (results[0] > 2.0) {
-                walkedPoints.add(pos)
-                actualizarLineaRecorrida()
-            }
+            actualizarLineaRecorrida()
         }
         
-        // Centrar cámara con perspectiva de navegación (inclinación)
+        // Se elimina el seguimiento automático forzado para permitir que el usuario vea el origen y la ruta completa
+        /*
         if (isRouteDrawn) {
             val cameraPosition = com.google.android.gms.maps.model.CameraPosition.Builder()
-                .target(pos)
-                .zoom(18.5f)
-                .tilt(55f)
-                .bearing(mMap.cameraPosition.bearing) // Mantener orientación actual
-                .build()
+                .target(pos).zoom(18.5f).tilt(55f).bearing(mMap.cameraPosition.bearing).build()
             mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
         } else if (isFirstLocationUpdate) {
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, 17f))
             isFirstLocationUpdate = false
         }
+        */
+    }
+
+    private fun calcularDistancia(p1: LatLng, p2: LatLng): Float {
+        val results = FloatArray(1)
+        Location.distanceBetween(p1.latitude, p1.longitude, p2.latitude, p2.longitude, results)
+        return results[0]
     }
 
     private fun actualizarLineaRecorrida() {
         walkedPolyline?.remove()
         walkedPolyline = mMap.addPolyline(PolylineOptions()
             .addAll(walkedPoints)
-            .color(Color.argb(100, 100, 100, 100)) // Gris suave y transparente
-            .width(8f) // Más delgada para no tapar la ruta principal
-            .zIndex(5f))
+            .color(Color.argb(100, 100, 100, 100))
+            .width(8f).zIndex(5f))
     }
 
     private fun startTracking() {
         try {
             val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 2000)
-                .setMinUpdateDistanceMeters(2f)
-                .build()
+                .setMinUpdateDistanceMeters(2f).build()
             fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
-        } catch (e: SecurityException) {
-            Log.e("Peatonal", "Error de permisos: ${e.message}")
-        }
+        } catch (e: SecurityException) {}
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
@@ -237,14 +219,11 @@ class recorrido_peatonal : AppCompatActivity(), OnMapReadyCallback {
         mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.standard))
         mMap.addMarker(MarkerOptions().position(startLocation).title("Inicio"))
         mMap.addMarker(MarkerOptions().position(endLocation).title("Destino"))
-        
-        // Mover cámara al inicio con un zoom inicial decente
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(startLocation, 16f))
         
-        // Primero calculamos la más rápida para la base de tiempo
         Thread {
-            val res = fetchOSRMRouteDirect(listOf(startLocation, endLocation))
-            if (res != null) fastestDuration = res.second
+            val res = fetchOSRMRoute(listOf(startLocation, endLocation))
+            if (res.first.isNotEmpty()) fastestDuration = res.second
             runOnUiThread { generarRuta(true) }
         }.start()
     }
@@ -269,62 +248,95 @@ class recorrido_peatonal : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun generarRuta(optimizarSeguridad: Boolean) {
-        if (!isActivityActive || isFinishing || !isOnline()) return
-        isRouteDrawn = false // Pausar seguimiento para mostrar la nueva ruta
+        if (!isActivityActive || isFinishing) return
+        isRouteDrawn = false 
         progressBar.visibility = View.VISIBLE
         mMap.clear()
-        // Eliminado el marcador de "Inicio" para evitar que se encime con el icono del usuario (Tú)
+        mMap.addMarker(MarkerOptions().position(startLocation).title("Inicio").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)))
         mMap.addMarker(MarkerOptions().position(endLocation).title("Destino"))
 
         Thread {
             try {
-                val directRoute = fetchOSRMRouteDirect(listOf(startLocation, endLocation))
-                val directPoints = directRoute?.first ?: listOf(startLocation, endLocation)
-                
-                val finalWaypoints = mutableListOf<LatLng>()
-                finalWaypoints.add(startLocation)
+                // Obtenemos todas las alternativas para la ruta directa
+                val alternatives = fetchOSRMRoute(listOf(startLocation, endLocation))
+                if (alternatives.isEmpty()) {
+                    runOnUiThread { progressBar.visibility = View.GONE }
+                    return@Thread
+                }
+
+                // Analizamos la seguridad de cada alternativa
+                val analyzedAlternatives = alternatives.map { 
+                    it to RiskManager.analyzeRoute(it.first)
+                }
+
+                // La ruta más rápida absoluta
+                val fastestResult = analyzedAlternatives.minByOrNull { it.first.second }!!
+                val directDuration = fastestResult.first.second
+
+                var finalPoints: List<LatLng>
+                var dur: Double
+                var finalAnalysis: RiskManager.SafetyAnalysis
+                var isSafeRerouteUsed = false
 
                 if (optimizarSeguridad) {
-                    val candidates = mutableListOf<LatLng>()
+                    // Buscamos la mejor alternativa directa en seguridad
+                    val bestDirectSafe = analyzedAlternatives.maxByOrNull { it.second.score }!!
+                    
+                    // También probamos la ruta por corredores prioritarios (Segura por infraestructura)
+                    val safeWaypoints = mutableListOf(startLocation)
                     var bestCorridor: List<LatLng>? = null
                     var maxAlignment = 0f
                     for (corridor in priorityCorridors) {
                         val alignment = calculateAlignment(startLocation, endLocation, corridor)
-                        if (alignment > maxAlignment) {
-                            maxAlignment = alignment
-                            bestCorridor = corridor
-                        }
+                        if (alignment > maxAlignment) { maxAlignment = alignment; bestCorridor = corridor }
                     }
+
+                    var corridorRoute: Pair<List<LatLng>, Double>? = null
+                    var corridorAnalysis: RiskManager.SafetyAnalysis? = null
 
                     if (bestCorridor != null && maxAlignment > 0.3) {
-                        val entryPoint = findNearestPointOnCorridor(startLocation, bestCorridor)
-                        val exitPoint = findNearestPointOnCorridor(endLocation, bestCorridor)
-                        candidates.add(entryPoint)
-                        candidates.addAll(getIntermediateNodes(entryPoint, exitPoint, bestCorridor))
-                        candidates.add(exitPoint)
-                    }
-
-                    if (directPoints.any { PolyUtil.containsLocation(it, chapultepecPolygon, false) }) {
-                        val forestCenterLng = -99.185
-                        if (endLocation.longitude > forestCenterLng) {
-                            candidates.add(LatLng(19.4115, -99.1760))
-                            candidates.add(LatLng(19.4235, -99.1755))
-                        } else {
-                            candidates.add(LatLng(19.4170, -99.1920))
-                            candidates.add(LatLng(19.4240, -99.1915))
+                        safeWaypoints.add(findNearestPointOnCorridor(startLocation, bestCorridor))
+                        safeWaypoints.add(findNearestPointOnCorridor(endLocation, bestCorridor))
+                        safeWaypoints.add(endLocation)
+                        
+                        val res = fetchOSRMRoute(safeWaypoints).firstOrNull()
+                        if (res != null) {
+                            corridorRoute = res
+                            corridorAnalysis = RiskManager.analyzeRoute(res.first)
                         }
                     }
 
-                    for (wp in candidates) {
-                        if (!PolyUtil.isLocationOnPath(wp, directPoints, false, 50.0)) {
-                            finalWaypoints.add(wp)
-                        }
+                    // Comparamos la mejor alternativa directa vs la ruta del corredor
+                    val candidates = mutableListOf(bestDirectSafe)
+                    if (corridorRoute != null && corridorAnalysis != null) {
+                        candidates.add(corridorRoute to corridorAnalysis)
                     }
+
+                    val overallBestSafe = candidates.maxByOrNull { it.second.score }!!
+                    
+                    finalPoints = overallBestSafe.first.first
+                    dur = overallBestSafe.first.second
+                    finalAnalysis = overallBestSafe.second
+
+                    // Determinamos si realmente hay un beneficio de seguridad vs la más rápida
+                    if (finalPoints != fastestResult.first.first && 
+                        (finalAnalysis.score > fastestResult.second.score || 
+                         (finalAnalysis.cameraCount + finalAnalysis.pathCount) > (fastestResult.second.cameraCount + fastestResult.second.pathCount))) {
+                        isSafeRerouteUsed = true
+                    } else {
+                        // Si no hay mejora real, nos quedamos con la más rápida pero evaluamos su seguridad
+                        finalPoints = fastestResult.first.first
+                        dur = fastestResult.first.second
+                        finalAnalysis = fastestResult.second
+                        isSafeRerouteUsed = false
+                    }
+                } else {
+                    // Modo Más Rápida
+                    finalPoints = fastestResult.first.first
+                    dur = fastestResult.first.second
+                    finalAnalysis = fastestResult.second
+                    isSafeRerouteUsed = false
                 }
-
-                finalWaypoints.add(endLocation)
-                val finalPoints = fetchOSRMRoute(cleanWaypoints(finalWaypoints))
-                val dur = if (optimizarSeguridad) calculateTimeForPoints(finalPoints) else fastestDuration
 
                 mainHandler.post {
                     if (!isActivityActive || isFinishing) return@post
@@ -332,127 +344,95 @@ class recorrido_peatonal : AppCompatActivity(), OnMapReadyCallback {
                     if (finalPoints.isNotEmpty()) {
                         fullRoutePoints = finalPoints
                         startTracking()
-                        val safety = identifySafety(finalPoints)
-                        val safetyCounts = safety.groupBy { it.type }.mapValues { it.value.size }
-                        val summary = "Cámaras: ${safetyCounts[2] ?: 0} | Senderos: ${safetyCounts[5] ?: 0}"
+                        val safetyMarkers = identifySafety(finalPoints)
+
+                        drawAll(finalPoints, safetyMarkers)
                         
-                        // Análisis ISM para el etiquetado inteligente
-                        val analysis = RiskManager.analyzeRoute(finalPoints)
-
-                        if (isActivityActive && !isFinishing) {
-                            drawAll(finalPoints, safety)
-                            
-                            // Configurar explicación al tocar la tarjeta de información
-                            findViewById<View>(R.id.cardInfo).setOnClickListener {
-                                showSafetyExplanation(analysis)
-                            }
-                            
-                            tipoRutaTitulo.text = if (optimizarSeguridad) analysis.label else "Peatonal más Rápida"
-                            textoRuta.text = "Cámaras: ${analysis.cameraCount} | Senderos: ${analysis.pathCount}\nEntorno: ${analysis.riskLevel} | Tiempo: ${formatTiempo(dur)}"
-                            
-                            val diff = ((dur - fastestDuration) / 60).toInt()
-                            if (optimizarSeguridad && diff > 0) {
-                                diffTiempo.text = "+$diff min para priorizar tu seguridad"
-                                diffTiempo.setTextColor(ContextCompat.getColor(this, R.color.naranja))
-                            } else if (!optimizarSeguridad) {
-                                diffTiempo.text = "Trayecto con tiempo mínimo"
-                                diffTiempo.setTextColor(ContextCompat.getColor(this, R.color.azul3))
+                        tipoRutaTitulo.text = if (optimizarSeguridad && isSafeRerouteUsed) finalAnalysis.label else if (optimizarSeguridad) "Máxima Seguridad Detectada" else "Peatonal más Rápida"
+                        textoRuta.text = "Cámaras: ${finalAnalysis.cameraCount} | Senderos: ${finalAnalysis.pathCount}\nEntorno: ${finalAnalysis.riskLevel} | Tiempo: ${formatTiempo(dur)}"
+                        
+                        val diff = ((dur - directDuration) / 60).toInt()
+                        
+                        if (optimizarSeguridad && isSafeRerouteUsed && diff > 0) {
+                            diffTiempo.text = "+$diff min para priorizar tu seguridad"
+                            diffTiempo.setTextColor(ContextCompat.getColor(this, R.color.naranja))
+                        } else if (!optimizarSeguridad) {
+                            if (diff > 0 && finalPoints != fastestResult.first.first) {
+                                // Caso raro donde la rápida seleccionada no es la absoluta
+                                diffTiempo.text = "Trayecto optimizado"
                             } else {
-                                diffTiempo.text = "Ruta optimizada con seguridad máxima"
-                                diffTiempo.setTextColor(ContextCompat.getColor(this, R.color.verde))
+                                diffTiempo.text = "Trayecto con tiempo mínimo"
                             }
+                            diffTiempo.setTextColor(ContextCompat.getColor(this, R.color.azul3))
+                        } else {
+                            diffTiempo.text = "Ruta optimizada con seguridad máxima"
+                            diffTiempo.setTextColor(ContextCompat.getColor(this, R.color.verde))
+                        }
 
-                            if (safety.isEmpty()) {
-                                AlertDialog.Builder(this)
-                                    .setTitle("Advertencia de Seguridad")
-                                    .setMessage("No se detectó vigilancia monitoreada en este trayecto peatonal. Manténgase en zonas iluminadas.")
-                                    .setPositiveButton("Entendido", null)
-                                    .show()
-                            }
+                        if (safetyMarkers.isEmpty() && optimizarSeguridad) {
+                            AlertDialog.Builder(this).setTitle("Advertencia de Seguridad")
+                                .setMessage("No se detectó vigilancia monitoreada en esta zona. Manténgase alerta.")
+                                .setPositiveButton("Entendido", null).show()
                         }
                     }
                 }
-            } catch (e: Exception) { 
-                mainHandler.post { 
-                    if (isActivityActive) progressBar.visibility = View.GONE 
-                }
-            }
+            } catch (e: Exception) { runOnUiThread { progressBar.visibility = View.GONE } }
         }.start()
     }
 
-    private fun calculateTimeForPoints(points: List<LatLng>): Double {
-        // Estimación OSRM simplificada o re-petición si fuera necesario
-        return fastestDuration * 1.15 // Aproximación para evitar exceso de peticiones
-    }
+    private fun calculateTimeForPoints(points: List<LatLng>): Double = fastestDuration * 1.15
 
     private fun calculateAlignment(start: LatLng, end: LatLng, corridor: List<LatLng>): Float {
-        val corridorBounds = LatLngBounds.builder()
-        corridor.forEach { corridorBounds.include(it) }
-        val center = corridorBounds.build().center
-        val distToCenter = FloatArray(1)
-        Location.distanceBetween(start.latitude, start.longitude, center.latitude, center.longitude, distToCenter)
-        return if (distToCenter[0] < 1500) 0.5f else 0f
+        val bounds = try { LatLngBounds.builder().include(start).include(end).build() } catch (e: Exception) { return 0f }
+        var pointsInside = 0
+        corridor.forEach { if (bounds.contains(it)) pointsInside++ }
+        val ratio = pointsInside.toFloat() / corridor.size
+        val dStart = FloatArray(1)
+        Location.distanceBetween(start.latitude, start.longitude, corridor.first().latitude, corridor.first().longitude, dStart)
+        return if (dStart[0] < 3000) ratio + 0.3f else ratio
     }
 
     private fun findNearestPointOnCorridor(point: LatLng, corridor: List<LatLng>): LatLng {
-        return corridor.minByOrNull { 
-            val res = FloatArray(1)
-            Location.distanceBetween(point.latitude, point.longitude, it.latitude, it.longitude, res)
-            res[0]
-        } ?: corridor[0]
-    }
-
-    private fun getIntermediateNodes(start: LatLng, end: LatLng, corridor: List<LatLng>): List<LatLng> {
-        val startIndex = corridor.indexOf(start)
-        val endIndex = corridor.indexOf(end)
-        if (startIndex == -1 || endIndex == -1 || startIndex == endIndex) return emptyList()
-        return if (startIndex < endIndex) corridor.subList(startIndex + 1, endIndex) 
-               else corridor.subList(endIndex + 1, startIndex).reversed()
-    }
-
-    private fun cleanWaypoints(points: List<LatLng>): List<LatLng> {
-        if (points.size < 2) return points
-        val cleaned = mutableListOf<LatLng>()
-        cleaned.add(points.first())
-        for (i in 1 until points.size - 1) {
+        var minDistance = Double.MAX_VALUE
+        var nearest = corridor[0]
+        for (p in corridor) {
             val dist = FloatArray(1)
-            Location.distanceBetween(cleaned.last().latitude, cleaned.last().longitude, points[i].latitude, points[i].longitude, dist)
-            if (dist[0] > 100) cleaned.add(points[i])
+            Location.distanceBetween(point.latitude, point.longitude, p.latitude, p.longitude, dist)
+            if (dist[0] < minDistance) { minDistance = dist[0].toDouble(); nearest = p }
         }
-        val distToEnd = FloatArray(1)
-        Location.distanceBetween(cleaned.last().latitude, cleaned.last().longitude, points.last().latitude, points.last().longitude, distToEnd)
-        if (distToEnd[0] < 10 && cleaned.size > 1) cleaned.removeAt(cleaned.size - 1)
-        cleaned.add(points.last())
-        return cleaned
+        return nearest
     }
 
-    private fun fetchOSRMRoute(points: List<LatLng>): List<LatLng> {
+    private fun getIntermediateNodes(start: LatLng, end: LatLng, corridor: List<LatLng>): List<LatLng> = emptyList()
+
+    private fun cleanWaypoints(points: List<LatLng>): List<LatLng> = points
+
+    private fun fetchOSRMRoute(points: List<LatLng>): List<Pair<List<LatLng>, Double>> {
         if (points.size < 2) return emptyList()
+        val results = mutableListOf<Pair<List<LatLng>, Double>>()
         try {
             val coords = points.joinToString(";") { "${it.longitude},${it.latitude}" }
-            // Restauramos radiuses=unlimited para asegurar que siempre encuentre ruta, 
-            // pero confiamos en cleanWaypoints para la limpieza
-            val urlStr = "https://routing.openstreetmap.de/routed-foot/route/v1/foot/$coords?overview=full&geometries=polyline&continue_straight=true&radiuses=${points.map { "unlimited" }.joinToString(";")}"
+            val urlStr = "https://routing.openstreetmap.de/routed-foot/route/v1/foot/$coords?overview=full&geometries=polyline&continue_straight=true&alternatives=true"
             val conn = URL(urlStr).openConnection() as HttpsURLConnection
             conn.setRequestProperty("User-Agent", "iGoSafeApp/1.5")
             if (conn.responseCode == 200) {
                 val res = conn.inputStream.bufferedReader().readText()
                 val routes = JSONObject(res).optJSONArray("routes")
-                if (routes != null && routes.length() > 0) return PolyUtil.decode(routes.getJSONObject(0).getString("geometry"))
+                if (routes != null) {
+                    for (i in 0 until routes.length()) {
+                        val r = routes.getJSONObject(i)
+                        results.add(Pair(PolyUtil.decode(r.getString("geometry")), r.getDouble("duration")))
+                    }
+                }
             }
         } catch (e: Exception) {}
-        return emptyList()
+        return results
     }
 
     private fun identifySafety(path: List<LatLng>): List<SafetyFeature> {
         val list = mutableListOf<SafetyFeature>()
-        // Usar los métodos optimizados de RiskManager para recuperar cámaras y senderos
-        RiskManager.getCamerasOnPath(path).forEach { 
-            list.add(SafetyFeature(it, "Cámara C5", 2))
-        }
-        RiskManager.getPathsOnPath(path).forEach { 
-            list.add(SafetyFeature(it, "Sendero Seguro", 5))
-        }
+        RiskManager.getCamerasOnPath(path).forEach { list.add(SafetyFeature(it, "Cámara C5", 2)) }
+        RiskManager.getPathsOnPath(path).forEach { list.add(SafetyFeature(it, "Sendero Seguro", 5)) }
         return list
     }
 
@@ -474,44 +454,16 @@ class recorrido_peatonal : AppCompatActivity(), OnMapReadyCallback {
 
     private fun drawAll(points: List<LatLng>, features: List<SafetyFeature>) {
         if (!isActivityActive || points.size < 2) return
-        // Ruta principal más vibrante y gruesa
-        mMap.addPolyline(PolylineOptions()
-            .addAll(points)
-            .color(Color.parseColor("#27AE60"))
-            .width(20f)
-            .zIndex(1f))
-        
+        mMap.addPolyline(PolylineOptions().addAll(points).color(Color.parseColor("#27AE60")).width(20f).zIndex(1f))
         val cameraIcon = getIconFromVector(R.drawable.ic_camera, Color.YELLOW, 70)
         val senderoIcon = getResizedBitmap(R.drawable.icon_peaton, 90)
-        val patrolIcon = getResizedBitmap(R.drawable.icon_auto, 90)
         for (f in features) {
-            val icon = when(f.type) {
-                2 -> cameraIcon 
-                4 -> patrolIcon  
-                else -> senderoIcon
-            }
+            val icon = if (f.type == 2) cameraIcon else senderoIcon
             mMap.addMarker(MarkerOptions().position(f.location).title(f.title).icon(icon).anchor(0.5f, 0.5f))
         }
         val bounds = LatLngBounds.Builder()
         points.forEach { bounds.include(it) }
-        try { 
-            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds.build(), 160), object : GoogleMap.CancelableCallback {
-                override fun onFinish() { 
-                    isRouteDrawn = true 
-                    // Acercamiento inmediato a la posición del usuario al terminar de dibujar
-                    val currentPos = userMarker?.position ?: startLocation
-                    val navPos = com.google.android.gms.maps.model.CameraPosition.Builder()
-                        .target(currentPos)
-                        .zoom(18.5f)
-                        .tilt(55f)
-                        .build()
-                    mMap.animateCamera(CameraUpdateFactory.newCameraPosition(navPos))
-                }
-                override fun onCancel() { isRouteDrawn = true }
-            })
-        } catch (e: Exception) {
-            isRouteDrawn = true
-        }
+        try { mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds.build(), 160)) } catch (e: Exception) {}
     }
 
     private fun isOnline(): Boolean {
@@ -525,21 +477,7 @@ class recorrido_peatonal : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun showSafetyExplanation(analysis: RiskManager.SafetyAnalysis) {
-        val msg = """
-            Criterios de Seguridad Aplicados:
-            
-            • Infraestructura: Se detectaron ${analysis.cameraCount} cámaras C5 y ${analysis.pathCount} senderos iluminados.
-            • Entorno: El nivel de riesgo histórico en esta zona es ${analysis.riskLevel.lowercase()}.
-            • Monitoreo: Basado en la cobertura de vigilancia y horario actual.
-            
-            * Ninguna ruta es 100% segura. Mantente siempre alerta a tu entorno.
-        """.trimIndent()
-
-        AlertDialog.Builder(this)
-            .setTitle("¿Por qué esta ruta?")
-            .setMessage(msg)
-            .setPositiveButton("Entendido", null)
-            .show()
+        AlertDialog.Builder(this).setTitle("¿Por qué esta ruta?").setMessage("Análisis basado en infraestructura detectada.").setPositiveButton("Entendido", null).show()
     }
 
     override fun onDestroy() { 

@@ -16,6 +16,8 @@
 # debugging stack traces.
 #-keepattributes SourceFile,LineNumberTable
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# Keep H3 native library and classes
+-keep class com.uber.h3core.** { *; }
+-keep class com.uber.h3.** { *; }
+-keepresource names lib/arm64-v8a/libh3-java.so
+-keepresource names lib/x86_64/libh3-java.so

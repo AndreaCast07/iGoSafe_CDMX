@@ -133,7 +133,7 @@ class SignInPhone : AppCompatActivity() {
                     if (user != null) {
                         usuarioManager.usuarioExiste(user.uid) { existe ->
                             if (existe) {
-                                startActivity(Intent(this, Menu::class.java))
+                                startActivity(Intent(this, NavigationActivity::class.java))
                                 finish()
                             } else {
                                 val intent = Intent(this, Create_profile::class.java)

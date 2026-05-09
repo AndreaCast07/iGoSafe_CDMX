@@ -72,7 +72,7 @@ class review_ruta : AppCompatActivity() {
 
     private fun irAMenuPrincipal() {
         Toast.makeText(this, "¡Gracias por tu reseña!", Toast.LENGTH_SHORT).show()
-        val intent = Intent(this, Menu::class.java)
+        val intent = Intent(this, NavigationActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
         startActivity(intent)
         finish()

@@ -45,6 +45,9 @@ import com.icm.igosafeapp.R
 import com.icm.igosafeapp.databinding.FragmentPlanearViajeBinding
 import com.icm.igosafeapp.ruta_peatonal
 import com.icm.igosafeapp.ruta_vehicular
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import java.util.Locale
 import java.util.concurrent.Executors
 

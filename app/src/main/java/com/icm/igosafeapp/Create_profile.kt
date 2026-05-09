@@ -200,7 +200,7 @@ class Create_profile : AppCompatActivity() {
         val datos = DatosUsuario(nombre, genero, edad, nacionalidad)
         if (isGoogleFlow) {
             usuarioManager.completarRegistroGoogle(celular, pickedPhoto, datos) { exito, _ ->
-                if (exito) startActivity(Intent(this, Menu::class.java)).also { finish() }
+                if (exito) startActivity(Intent(this, NavigationActivity::class.java)).also { finish() }
             }
         } else {
             val intent = Intent(this, SignInValidateSms::class.java).apply {

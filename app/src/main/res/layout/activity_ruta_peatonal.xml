@@ -29,11 +29,13 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/infoContainer"
         android:layout_width="match_parent"
-        android:layout_height="183dp"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="0dp"
         android:background="@color/claro"
-        android:padding="16dp">
+        android:paddingBottom="40dp"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:paddingTop="16dp">
 
         <TextView
             android:id="@+id/Contacto"

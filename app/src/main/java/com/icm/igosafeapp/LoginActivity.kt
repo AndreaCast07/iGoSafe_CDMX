@@ -137,7 +137,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun irAlMenu() {
-        val intent = Intent(this, Menu::class.java)
+        val intent = Intent(this, NavigationActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
         finish()
