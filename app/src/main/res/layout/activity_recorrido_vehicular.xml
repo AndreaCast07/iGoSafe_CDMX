@@ -42,18 +42,34 @@
             android:backgroundTint="@color/verde"/>
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/textoRuta"
+    <LinearLayout
+        android:id="@+id/textoRutaLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"
         android:background="@color/verde"
-        android:textColor="@color/claro"
-        android:padding="10dp"
-        android:text="Calculando la ruta..."
-        android:textSize="14sp"
-        android:layout_marginTop="16dp" />
+        android:orientation="horizontal"
+        android:padding="5dp">
+
+        <TextView
+            android:id="@+id/textoRuta"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:text="Calculando la ruta..."
+            android:textColor="@color/claro"
+            android:textSize="14sp" />
+
+        <ImageButton
+            android:id="@+id/btnInfoRuta"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@android:drawable/ic_menu_info_details"
+            app:tint="@color/claro" />
+    </LinearLayout>
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cardInfo"
@@ -67,24 +83,44 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="10dp">
+            android:orientation="horizontal"
+            android:padding="10dp"
+            android:gravity="center_vertical">
 
-            <TextView
-                android:id="@+id/tipoRutaTitulo"
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tipoRutaTitulo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Tipo de Ruta"
+                    android:textStyle="bold"
+                    android:textSize="15sp"/>
+
+                <TextView
+                    android:id="@+id/diffTiempo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Diferencia de tiempo"
+                    android:textSize="11sp"
+                    android:textColor="@color/naranja"/>
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btnIniciarNav"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Tipo de Ruta"
-                android:textStyle="bold"
-                android:textSize="16sp"/>
-
-            <TextView
-                android:id="@+id/diffTiempo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Diferencia de tiempo"
+                android:text="NAVEGAR"
                 android:textSize="12sp"
-                android:textColor="@color/naranja"/>
+                android:drawableStart="@android:drawable/ic_menu_directions"
+                android:backgroundTint="#2E7D32"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:visibility="gone" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
@@ -94,7 +130,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="32dp"
+        android:layout_marginBottom="20dp"
         android:text="Finalizar Ruta"
         android:backgroundTint="@color/azul1"
         android:textColor="#FFFFFF"
@@ -107,4 +143,139 @@
         android:layout_centerInParent="true"
         android:visibility="gone" />
 
+    <!-- Navigation Overlay -->
+    <RelativeLayout
+        android:id="@+id/navigationOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+
+        <!-- Off Route Banner -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/bannerOffRoute"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/navTopPanel"
+            android:layout_margin="16dp"
+            android:visibility="gone"
+            app:cardBackgroundColor="#E74C3C"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="10dp">
+            <TextView
+                android:id="@+id/bannerOffRouteText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="12dp"
+                android:text="⚠️ Fuera de Ruta Protegida: Has abandonado el camino verificado. El nivel de vigilancia de este tramo no ha sido auditado."
+                android:textColor="#FFFFFF"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:gravity="center" />
+        </androidx.cardview.widget.CardView>
+
+        <!-- Top Instruction Panel -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/navTopPanel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            app:cardBackgroundColor="#004D40"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="8dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:id="@+id/navDirectionIcon"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@android:drawable/ic_menu_directions"
+                    app:tint="@color/claro" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="16dp">
+
+                    <TextView
+                        android:id="@+id/navDistanceToNext"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="--"
+                        android:textColor="@color/claro"
+                        android:textSize="22sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/navInstructionText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Calculando..."
+                        android:textColor="@color/claro"
+                        android:textSize="16sp" />
+                </LinearLayout>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Bottom ETA Panel -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/navBottomPanel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_margin="16dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="8dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                android:gravity="center">
+
+                <TextView
+                    android:id="@+id/navEtaTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-- min"
+                    android:textColor="#C0392B"
+                    android:textSize="22sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/navTotalDistance"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="-- km"
+                    android:textSize="16sp" />
+
+                <Button
+                    android:id="@+id/btnFinalizarNav"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:backgroundTint="@color/azul1"
+                    android:text="FINALIZAR"
+                    android:textSize="12sp"
+                    android:textColor="#FFFFFF" />
+
+                <ImageButton
+                    android:id="@+id/btnStopNav"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="8dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@android:drawable/ic_menu_close_clear_cancel" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+    </RelativeLayout>
 </RelativeLayout>

@@ -157,6 +157,18 @@ class HomeFragment : Fragment() {
             if (destLat == null) { Toast.makeText(requireContext(), "Busca un destino", Toast.LENGTH_SHORT).show(); return@setOnClickListener }
             if (selectedOption == null) { Toast.makeText(requireContext(), "Elige modo de transporte", Toast.LENGTH_SHORT).show(); return@setOnClickListener }
 
+            // Validación de límites CDMX
+            val originPoint = LatLng(originLat!!, originLng!!)
+            val destPoint = LatLng(destLat!!, destLng!!)
+            
+            if (originPoint.latitude < 19.04 || originPoint.latitude > 19.60 || 
+                originPoint.longitude < -99.37 || originPoint.longitude > -98.94 ||
+                destPoint.latitude < 19.04 || destPoint.latitude > 19.60 || 
+                destPoint.longitude < -99.37 || destPoint.longitude > -98.94) {
+                Toast.makeText(requireContext(), "iGoSafe solo opera dentro de la Ciudad de México", Toast.LENGTH_LONG).show()
+                return@setOnClickListener
+            }
+
             saveToRecent(destName ?: "", destAddress ?: "", destLat!!, destLng!!)
 
             val intentClass = if (selectedOption == "Caminar") ruta_peatonal::class.java else ruta_vehicular::class.java
@@ -195,6 +207,14 @@ class HomeFragment : Fragment() {
             val request = FetchPlaceRequest.builder(adapter.getItem(position).placeId, listOf(Place.Field.ID, Place.Field.DISPLAY_NAME, Place.Field.LOCATION, Place.Field.FORMATTED_ADDRESS)).build()
             placesClient.fetchPlace(request).addOnSuccessListener { 
                 val p = it.place
+                val address = p.formattedAddress ?: ""
+                if (!address.contains("Ciudad de México") && !address.contains("CDMX") && !address.contains("Distrito Federal")) {
+                    Toast.makeText(requireContext(), "El origen debe estar dentro de CDMX", Toast.LENGTH_LONG).show()
+                    binding.actualLocation.text.clear()
+                    originLat = null
+                    originLng = null
+                    return@addOnSuccessListener
+                }
                 originLat = p.location?.latitude
                 originLng = p.location?.longitude
                 originName = p.displayName ?: p.formattedAddress
@@ -212,6 +232,14 @@ class HomeFragment : Fragment() {
     }
 
     private fun establecerDestino(place: Place) {
+        val address = place.formattedAddress ?: ""
+        if (!address.contains("Ciudad de México") && !address.contains("CDMX") && !address.contains("Distrito Federal")) {
+            Toast.makeText(requireContext(), "iGoSafe solo opera dentro de la Ciudad de México", Toast.LENGTH_LONG).show()
+            binding.contactLocation.text.clear()
+            destLat = null
+            destLng = null
+            return
+        }
         destLat = place.location?.latitude
         destLng = place.location?.longitude
         destName = place.displayName ?: place.formattedAddress

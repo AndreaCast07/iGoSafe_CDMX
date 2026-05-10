@@ -3,13 +3,8 @@ package com.icm.igosafeapp
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.view.Gravity
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Button
-import android.widget.EditText
-import android.widget.PopupWindow
 import android.widget.RatingBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -18,50 +13,95 @@ import com.google.firebase.database.FirebaseDatabase
 
 class review_ruta : AppCompatActivity() {
 
-    private var ratingSeleccionado: Float = 0f
-    private var comentarioEscrito: String = ""
+    private var ratingGlobal: Float = 0f
+    private var ratingInfra: Float = 0f
+    private var ratingVitalidad: Float = 0f
+    private var ratingEntorno: Float = 0f
+    
+    private var userWeight: Double = 1.0
+    private var userProfileType: String = "Estándar"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_review_ruta)
+        cargarPerfilUsuario()
         showVentana()
+    }
+
+    private fun cargarPerfilUsuario() {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        FirebaseDatabase.getInstance().getReference("usuarios").child(userId).get()
+            .addOnSuccessListener { snapshot ->
+                val genero = snapshot.child("genero").value?.toString() ?: ""
+                val nacionalidad = snapshot.child("nacionalidad").value?.toString() ?: ""
+                
+                val esMexicano = nacionalidad.equals("México", ignoreCase = true)
+                val esMujer = genero.equals("Femenino", ignoreCase = true)
+
+                // Aplicar lógica de ponderación estratégica
+                when {
+                    esMujer && esMexicano -> {
+                        userWeight = 1.5
+                        userProfileType = "Mujer Local (Estándar de Oro)"
+                    }
+                    esMexicano -> {
+                        userWeight = 1.2
+                        userProfileType = "Nacional (Sensor de Peligro)"
+                    }
+                    else -> {
+                        userWeight = 0.8
+                        userProfileType = "Extranjero (Sensor de Calidad)"
+                    }
+                }
+                Log.d("ReviewRuta", "Perfil detectado: $userProfileType con peso $userWeight")
+            }
     }
 
     fun showVentana() {
         val closeButton: Button = findViewById(R.id.cerrarReview)
-        val ratingBar: RatingBar = findViewById(R.id.ratingRutaSegura)
-        val editText: EditText = findViewById(R.id.review)
+        val rbGlobal: RatingBar = findViewById(R.id.ratingRutaSegura)
+        val rbInfra: RatingBar = findViewById(R.id.ratingInfraestructura)
+        val rbVitalidad: RatingBar = findViewById(R.id.ratingVitalidad)
+        val rbEntorno: RatingBar = findViewById(R.id.ratingEntorno)
 
         val barriosPorRuta = intent.getStringArrayListExtra("barriosPorRuta")
 
         closeButton.setOnClickListener {
-            ratingSeleccionado = ratingBar.rating
-            comentarioEscrito = editText.text.toString()
+            ratingGlobal = rbGlobal.rating
+            ratingInfra = rbInfra.rating
+            ratingVitalidad = rbVitalidad.rating
+            ratingEntorno = rbEntorno.rating
 
-            if (ratingSeleccionado > 0 && comentarioEscrito.isNotBlank()) {
-                // Guardar la reseña en una ubicación general vinculada al usuario
-                guardarResenaEnFirebase(ratingSeleccionado, comentarioEscrito)
+            if (ratingGlobal > 0 && ratingInfra > 0 && ratingVitalidad > 0 && ratingEntorno > 0) {
+                // Guardar la reseña multidimensional
+                guardarResenaEnFirebase()
 
                 if (barriosPorRuta != null && barriosPorRuta.isNotEmpty()) {
-                    actualizarCalificaciones(barriosPorRuta, ratingSeleccionado) {
+                    // La calificación que afecta al mapa se pondera por el perfil
+                    val weightedRating = (ratingGlobal * userWeight).toFloat().coerceAtMost(5.0f)
+                    actualizarCalificaciones(barriosPorRuta, weightedRating) {
                         irAMenuPrincipal()
                     }
                 } else {
                     irAMenuPrincipal()
                 }
             } else {
-                Toast.makeText(this, "Por favor, completa el rating y el comentario.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Por favor, completa todas las calificaciones de la encuesta.", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
-    private fun guardarResenaEnFirebase(rating: Float, review: String) {
+    private fun guardarResenaEnFirebase() {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: "desconocido"
         val ref = FirebaseDatabase.getInstance().getReference("resenas_viajes").child(userId).push()
         
         val resenaData = mapOf(
-            "calificacion" to rating,
-            "comentario" to review,
+            "puntuacion_global" to ratingGlobal,
+            "infraestructura" to ratingInfra,
+            "vitalidad" to ratingVitalidad,
+            "entorno_fisico" to ratingEntorno,
+            "perfil_weight" to userWeight,
+            "perfil_tipo" to userProfileType,
             "fecha" to System.currentTimeMillis()
         )
         
