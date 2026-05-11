@@ -12,6 +12,10 @@
         <item name="windowNoTitle">true</item>
     </style>
 
+    <style name="ShapeAppearanceOverlay.App.CornerSize24" parent="">
+        <item name="cornerSize">28dp</item>
+    </style>
+
     <style name="AppThemeIgoSafe.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="AppThemeIgoSafe.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />

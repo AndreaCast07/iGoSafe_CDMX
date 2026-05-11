@@ -8,19 +8,6 @@
             android:id="@+id/nav_viaje"
             android:icon="@drawable/ic_travel"
             android:title="@string/menu_planear_viaje"/>
-        <item
-            android:id="@+id/nav_favoritos"
-            android:icon="@drawable/ic_favorite"
-            android:title="@string/menu_favoritos" />
-        <item
-            android:id="@+id/nav_contactos"
-            android:icon="@drawable/ic_contacts"
-            android:title="@string/menu_contactos" />
-
-        <item
-            android:id="@+id/nav_premium"
-            android:icon="@drawable/ic_important"
-            android:title="@string/menu_premium" />
 
         <item
             android:id="@+id/cerrar_sesion"

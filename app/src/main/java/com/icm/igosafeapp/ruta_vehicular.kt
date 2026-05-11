@@ -106,7 +106,7 @@ class ruta_vehicular : AppCompatActivity(), OnMapReadyCallback {
     private fun realizarTransicionZoom(userLoc: LatLng, destLoc: LatLng) {
         if (hasAnimatedOnce) return
         hasAnimatedOnce = true
-        
+
         transitionHandler.postDelayed({ mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userLoc, 17f)) }, 500)
         transitionHandler.postDelayed({ mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(destLoc, 17f)) }, 3000)
         transitionHandler.postDelayed({
@@ -114,6 +114,7 @@ class ruta_vehicular : AppCompatActivity(), OnMapReadyCallback {
             mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 150))
         }, 5500)
     }
+
 
     private fun obtenerFotoPerfil() {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return

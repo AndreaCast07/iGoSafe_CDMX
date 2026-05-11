@@ -39,7 +39,7 @@
             android:layout_weight="1"
             android:text="Más Segura"
             android:layout_marginStart="5dp"
-            android:backgroundTint="@color/verde"/>
+            android:backgroundTint="@color/azul3"/>
     </LinearLayout>
 
     <LinearLayout
@@ -117,7 +117,7 @@
                 android:text="NAVEGAR"
                 android:textSize="12sp"
                 android:drawableStart="@android:drawable/ic_menu_directions"
-                android:backgroundTint="#2E7D32"
+                android:backgroundTint="@color/azul7"
                 android:textColor="#FFFFFF"
                 android:textStyle="bold"
                 android:visibility="gone" />

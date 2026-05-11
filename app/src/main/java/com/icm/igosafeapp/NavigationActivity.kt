@@ -64,15 +64,6 @@ class NavigationActivity : AppCompatActivity(), NavigationView.OnNavigationItemS
             R.id.nav_viaje -> {
                 // Ya estamos en la pantalla principal
             }
-            R.id.nav_favoritos -> {
-                Toast.makeText(this, "Favoritos próximamente", Toast.LENGTH_SHORT).show()
-            }
-            R.id.nav_contactos -> {
-                Toast.makeText(this, "Contactos de emergencia", Toast.LENGTH_SHORT).show()
-            }
-            R.id.nav_premium -> {
-                Toast.makeText(this, "iGoSafe Premium", Toast.LENGTH_SHORT).show()
-            }
             R.id.cerrar_sesion -> {
                 cerrarSesion()
             }

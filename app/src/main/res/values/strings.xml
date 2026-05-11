@@ -1,7 +1,7 @@
 <resources>
-    <string name="app_name2">iGoSafeApp</string>
+    <string name="app_name2">iGoSafe</string>
     <string name="codigo">AIzaSyAuWtO-Xpq5v8dQTIQZTLs4QgJu4DQ6eVw</string>
-    <string name="celular">Número de celular</string>
+    <string name="celular">Número de celular registrado</string>
     <string name="contraseña">Contraseña</string>
     <string name="olvidarContraseña"><u>¿Olvidaste tu contraseña?</u></string>
     <string name="cuenta">¿No tienes una cuenta?</string>
@@ -11,13 +11,13 @@
     <string name="volverEnviarCodigo"><u>¿No recibiste un código? Volver a enviar</u></string>
     <string name="regisContrasena">Contraseña</string>
     <string name="confirContrasena">Confirmar contraseña</string>
-    <string name="infoContrasena">La contraseña debe contar con 6 dígitos y ser compuesta con número y caracteres</string>
+    <string name="infoContrasena">La contraseña debeser de al menos 6 caracteres. Debe incluir mayúsculas, minúsculas, números y caracteres especiales.</string>
     <string name="numDocumento">Número de documento</string>
     <string name="creaPerfil">Crea tu perfil</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">Jorge Luis Castellanos</string>
-    <string name="nav_header_subtitle">iGoSafe Free</string>
+    <string name="nav_header_title">Title</string>
+    <string name="nav_header_subtitle">iGoSafe</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
     <string name="comentarioOrigen">Tu ubicación</string>

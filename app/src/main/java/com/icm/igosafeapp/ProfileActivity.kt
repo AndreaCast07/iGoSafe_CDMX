@@ -1,108 +1,84 @@
 package com.icm.igosafeapp
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
+import android.widget.Button
+import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
-import com.icm.igosafeapp.databinding.ActivityProfileBinding
 import com.squareup.picasso.Picasso
 
 class ProfileActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityProfileBinding
     private val auth = FirebaseAuth.getInstance()
-    private val database = FirebaseDatabase.getInstance()
+    private val database = FirebaseDatabase.getInstance().reference
+    private var userCelularFiltro: String? = null // Para poder borrar el registro del celular
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityProfileBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        setContentView(R.layout.activity_profile)
 
         val userId = auth.currentUser?.uid
         if (userId != null) {
             cargarDatosUsuario(userId)
+        } else {
+            irAMain()
         }
 
         setupButtons()
     }
 
     private fun cargarDatosUsuario(uid: String) {
-        val userRef = database.getReference("usuarios").child(uid)
-
-        userRef.get().addOnSuccessListener { snapshot ->
+        database.child("usuarios").child(uid).get().addOnSuccessListener { snapshot ->
             if (snapshot.exists()) {
-                val nombre = snapshot.child("nombre").value.toString()
-                val email = snapshot.child("email").value.toString()
-                val celular = snapshot.child("celular").value.toString()
-                val edad = snapshot.child("edad").value.toString()
-                val genero = snapshot.child("genero").value.toString()
-                val nacionalidad = snapshot.child("nacionalidad").value.toString()
-                val fotoUrl = snapshot.child("fotoPerfilUrl").value.toString()
+                // Guardamos el celular para el borrado posterior
+                userCelularFiltro = snapshot.child("celularFiltro").value?.toString()
 
-                binding.tvUserName.text = nombre
-                binding.tvUserEmail.text = if (email != "null") email else "Sin correo registrado"
-                binding.tvUserPhone.text = celular
-                binding.tvProfileAge.text = "Edad: $edad"
-                binding.tvProfileGender.text = "Género: $genero"
-                binding.tvProfileNationality.text = "Nacionalidad: $nacionalidad"
+                findViewById<TextView>(R.id.tvUserName).text = snapshot.child("nombre").value?.toString() ?: "Usuario"
+                findViewById<TextView>(R.id.tvUserEmail).text = snapshot.child("email").value?.toString() ?: "Sin correo"
+                findViewById<TextView>(R.id.tvUserPhone).text = snapshot.child("celular").value?.toString() ?: "Sin teléfono"
+                findViewById<TextView>(R.id.tvProfileAge).text = "Edad: ${snapshot.child("edad").value}"
+                findViewById<TextView>(R.id.tvProfileGender).text = "Género: ${snapshot.child("genero").value}"
+                findViewById<TextView>(R.id.tvProfileNationality).text = "Nacionalidad: ${snapshot.child("nacionalidad").value}"
 
+                val fotoUrl = snapshot.child("fotoPerfilUrl").value?.toString() ?: ""
                 if (fotoUrl.isNotEmpty() && fotoUrl != "null") {
-                    Picasso.get()
-                        .load(fotoUrl)
-                        .transform(CircleTransform(120))
+                    Picasso.get().load(fotoUrl).transform(CircleTransform(120, Color.WHITE, 0f))
                         .placeholder(R.drawable.photo_original_user)
-                        .into(binding.imgProfileDetail)
+                        .into(findViewById<ImageView>(R.id.imgProfileDetail))
                 }
+            } else {
+                Log.e("iGoSafe_Debug", "UID no encontrado en /usuarios/$uid")
+                Toast.makeText(this, "Perfil incompleto. Favor de completar registro.", Toast.LENGTH_LONG).show()
             }
-        }.addOnFailureListener {
-            Toast.makeText(this, "Error al cargar la información", Toast.LENGTH_SHORT).show()
+        }.addOnFailureListener { e ->
+            Toast.makeText(this, "Error de red: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
 
     private fun setupButtons() {
-        // Botón Cerrar Sesión Estándar
-        binding.btnCerrarSesion.setOnClickListener {
+        findViewById<Button>(R.id.btnCerrarSesion).setOnClickListener {
             auth.signOut()
             irAMain()
         }
 
-        // Lógica de Cambio de Contraseña solicitada
-        binding.btnChangePassword.setOnClickListener {
-            val email = auth.currentUser?.email
-            if (email != null) {
-                auth.sendPasswordResetEmail(email).addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        Toast.makeText(this, "Correo enviado. Por seguridad, la sesión se cerrará.", Toast.LENGTH_LONG).show()
-
-                        // 1. Cerramos la sesión de Firebase
-                        auth.signOut()
-
-                        // 2. Mandamos al usuario a la pantalla principal
-                        irAMain()
-                    } else {
-                        Toast.makeText(this, "Error: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
-                    }
+        findViewById<Button>(R.id.btnChangePassword).setOnClickListener {
+            auth.currentUser?.email?.let { email ->
+                auth.sendPasswordResetEmail(email).addOnSuccessListener {
+                    Toast.makeText(this, "Correo de recuperación enviado", Toast.LENGTH_SHORT).show()
                 }
-            } else {
-                Toast.makeText(this, "No hay un correo asociado", Toast.LENGTH_SHORT).show()
             }
         }
 
-        binding.btnDeleteAccount.setOnClickListener {
+        findViewById<Button>(R.id.btnDeleteAccount).setOnClickListener {
             mostrarDialogoEliminacion()
         }
-    }
-
-    // Función auxiliar para no repetir código de navegación
-    private fun irAMain() {
-        val intent = Intent(this, MainActivity::class.java)
-        // Limpiamos el stack de actividades para que no pueda volver atrás
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        startActivity(intent)
-        finish()
     }
 
     private fun mostrarDialogoEliminacion() {
@@ -111,20 +87,37 @@ class ProfileActivity : AppCompatActivity() {
 
         AlertDialog.Builder(this)
             .setTitle("Eliminar Cuenta")
-            .setMessage("¿Estás seguro? Esta acción eliminará permanentemente tu perfil y datos de iGoSafe.")
+            .setMessage("¿Estás seguro? Se borrarán tus datos y el número quedará libre.")
             .setPositiveButton("Eliminar") { _, _ ->
-                database.getReference("usuarios").child(uid).removeValue().addOnCompleteListener {
+                // 1. Borramos de 'usuarios'
+                database.child("usuarios").child(uid).removeValue().addOnSuccessListener {
+
+                    // 2. Borramos de 'celulares_registrados' para que el número se pueda volver a usar
+                    userCelularFiltro?.let {
+                        database.child("celulares_registrados").child(it).removeValue()
+                    }
+
+                    // 3. Borramos del sistema de Autenticación
                     user.delete().addOnCompleteListener { task ->
                         if (task.isSuccessful) {
-                            Toast.makeText(this, "Cuenta eliminada con éxito", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this, "Cuenta eliminada correctamente", Toast.LENGTH_SHORT).show()
                             irAMain()
                         } else {
-                            Toast.makeText(this, "Vuelve a iniciar sesión para eliminar la cuenta.", Toast.LENGTH_LONG).show()
+                            // Si falla aquí, es por seguridad de Firebase (requiere login reciente)
+                            Log.e("iGoSafe_Error", "Fallo al borrar auth: ${task.exception?.message}")
+                            Toast.makeText(this, "Por seguridad, cierra sesión e inicia de nuevo antes de borrar.", Toast.LENGTH_LONG).show()
                         }
                     }
                 }
             }
             .setNegativeButton("Cancelar", null)
             .show()
+    }
+
+    private fun irAMain() {
+        val intent = Intent(this, MainActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
     }
 }

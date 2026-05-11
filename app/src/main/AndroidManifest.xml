@@ -16,6 +16,8 @@
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
 
     <application
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:name=".MainApplication"
         android:allowBackup="true"
         android:largeHeap="true"
@@ -45,9 +47,6 @@
         <activity android:name=".LoginActivity" android:exported="false" />
         <activity android:name=".ForgotPassActivity" android:exported="false" />
 
-        <activity android:name=".ResetPasswordActivity" android:exported="false" />
-
-        <activity android:name=".SignInPhone" android:exported="false" />
         <activity android:name=".SignInValidateSms" android:exported="false" />
         <activity android:name=".Create_profile" android:exported="false" />
         <activity android:name=".CreatePassword" android:exported="false" />
@@ -61,6 +60,7 @@
         <activity android:name=".ruta_vehicular" android:exported="false" />
         <activity android:name=".recorrido_vehicular" android:exported="false" />
         <activity android:name=".review_ruta" android:exported="false" />
+        <activity android:name=".TerminosActivity" android:exported="false"/>
 
         <provider
             android:name="androidx.core.content.FileProvider"

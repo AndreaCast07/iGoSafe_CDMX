@@ -109,7 +109,8 @@
                 android:text="Destinos Recientes"
                 android:textStyle="bold"
                 android:layout_marginTop="10dp"
-                android:visibility="gone"/>
+                android:visibility="gone"
+                android:textColor="@color/quantum_grey"/>
 
             <LinearLayout
                 android:id="@+id/historyContainer"

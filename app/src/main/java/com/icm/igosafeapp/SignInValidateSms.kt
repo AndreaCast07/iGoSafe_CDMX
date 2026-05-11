@@ -2,201 +2,146 @@ package com.icm.igosafeapp
 
 import android.content.Intent
 import android.os.Bundle
-import android.os.CountDownTimer
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.KeyEvent
-import android.view.View
-import android.view.inputmethod.InputMethodManager
-import android.widget.Button
 import android.widget.EditText
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.google.firebase.FirebaseException
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.PhoneAuthProvider
+import com.google.firebase.database.FirebaseDatabase
+import com.icm.igosafeapp.databinding.ActivitySignInValidateBinding
 import java.util.concurrent.TimeUnit
 
 class SignInValidateSms : AppCompatActivity() {
 
-    private lateinit var editTexts: Array<EditText>
-    private lateinit var btnValidar: Button
-    private lateinit var timerText: TextView
-    private lateinit var resendCode: TextView
-
-    // Firebase Auth Variables
-    private lateinit var auth: FirebaseAuth
+    private lateinit var binding: ActivitySignInValidateBinding
+    private val auth = FirebaseAuth.getInstance()
     private var verificationId: String? = null
-    private var resendToken: PhoneAuthProvider.ForceResendingToken? = null
-    private var celularDestino: String? = null
+
+    private lateinit var otpFields: Array<EditText>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_sign_in_validate)
+        binding = ActivitySignInValidateBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        auth = FirebaseAuth.getInstance()
-        celularDestino = intent.getStringExtra("CELULAR")
-
-        initializeViews()
-        setupEditTexts()
-        startPhoneNumberVerification()
-    }
-
-    private fun initializeViews() {
-        // Vinculamos los 6 campos (Asegúrate de tener el 6to en tu XML)
-        editTexts = arrayOf(
-            findViewById(R.id.editText1), findViewById(R.id.editText2),
-            findViewById(R.id.editText3), findViewById(R.id.editText4),
-            findViewById(R.id.editText5), findViewById(R.id.editText6)
+        otpFields = arrayOf(
+            binding.editText1, binding.editText2, binding.editText3,
+            binding.editText4, binding.editText5, binding.editText6
         )
-        btnValidar = findViewById(R.id.btnValidate)
-        timerText = findViewById(R.id.timer)
-        resendCode = findViewById(R.id.resendCode)
 
-        btnValidar.setOnClickListener {
-            val code = editTexts.joinToString("") { it.text.toString() }
-            if (code.length == 6 && verificationId != null) {
-                val credential = PhoneAuthProvider.getCredential(verificationId!!, code)
-                signInWithPhoneAuthCredential(credential)
-            } else {
-                Toast.makeText(this, "Ingresa el código de 6 dígitos", Toast.LENGTH_SHORT).show()
-            }
-        }
+        setupOtpInputs()
 
-        resendCode.setOnClickListener {
-            if (resendToken != null) {
-                resendVerificationCode()
-            }
-        }
-    }
-
-    // --- LÓGICA DE FIREBASE AUTH ---
-
-    private fun startPhoneNumberVerification() {
-        // iGoSafe usa el prefijo de México (+52)
-        val phoneNumber = "+52$celularDestino"
+        val celular = intent.getStringExtra("CELULAR") ?: ""
+        val phoneFull = if (celular.startsWith("+")) celular else "+52$celular"
 
         val options = PhoneAuthOptions.newBuilder(auth)
-            .setPhoneNumber(phoneNumber)
+            .setPhoneNumber(phoneFull)
             .setTimeout(60L, TimeUnit.SECONDS)
             .setActivity(this)
-            .setCallbacks(callbacks)
-            .build()
-        PhoneAuthProvider.verifyPhoneNumber(options)
-        startCountdownTimer()
-    }
-
-    private fun resendVerificationCode() {
-        val phoneNumber = "+52$celularDestino"
-        val options = PhoneAuthOptions.newBuilder(auth)
-            .setPhoneNumber(phoneNumber)
-            .setTimeout(60L, TimeUnit.SECONDS)
-            .setActivity(this)
-            .setCallbacks(callbacks)
-            .setForceResendingToken(resendToken!!)
-            .build()
-        PhoneAuthProvider.verifyPhoneNumber(options)
-        startCountdownTimer()
-    }
-
-    private val callbacks = object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
-
-        override fun onVerificationCompleted(credential: PhoneAuthCredential) {
-            // Detección automática exitosa (Instant Verification)
-            val code = credential.smsCode
-            if (code != null) {
-                llenarCamposAutomatico(code)
-            }
-            signInWithPhoneAuthCredential(credential)
-        }
-
-        override fun onVerificationFailed(e: FirebaseException) {
-            Log.e("iGoSafe_Auth", "Error de Firebase: ${e.message}")
-            Toast.makeText(this@SignInValidateSms, "Error: ${e.message}", Toast.LENGTH_LONG).show()
-        }
-
-        override fun onCodeSent(vId: String, token: PhoneAuthProvider.ForceResendingToken) {
-            verificationId = vId
-            resendToken = token
-            Toast.makeText(this@SignInValidateSms, "Código enviado", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun signInWithPhoneAuthCredential(credential: PhoneAuthCredential) {
-        auth.signInWithCredential(credential).addOnCompleteListener(this) { task ->
-            if (task.isSuccessful) {
-                Toast.makeText(this, "Verificación exitosa", Toast.LENGTH_SHORT).show()
-                navigateToCreatePassword()
-            } else {
-                Toast.makeText(this, "Código incorrecto o expirado", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
-    // --- LÓGICA DE INTERFAZ (UX) ---
-
-    private fun setupEditTexts() {
-        val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-        editTexts.forEachIndexed { index, editText ->
-            editText.addTextChangedListener(object : TextWatcher {
-                override fun afterTextChanged(s: Editable?) {
-                    if (s?.length == 1 && index < editTexts.size - 1) {
-                        editTexts[index + 1].requestFocus()
-                    } else if (index == editTexts.size - 1 && s?.length == 1) {
-                        imm.hideSoftInputFromWindow(editTexts.last().windowToken, 0)
-                        btnValidar.performClick() // Autovalidar al terminar
-                    }
+            .setCallbacks(object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+                override fun onCodeSent(vId: String, token: PhoneAuthProvider.ForceResendingToken) {
+                    verificationId = vId
+                    Toast.makeText(this@SignInValidateSms, "Código enviado", Toast.LENGTH_SHORT).show()
                 }
+                override fun onVerificationCompleted(p0: com.google.firebase.auth.PhoneAuthCredential) {
+                    navigateToCreatePassword()
+                }
+                override fun onVerificationFailed(p0: com.google.firebase.FirebaseException) {
+                    Toast.makeText(this@SignInValidateSms, "Error: ${p0.message}", Toast.LENGTH_LONG).show()
+                }
+            }).build()
+
+        PhoneAuthProvider.verifyPhoneNumber(options)
+
+        binding.btnValidate.setOnClickListener {
+            validarCodigo()
+        }
+    }
+
+    private fun setupOtpInputs() {
+        for (i in otpFields.indices) {
+            otpFields[i].addTextChangedListener(object : TextWatcher {
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
+                override fun afterTextChanged(s: Editable?) {
+                    if (s?.length == 1 && i < otpFields.size - 1) {
+                        // Salta al siguiente cuadro
+                        otpFields[i + 1].requestFocus()
+                    } else if (s?.length == 1 && i == otpFields.size - 1) {
+                        validarCodigo()
+                    }
+                }
             })
 
-            editText.setOnKeyListener { _, keyCode, event ->
+            otpFields[i].setOnKeyListener { v, keyCode, event ->
                 if (event.action == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_DEL) {
-                    if (editTexts[index].text.isEmpty() && index > 0) {
-                        editTexts[index - 1].requestFocus()
+                    if (otpFields[i].text.isEmpty() && i > 0) {
+                        // Regresa al cuadro anterior si el actual está vacío
+                        otpFields[i - 1].requestFocus()
+                        otpFields[i - 1].text = null // Borra el número anterior
                         true
-                    } else false
-                } else false
+                    } else {
+                        false
+                    }
+                } else {
+                    false
+                }
             }
         }
     }
 
-    private fun llenarCamposAutomatico(otp: String) {
-        for (i in otp.indices) {
-            if (i < editTexts.size) editTexts[i].setText(otp[i].toString())
-        }
-    }
+    private fun validarCodigo() {
+        val code = otpFields.joinToString("") { it.text.toString() }
 
-    private fun startCountdownTimer() {
-        object : CountDownTimer(60000, 1000) {
-            override fun onTick(millisUntilFinished: Long) {
-                timerText.text = "Reenviar en: ${millisUntilFinished / 1000}s"
-                resendCode.visibility = View.GONE
-            }
-            override fun onFinish() {
-                timerText.text = "Ya puedes solicitar otro código"
-                resendCode.visibility = View.VISIBLE
-            }
-        }.start()
+        if (code.length == 6 && verificationId != null) {
+            val credential = PhoneAuthProvider.getCredential(verificationId!!, code)
+            auth.signInWithCredential(credential)
+                .addOnSuccessListener {
+                    Toast.makeText(this, "Verificación exitosa", Toast.LENGTH_SHORT).show()
+                    navigateToCreatePassword()
+                }
+                .addOnFailureListener {
+                    Toast.makeText(this, "Código incorrecto", Toast.LENGTH_SHORT).show()
+                }
+        } else if (code.length < 6) {
+            Toast.makeText(this, "Ingresa los 6 dígitos", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun navigateToCreatePassword() {
-        val intentOriginal = intent
-        val nextIntent = Intent(this, CreatePassword::class.java).apply {
-            putExtra("CELULAR", intentOriginal.getStringExtra("CELULAR"))
-            putExtra("NOMBRE", intentOriginal.getStringExtra("NOMBRE"))
-            putExtra("EMAIL", intentOriginal.getStringExtra("EMAIL"))
-            putExtra("GENERO", intentOriginal.getStringExtra("GENERO"))
-            putExtra("EDAD", intentOriginal.getIntExtra("EDAD", 0))
-            putExtra("NACIONALIDAD", intentOriginal.getStringExtra("NACIONALIDAD"))
-            putExtra("FOTO_URI", intentOriginal.getStringExtra("FOTO_URI"))
+        val isGoogle = intent.getBooleanExtra("IS_GOOGLE", false)
+
+        if (isGoogle) {
+            val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+            val db = FirebaseDatabase.getInstance().getReference("usuarios")
+
+            val datos = mapOf(
+                "nombre" to intent.getStringExtra("NOMBRE"),
+                "email" to intent.getStringExtra("EMAIL"),
+                "celular" to intent.getStringExtra("CELULAR"),
+                "celularFiltro" to intent.getStringExtra("CELULAR")?.takeLast(10),
+                "genero" to intent.getStringExtra("GENERO"),
+                "nacionalidad" to intent.getStringExtra("NACIONALIDAD"),
+                "edad" to intent.getIntExtra("EDAD", 0)
+            )
+
+            db.child(uid).setValue(datos).addOnSuccessListener {
+                Toast.makeText(this, "Registro de Google completado", Toast.LENGTH_SHORT).show()
+                val intentHome = Intent(this, NavigationActivity::class.java)
+                intentHome.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                startActivity(intentHome)
+                finish()
+            }
+        } else {
+            val next = Intent(this, CreatePassword::class.java)
+            next.putExtras(intent.extras!!)
+            startActivity(next)
+            finish()
         }
-        startActivity(nextIntent)
-        finish()
     }
 }

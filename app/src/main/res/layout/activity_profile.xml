@@ -11,8 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="180dp"
         android:scaleType="centerCrop"
-        android:src="@drawable/marco_inferior"
-        android:rotation="180"
+        android:src="@drawable/gradient_soft_blue"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView

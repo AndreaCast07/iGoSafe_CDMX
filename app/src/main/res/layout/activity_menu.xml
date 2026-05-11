@@ -20,6 +20,7 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
+        android:textSize="10dp"
         android:backgroundTint="@color/azul5"
         app:itemTextColor="@color/claro"
         app:itemIconTint="@color/claro"

@@ -1,260 +1,238 @@
 package com.icm.igosafeapp
 
+import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Color
+import android.graphics.Bitmap
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.text.SpannableString
-import android.text.Spanned
-import android.text.TextPaint
+import android.text.*
 import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
+import android.text.style.ForegroundColorSpan
 import android.view.View
-import android.widget.*
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.content.FileProvider
-import androidx.exifinterface.media.ExifInterface
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.firebase.auth.FirebaseAuth
+import com.icm.igosafeapp.databinding.ActivityCreateProfileBinding
 import com.icm.igosafeapp.manejoArchivos.UsuarioManager
-import com.squareup.picasso.MemoryPolicy
-import com.squareup.picasso.NetworkPolicy
-import com.squareup.picasso.Picasso
-import entidades.DatosUsuario
-import java.io.File
 
 class Create_profile : AppCompatActivity() {
 
-    private lateinit var txtNombre: EditText
-    private lateinit var txtCelular: EditText
-    private lateinit var txtEdad: EditText
-    private lateinit var txtEmail: EditText
-    private lateinit var spinnerGenero: Spinner
-    private lateinit var spinnerNacionalidad: Spinner
-    private lateinit var btnCrearPerfil: Button
-    private lateinit var cbTerminos: CheckBox
-
-    private lateinit var photoPerfil: ImageView
-    private lateinit var iconCamera: ImageView
-    private var pickedPhoto: Uri? = null
-    private val FILE_NAME = "profile_photo.jpg"
-    private lateinit var imageUrl: Uri
-
+    private lateinit var binding: ActivityCreateProfileBinding
+    private lateinit var googleSignInClient: GoogleSignInClient
     private lateinit var usuarioManager: UsuarioManager
-    private var isGoogleFlow: Boolean = false
+    private val auth = FirebaseAuth.getInstance()
 
-    // Contratos para Cámara y Galería
-    private val cameraContract = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
-        if (success) {
-            pickedPhoto = imageUrl
-            actualizarFotoEnVista(imageUrl)
-        }
+    // Lanzadores para Imagen
+    private val galleryLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let { binding.photoPerfil.setImageURI(it) }
     }
 
-    private val galleryContract = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        uri?.let {
-            pickedPhoto = it
-            actualizarFotoEnVista(it)
-        }
+    private val cameraLauncher = registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap: Bitmap? ->
+        bitmap?.let { binding.photoPerfil.setImageBitmap(it) }
+    }
+
+    private val requestCameraPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+        if (isGranted) cameraLauncher.launch(null)
+        else Toast.makeText(this, "Se requiere permiso de cámara", Toast.LENGTH_SHORT).show()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_create_profile)
+        binding = ActivityCreateProfileBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        usuarioManager = UsuarioManager(this)
-        isGoogleFlow = intent.getBooleanExtra("IS_GOOGLE", false)
+        // Inicializar Manager
+        usuarioManager = UsuarioManager()
 
-        // Inicializar vistas[cite: 2, 22]
-        txtNombre = findViewById(R.id.editTxtName)
-        txtCelular = findViewById(R.id.editTxtCelular)
-        txtEdad = findViewById(R.id.editTxtEdad)
-        txtEmail = findViewById(R.id.editTextTextEmailAddress)
-        spinnerGenero = findViewById(R.id.spinnerGenero)
-        spinnerNacionalidad = findViewById(R.id.spinnerNacionalidad)
-        photoPerfil = findViewById(R.id.photoPerfil)
-        iconCamera = findViewById(R.id.iconCamera)
-        btnCrearPerfil = findViewById(R.id.btnCreateProfile)
-        cbTerminos = findViewById(R.id.cbTerminos)
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
+        googleSignInClient = GoogleSignIn.getClient(this, gso)
 
-        val celularSms = intent.getStringExtra("CELULAR") ?: ""
-        if (celularSms.isNotEmpty()) {
-            txtCelular.setText(celularSms)
-            txtCelular.isEnabled = false
-        }
+        setupSpinners()
+        setupPhoneLogic()
+        setupTermsCheckBox()
+        manejarBotonAtras()
+        verificarDatosGoogle()
 
-        configurarSpinners()
-        setupImageClickListeners()
-        setupTerminosClickable()
-        imageUrl = createImageUri()
-        configurarBotonCrear()
+        binding.iconCamera.setOnClickListener { mostrarOpcionesImagen() }
+        binding.btnCreateProfile.setOnClickListener { validarYContinuar() }
+    }
 
+    private fun manejarBotonAtras() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                val intent = Intent(this@Create_profile, LoginActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                startActivity(intent)
+                if (intent.getBooleanExtra("IS_GOOGLE", false)) {
+                    auth.signOut()
+                    googleSignInClient.signOut()
+                }
                 finish()
             }
         })
     }
 
-    // Muestra diálogo para elegir origen de imagen[cite: 22]
+    private fun verificarDatosGoogle() {
+        if (intent.getBooleanExtra("IS_GOOGLE", false)) {
+            binding.editTxtName.setText(intent.getStringExtra("NOMBRE"))
+            binding.editTextTextEmailAddress.setText(intent.getStringExtra("EMAIL"))
+            binding.editTextTextEmailAddress.isEnabled = false
+        }
+    }
+
+    private fun setupSpinners() {
+        val generos = arrayOf("Selecciona Género", "Femenino", "Masculino", "No binario", "Otro")
+        binding.spinnerGenero.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, generos)
+
+        val nacionalidades = arrayOf("Selecciona Nacionalidad", "Mexicana", "Estadounidense", "Española", "Colombiana", "Otra")
+        binding.spinnerNacionalidad.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, nacionalidades)
+
+        binding.spinnerNacionalidad.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(p0: AdapterView<*>?, p1: View?, position: Int, p3: Long) {
+                val prefijo = when (position) {
+                    1 -> "+52"
+                    2 -> "+1"
+                    3 -> "+34"
+                    4 -> "+57"
+                    5 -> "+"
+                    else -> ""
+                }
+                binding.editCountryCode.setText(prefijo)
+                binding.editCountryCode.isEnabled = (position == 5)
+            }
+            override fun onNothingSelected(p0: AdapterView<*>?) {}
+        }
+    }
+
+    private fun setupPhoneLogic() {
+        binding.editCountryCode.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                val prefijo = s.toString()
+                if (prefijo.isNotEmpty() && !prefijo.startsWith("+")) {
+                    binding.editCountryCode.setText("+$prefijo")
+                    binding.editCountryCode.setSelection(binding.editCountryCode.length())
+                    return
+                }
+                val flag = when (prefijo) {
+                    "+52" -> R.drawable.mx
+                    "+1"  -> R.drawable.us
+                    "+34" -> R.drawable.es
+                    "+57" -> R.drawable.co
+                    else  -> R.drawable.row
+                }
+                binding.imgFlag.setImageResource(flag)
+            }
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+        })
+    }
+
+    private fun setupTermsCheckBox() {
+        val fullText = "Acepto los términos y condiciones de iGoSafe"
+        val clickablePart = "términos y condiciones"
+        val spannableString = SpannableString(fullText)
+        val startIndex = fullText.indexOf(clickablePart)
+        val endIndex = startIndex + clickablePart.length
+
+        spannableString.setSpan(
+            ForegroundColorSpan(ContextCompat.getColor(this, R.color.verde)),
+            startIndex, endIndex, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+
+        spannableString.setSpan(
+            object : ClickableSpan() {
+                override fun onClick(widget: View) {
+                    startActivity(Intent(this@Create_profile, TerminosActivity::class.java))
+                }
+                override fun updateDrawState(ds: TextPaint) {
+                    super.updateDrawState(ds)
+                    ds.isUnderlineText = true
+                }
+            },
+            startIndex, endIndex, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+
+        binding.cbTerminos.text = spannableString
+        binding.cbTerminos.movementMethod = LinkMovementMethod.getInstance()
+    }
+
     private fun mostrarOpcionesImagen() {
         val opciones = arrayOf("Cámara", "Galería")
         AlertDialog.Builder(this)
-            .setTitle("Seleccionar foto de perfil")
+            .setTitle("Foto de perfil")
             .setItems(opciones) { _, which ->
-                when (which) {
-                    0 -> if (checkAndRequestPermissions("CAMERA")) cameraContract.launch(imageUrl)
-                    1 -> if (checkAndRequestPermissions("GALLERY")) galleryContract.launch("image/*")
-                }
-            }
-            .show()
-    }
-
-    private fun setupImageClickListeners() {
-        photoPerfil.setOnClickListener { mostrarOpcionesImagen() }
-        iconCamera.setOnClickListener { mostrarOpcionesImagen() }
-    }
-
-    private fun setupTerminosClickable() {
-        val texto = "Acepto los términos y condiciones"
-        val spannable = SpannableString(texto)
-        val linkText = "términos y condiciones"
-
-        val clickableSpan = object : ClickableSpan() {
-            override fun onClick(widget: View) {
-                // Ir a la actividad de términos[cite: 22]
-                val intent = Intent(this@Create_profile, TerminosActivity::class.java)
-                startActivity(intent)
-            }
-            override fun updateDrawState(ds: TextPaint) {
-                super.updateDrawState(ds)
-                ds.color = Color.BLUE
-                ds.isUnderlineText = true
-            }
-        }
-
-        val start = texto.indexOf(linkText)
-        val end = start + linkText.length
-        spannable.setSpan(clickableSpan, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-
-        cbTerminos.text = spannable
-        cbTerminos.movementMethod = LinkMovementMethod.getInstance()
-    }
-
-    private fun configurarBotonCrear() {
-        btnCrearPerfil.setOnClickListener {
-            val nombre = txtNombre.text.toString().trim()
-            val edadStr = txtEdad.text.toString().trim()
-            val email = txtEmail.text.toString().trim()
-            val celular = txtCelular.text.toString().trim()
-
-            // Validaciones obligatorias[cite: 22]
-            if (nombre.isEmpty() || edadStr.isEmpty() || email.isEmpty() || celular.isEmpty()) {
-                Toast.makeText(this, "Completa todos los campos", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            if (!cbTerminos.isChecked) {
-                Toast.makeText(this, "Debes aceptar los términos y condiciones", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            btnCrearPerfil.isEnabled = false
-            btnCrearPerfil.text = "Procesando..."
-
-            usuarioManager.celularYaRegistrado(celular) { existe ->
-                runOnUiThread {
-                    if (existe && !isGoogleFlow) {
-                        Toast.makeText(this@Create_profile, "Número ya registrado", Toast.LENGTH_LONG).show()
-                        btnCrearPerfil.isEnabled = true
-                        btnCrearPerfil.text = "Crear perfil"
+                if (which == 0) {
+                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                        cameraLauncher.launch(null)
                     } else {
-                        continuarRegistro(nombre, edadStr.toIntOrNull() ?: 0,
-                            spinnerGenero.selectedItem.toString(),
-                            spinnerNacionalidad.selectedItem.toString(), celular, email)
+                        requestCameraPermissionLauncher.launch(Manifest.permission.CAMERA)
                     }
+                } else {
+                    galleryLauncher.launch("image/*")
+                }
+            }.show()
+    }
+
+    private fun validarYContinuar() {
+        val nombre = binding.editTxtName.text.toString().trim()
+        val email = binding.editTextTextEmailAddress.text.toString().trim()
+        val prefijo = binding.editCountryCode.text.toString().trim()
+        val celular = binding.editTxtCelular.text.toString().trim()
+        val edadStr = binding.editTxtEdad.text.toString().trim()
+
+        if (nombre.isEmpty() || email.isEmpty() || celular.isEmpty() || edadStr.isEmpty()) {
+            Toast.makeText(this, "Completa todos los campos", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (!email.contains("@") || !email.endsWith(".com")) {
+            Toast.makeText(this, "Correo no válido", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (!binding.cbTerminos.isChecked) {
+            Toast.makeText(this, "Acepta los términos y condiciones", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val telefonoCompleto = prefijo + celular
+
+        // BLOQUEO DE DUPLICADOS: Antes de ir a SMS, verificamos en Firebase
+        binding.btnCreateProfile.isEnabled = false
+        binding.btnCreateProfile.text = "Validando número..."
+
+        usuarioManager.verificarCelularDisponible(telefonoCompleto) { disponible ->
+            runOnUiThread {
+                if (disponible) {
+                    // El número es nuevo, pasamos a SMS
+                    val intentSms = Intent(this@Create_profile, SignInValidateSms::class.java).apply {
+                        putExtra("NOMBRE", nombre)
+                        putExtra("EMAIL", email)
+                        putExtra("CELULAR", telefonoCompleto)
+                        putExtra("GENERO", binding.spinnerGenero.selectedItem.toString())
+                        putExtra("NACIONALIDAD", binding.spinnerNacionalidad.selectedItem.toString())
+                        putExtra("EDAD", edadStr.toIntOrNull() ?: 0)
+                        putExtra("IS_GOOGLE", intent.getBooleanExtra("IS_GOOGLE", false))
+                    }
+                    startActivity(intentSms)
+                    // Restablecemos por si el usuario regresa
+                    binding.btnCreateProfile.isEnabled = true
+                    binding.btnCreateProfile.text = "Continuar"
+                } else {
+                    // El número ya existe, detenemos el proceso
+                    Toast.makeText(this@Create_profile, "Este número de celular ya está registrado en iGoSafe", Toast.LENGTH_LONG).show()
+                    binding.btnCreateProfile.isEnabled = true
+                    binding.btnCreateProfile.text = "Continuar"
                 }
             }
         }
-    }
-
-    private fun actualizarFotoEnVista(uri: Uri) {
-        val rotation = getRotationAngle(uri)
-        Picasso.get()
-            .load(uri)
-            .rotate(rotation.toFloat())
-            .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)
-            .placeholder(R.drawable.photo_original_user)
-            .into(photoPerfil)
-    }
-
-    private fun continuarRegistro(nombre: String, edad: Int, genero: String, nacionalidad: String, celular: String, email: String) {
-        val datos = DatosUsuario(nombre, genero, edad, nacionalidad)
-        if (isGoogleFlow) {
-            usuarioManager.completarRegistroGoogle(celular, pickedPhoto, datos) { exito, _ ->
-                if (exito) startActivity(Intent(this, NavigationActivity::class.java)).also { finish() }
-            }
-        } else {
-            val intent = Intent(this, SignInValidateSms::class.java).apply {
-                putExtra("CELULAR", celular)
-                putExtra("NOMBRE", nombre)
-                putExtra("EMAIL", email)
-                putExtra("GENERO", genero)
-                putExtra("EDAD", edad)
-                putExtra("NACIONALIDAD", nacionalidad)
-                putExtra("FOTO_URI", pickedPhoto?.toString() ?: "")
-            }
-            startActivity(intent)
-            finish()
-        }
-    }
-
-    // Funciones de utilidad (Permisos, Rotación, URI) se mantienen[cite: 22]
-    private fun getRotationAngle(uri: Uri): Int {
-        return try { contentResolver.openInputStream(uri)?.use {
-            val exif = ExifInterface(it)
-            when (exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)) {
-                ExifInterface.ORIENTATION_ROTATE_90 -> 90
-                ExifInterface.ORIENTATION_ROTATE_180 -> 180
-                ExifInterface.ORIENTATION_ROTATE_270 -> 270
-                else -> 0
-            }
-        } ?: 0 } catch (e: Exception) { 0 }
-    }
-
-    private fun checkAndRequestPermissions(type: String): Boolean {
-        val permissions = if (type == "CAMERA") arrayOf(android.Manifest.permission.CAMERA)
-        else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) arrayOf(android.Manifest.permission.READ_MEDIA_IMAGES)
-        else arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE)
-
-        val toRequest = permissions.filter { ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED }
-        if (toRequest.isNotEmpty()) {
-            ActivityCompat.requestPermissions(this, toRequest.toTypedArray(), 10)
-            return false
-        }
-        return true
-    }
-
-    private fun createImageUri(): Uri {
-        val image = File(filesDir, FILE_NAME)
-        return FileProvider.getUriForFile(this, "com.icm.igosafeapp.fileprovider", image)
-    }
-
-    private fun configurarSpinners() {
-        val adapterGen = ArrayAdapter.createFromResource(this, R.array.opcionesGenero, android.R.layout.simple_spinner_item)
-        adapterGen.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerGenero.adapter = adapterGen
-
-        val adapterNac = ArrayAdapter.createFromResource(this, R.array.opcionesNacionalidad, android.R.layout.simple_spinner_item)
-        adapterNac.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerNacionalidad.adapter = adapterNac
     }
 }

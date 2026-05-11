@@ -10,154 +10,227 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fillViewport="true">
+        android:fillViewport="true"
+        android:scrollbars="none">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingBottom="50dp">
+            android:paddingBottom="40dp">
 
-            <!-- Decoración superior -->
-            <ImageView
-                android:id="@+id/imageView"
+            <View
+                android:id="@+id/headerBackground"
                 android:layout_width="match_parent"
-                android:layout_height="150dp"
-                android:rotation="180"
-                android:scaleType="fitXY"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/marco_inferior" />
+                android:layout_height="180dp"
+                android:background="@drawable/gradient_soft_blue"
+                app:layout_constraintTop_toTopOf="parent" />
 
-            <!-- Foto de Perfil -->
-            <ImageView
-                android:id="@+id/photoPerfil"
-                android:layout_width="150dp"
-                android:layout_height="150dp"
-                android:layout_marginTop="36dp"
-                android:padding="20dp"
-                android:scaleType="centerCrop"
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/profileCard"
+                android:layout_width="140dp"
+                android:layout_height="140dp"
+                android:layout_marginTop="60dp"
+                app:cardCornerRadius="70dp"
+                app:cardElevation="4dp"
+                app:strokeWidth="0dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/photo_original_user" />
+                app:layout_constraintTop_toTopOf="parent">
 
-            <ImageView
+                <ImageView
+                    android:id="@+id/photoPerfil"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/photo_original_user" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/iconCamera"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_marginEnd="10dp"
-                android:layout_marginBottom="10dp"
-                android:background="@drawable/custom_background_circle"
-                android:padding="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:src="@drawable/ic_camera"
-                app:layout_constraintBottom_toBottomOf="@+id/photoPerfil"
-                app:layout_constraintEnd_toEndOf="@+id/photoPerfil" />
+                app:backgroundTint="@color/verde"
+                app:fabSize="mini"
+                app:tint="@color/white"
+                app:layout_constraintBottom_toBottomOf="@+id/profileCard"
+                app:layout_constraintEnd_toEndOf="@+id/profileCard" />
 
             <TextView
                 android:id="@+id/texttitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:layout_marginStart="25dp"
+                android:layout_marginTop="24dp"
                 android:fontFamily="@font/quicksand_bold"
-                android:text="Crea tu perfil"
-                android:textColor="@color/verde"
-                android:textSize="18sp"
+                android:text="Completa tu perfil"
+                android:textColor="@color/azul3"
+                android:textSize="22sp"
                 android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/photoPerfil" />
+                app:layout_constraintTop_toBottomOf="@+id/profileCard" />
 
-            <!-- Campos de texto -->
-            <EditText
-                android:id="@+id/editTxtName"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/layoutName"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_height="wrap_content"
                 android:layout_marginHorizontal="25dp"
-                android:layout_marginTop="12dp"
-                android:background="@drawable/custom_input_general"
-                android:drawableStart="@drawable/ic_person"
-                android:drawablePadding="12dp"
+                android:layout_marginTop="20dp"
                 android:hint="Nombre completo"
-                android:paddingStart="12dp"
-                app:layout_constraintTop_toBottomOf="@+id/texttitle" />
+                app:startIconDrawable="@drawable/ic_person"
+                app:boxCornerRadiusBottomEnd="12dp"
+                app:boxCornerRadiusBottomStart="12dp"
+                app:boxCornerRadiusTopEnd="12dp"
+                app:boxCornerRadiusTopStart="12dp"
+                app:layout_constraintTop_toBottomOf="@+id/texttitle">
 
-            <EditText
-                android:id="@+id/editTxtCelular"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:layout_marginHorizontal="25dp"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/custom_input_general"
-                android:drawableStart="@drawable/ic_phone"
-                android:drawablePadding="12dp"
-                android:hint="Celular"
-                android:inputType="phone"
-                android:paddingStart="12dp"
-                app:layout_constraintTop_toBottomOf="@+id/editTxtName" />
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/editTxtName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPersonName"
+                    android:maxLength="50"/>
+            </com.google.android.material.textfield.TextInputLayout>
 
             <Spinner
                 android:id="@+id/spinnerGenero"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_height="56dp"
                 android:layout_marginHorizontal="25dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="12dp"
                 android:background="@drawable/custom_input_general"
-                app:layout_constraintTop_toBottomOf="@+id/editTxtCelular" />
+                app:layout_constraintTop_toBottomOf="@+id/layoutName" />
 
-            <EditText
-                android:id="@+id/editTxtEdad"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/layoutAge"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_height="wrap_content"
                 android:layout_marginHorizontal="25dp"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/custom_input_general"
+                android:layout_marginTop="12dp"
                 android:hint="Edad"
-                android:inputType="number"
-                android:paddingStart="12dp"
-                app:layout_constraintTop_toBottomOf="@+id/spinnerGenero" />
+                app:boxCornerRadiusBottomEnd="12dp"
+                app:boxCornerRadiusBottomStart="12dp"
+                app:boxCornerRadiusTopEnd="12dp"
+                app:boxCornerRadiusTopStart="12dp"
+                app:layout_constraintTop_toBottomOf="@+id/spinnerGenero">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/editTxtEdad"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:maxLength="3"/>
+            </com.google.android.material.textfield.TextInputLayout>
 
             <Spinner
                 android:id="@+id/spinnerNacionalidad"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_height="56dp"
                 android:layout_marginHorizontal="25dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="12dp"
                 android:background="@drawable/custom_input_general"
-                app:layout_constraintTop_toBottomOf="@+id/editTxtEdad" />
+                app:layout_constraintTop_toBottomOf="@+id/layoutAge" />
 
-            <EditText
-                android:id="@+id/editTextTextEmailAddress"
+            <LinearLayout
+                android:id="@+id/layoutPhoneContainer"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_height="60dp"
                 android:layout_marginHorizontal="25dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="12dp"
                 android:background="@drawable/custom_input_general"
-                android:hint="Correo electrónico"
-                android:inputType="textEmailAddress"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
                 android:paddingStart="12dp"
-                app:layout_constraintTop_toBottomOf="@+id/spinnerNacionalidad" />
+                android:paddingEnd="12dp"
+                app:layout_constraintTop_toBottomOf="@+id/spinnerNacionalidad">
 
-            <!-- Checkbox de Términos -->
+                <ImageView
+                    android:id="@+id/imgFlag"
+                    android:layout_width="30dp"
+                    android:layout_height="20dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/mx" />
+
+                <EditText
+                    android:id="@+id/editCountryCode"
+                    android:layout_width="60dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:background="@android:color/transparent"
+                    android:enabled="false"
+                    android:hint="+52"
+                    android:inputType="phone"
+                    android:maxLength="4"
+                    android:textColor="@color/black"
+                    android:textSize="16sp" />
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="24dp"
+                    android:layout_marginHorizontal="8dp"
+                    android:background="#DDDDDD" />
+
+                <EditText
+                    android:id="@+id/editTxtCelular"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
+                    android:hint="Celular"
+                    android:inputType="phone"
+                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    android:maxLength="10"/>
+            </LinearLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/layoutEmail"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="25dp"
+                android:layout_marginTop="12dp"
+                android:hint="Correo electrónico"
+                app:boxCornerRadiusBottomEnd="12dp"
+                app:boxCornerRadiusBottomStart="12dp"
+                app:boxCornerRadiusTopEnd="12dp"
+                app:boxCornerRadiusTopStart="12dp"
+                app:layout_constraintTop_toBottomOf="@+id/layoutPhoneContainer">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/editTextTextEmailAddress"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textEmailAddress"
+                    android:maxLength="35"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
             <CheckBox
                 android:id="@+id/cbTerminos"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="25dp"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="16dp"
+                android:fontFamily="@font/roboto"
+                android:textColor="@color/black"
                 android:textSize="14sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/editTextTextEmailAddress" />
+                app:layout_constraintTop_toBottomOf="@+id/layoutEmail" />
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnCreateProfile"
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
                 android:layout_marginHorizontal="25dp"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="32dp"
                 android:backgroundTint="@color/verde"
-                android:text="Crear perfil"
+                android:text="Finalizar Registro"
                 android:textColor="@color/white"
+                android:textSize="16sp"
                 android:textStyle="bold"
+                app:cornerRadius="30dp"
                 app:layout_constraintTop_toBottomOf="@+id/cbTerminos" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>

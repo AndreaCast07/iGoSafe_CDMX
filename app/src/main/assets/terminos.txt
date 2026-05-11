@@ -1,0 +1,32 @@
+1. ACEPTACIÓN DE LOS TÉRMINOS
+Al descargar, instalar o utilizar la aplicación iGoSafe (en adelante, "la Aplicación"), usted acepta cumplir y estar sujeto a los presentes Términos y Condiciones. Si no está de acuerdo con estos términos, no debe utilizar la Aplicación.
+
+2. DESCRIPCIÓN DEL SERVICIO
+iGoSafe es una plataforma diseñada para proporcionar rutas de tránsito (peatonales y vehiculares) en la Ciudad de México, priorizando trayectos con mayor infraestructura de vigilancia basada en los datos de las cámaras del Centro de Comando, Control, Cómputo, Comunicaciones y Contacto Ciudadano (C5).
+
+3. USO DE LA UBICACIÓN Y DATOS PERSONALES
+Para el funcionamiento óptimo de las rutas seguras y el monitoreo en tiempo real, iGoSafe requiere acceso continuo a su ubicación geográfica.
+
+Privacidad: Sus datos personales, incluyendo número celular, nombre y correo electrónico, son almacenados de forma segura mediante servicios de autenticación y base de datos de Firebase.
+
+Compartición: Al iniciar un viaje, su ubicación podrá ser compartida con los contactos de emergencia que usted haya designado previamente en la Aplicación.
+
+4. SEGURIDAD Y RESPONSABILIDAD
+
+Naturaleza del Servicio: iGoSafe actúa como una herramienta de asistencia basada en datos estadísticos y de infraestructura pública. Aunque la Aplicación sugiere rutas con mayor vigilancia, esto no garantiza la ausencia total de riesgos.
+
+Responsabilidad del Usuario: El usuario es el único responsable de mantenerse alerta a su entorno y seguir las indicaciones de las autoridades locales. iGoSafe no se hace responsable por incidentes, daños o perjuicios que puedan ocurrir durante el trayecto.
+
+5. CONTACTOS DE EMERGENCIA
+El usuario declara contar con el consentimiento de las personas registradas como "Contactos de Emergencia" para compartir con ellos su información de ubicación y estado de viaje.
+
+6. PROPIEDAD INTELECTUAL
+El nombre iGoSafe, su logotipo y el código fuente son propiedad exclusiva de sus desarrolladores. Queda prohibida la reproducción total o parcial sin autorización previa.
+
+7. MODIFICACIONES
+Nos reservamos el derecho de actualizar estos términos en cualquier momento para mejorar la seguridad de nuestra comunidad. El uso continuado de la Aplicación tras dichos cambios constituye la aceptación de los nuevos términos.
+
+8. CONTACTO
+Si tiene dudas sobre estos términos, puede contactar con el soporte técnico a través de la sección de perfil en la Aplicación.
+
+Última actualización: Mayo de 2026

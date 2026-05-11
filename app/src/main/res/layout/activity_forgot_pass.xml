@@ -189,9 +189,10 @@
         android:layout_width="0dp"
         android:layout_height="200dp"
         android:scaleType="fitXY"
+        android:rotationX="180"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:srcCompat="@drawable/marco_inferior" />
+        app:srcCompat="@drawable/gradient_soft_blue" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
